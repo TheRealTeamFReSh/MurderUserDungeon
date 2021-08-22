@@ -17,13 +17,18 @@ impl Plugin for ConsolePlugin {
             .add_system_set(
                 SystemSet::on_update(GameState::ConsoleOpenedState)
                     .with_system(input::handle_logs_area.system())
-                    .with_system(update_enter_command.system()),
+                    .with_system(update_enter_command.system())
+                    .with_system(ui::apply_animation.system()),
             )
             .add_system_set(
                 SystemSet::on_exit(GameState::ConsoleOpenedState)
                     .with_system(ui::destroy_ui.system()),
             )
             .insert_resource(ConsoleData::default())
+            .insert_resource(ConsoleAnimation {
+                moving_speed: 5.0,
+                ..Default::default()
+            })
             .add_system(trigger_open_console.system());
     }
 }
@@ -55,6 +60,13 @@ fn trigger_open_console(
 pub struct ConsoleData {
     pub enter_command: String,
     pub entity: Option<Entity>,
+}
+
+#[derive(Default)]
+pub struct ConsoleAnimation {
+    pub current_position: Vec2,
+    pub desired_position: Vec2,
+    pub moving_speed: f64,
 }
 
 fn update_enter_command(
