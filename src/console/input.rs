@@ -68,6 +68,10 @@ pub fn handle_input_keys(
 
                     KeyCode::Return => {
                         if data.fully_opened {
+                            // getting the command
+                            let command = data.enter_command.clone();
+                            data.messages.push(command);
+                            // clearing the input
                             data.enter_command.clear();
                         }
                     }
@@ -89,7 +93,7 @@ pub fn handle_input_keys(
 }
 
 pub fn update_enter_command(
-    mut enter_command_text: Query<&mut Text, With<ui::LogsArea>>,
+    mut enter_command_text: Query<&mut Text, With<ui::CommandLineText>>,
     state: Res<ConsoleData>,
     asset_server: Res<AssetServer>,
     time: Res<Time>,
@@ -97,7 +101,7 @@ pub fn update_enter_command(
     let mut text = enter_command_text.single_mut().unwrap();
     text.sections = vec![];
 
-    let mut to_show = String::from(" >  ");
+    let mut to_show = String::from(">  ");
     to_show.push_str(&state.enter_command);
     
     if (time.seconds_since_startup() * 3.0) as u64 % 2 == 0 {

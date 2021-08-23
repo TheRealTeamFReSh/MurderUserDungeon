@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use super::{ConsoleAnimation, ConsoleData};
 
 pub struct LogsArea;
+pub struct CommandLineText;
 pub struct ConsoleUI;
 
 pub fn build_ui(
@@ -16,12 +17,14 @@ pub fn build_ui(
     anim_data.start_position = Vec2::new(0.0, -current_window.height());
     anim_data.end_position = anim_data.start_position;
 
+    // building the background color
     let background_component = NodeBundle {
         style: Style {
             size: Size::new(
                 Val::Percent(100.0), 
                 Val::Percent(100.0)),
             justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
             flex_direction: FlexDirection::ColumnReverse,
             ..Default::default()
         },
@@ -29,28 +32,69 @@ pub fn build_ui(
         ..Default::default()
     };
 
+    let transparent_col = Color::rgba_u8(0, 0, 0, 0);
+
+    // don't forget the UI camera
+    commands.spawn_bundle(UiCameraBundle::default());
     commands.spawn_bundle(background_component)
         .insert(ConsoleUI {})
         .with_children(|parent| {
-            // Logs Area
-            parent
-                .spawn_bundle(NodeBundle {
-                    style: Style {
-                        size: Size::new(
-                            Val::Percent(100.0), 
-                            Val::Percent(90.0)),
-                        ..Default::default()
-                    },
-                    material: materials.add(Color::rgba_u8(0, 0, 0, 0).into()),
+            //container
+            parent.spawn_bundle(NodeBundle {
+                style: Style {
+                    size: Size::new(
+                        Val::Percent(95.0),
+                        Val::Percent(95.0)
+                    ),
+                    justify_content: JustifyContent::Center,
+                    flex_direction: FlexDirection::ColumnReverse,
                     ..Default::default()
-                })
-                .with_children(|parent| {
-                    parent
-                        .spawn_bundle(TextBundle {
+                },
+                material: materials.add(transparent_col.into()),
+                ..Default::default()
+            })
+            .with_children(|parent| {
+                 // logs area
+                parent
+                    .spawn_bundle(NodeBundle {
+                        style: Style {
+                            size: Size::new(
+                                Val::Percent(100.0), 
+                                Val::Percent(90.0)),
+                            justify_content: JustifyContent::FlexEnd,
+                            flex_direction: FlexDirection::ColumnReverse,
                             ..Default::default()
-                        })
-                        .insert(LogsArea);
-                });
+                        },
+                        material: materials.add(transparent_col.into()),
+                        ..Default::default()
+                    })
+                        .with_children(|parent| {
+                            parent
+                                .spawn_bundle(TextBundle {
+                                    ..Default::default()
+                                })
+                                .insert(LogsArea);
+                        });
+
+                // command textbox area
+                parent
+                    .spawn_bundle(NodeBundle {
+                        style: Style {
+                            size: Size::new(
+                                Val::Percent(100.0),
+                                Val::Percent(10.0)),
+                                ..Default::default()
+                        },
+                        material: materials.add(transparent_col.into()),
+                        ..Default::default()
+                    })
+                        .with_children(|parent| {
+                            parent.spawn_bundle(TextBundle {
+                                ..Default::default()
+                            })
+                            .insert(CommandLineText);
+                        });
+            });
         });
 }
 
@@ -103,4 +147,31 @@ pub fn apply_animation(
         style.position.top = Val::Px(new_position.y);
         style.position.left = Val::Px(new_position.x); 
     }
+}
+
+pub fn update_logs_area(
+    data: Res<ConsoleData>,
+    asset_server: Res<AssetServer>,
+    mut logs_area_query: Query<&mut Text, With<LogsArea>>,
+) {
+    let sections = data.messages.iter()
+        .flat_map(|msg| {
+            let mut msg = msg.clone();
+            msg.push('\n');
+
+            std::array::IntoIter::new([
+                TextSection {
+                    value: msg.clone(),
+                    style: TextStyle {
+                        font: asset_server.load("fonts/VT323-Regular.ttf"),
+                        font_size: 16.,
+                        color: Color::rgba_u8(102, 255, 102, 255),
+                    },
+                },
+            ])
+        })
+        .collect::<Vec<_>>();
+
+    let mut text = logs_area_query.single_mut().unwrap();
+    text.sections = sections;
 }

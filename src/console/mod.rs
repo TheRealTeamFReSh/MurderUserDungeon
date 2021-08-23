@@ -9,7 +9,6 @@ pub struct ConsolePlugin;
 impl Plugin for ConsolePlugin {
     fn build(&self, app: &mut AppBuilder) {
         app
-            .add_startup_system(setup.system())
             .add_startup_system(ui::build_ui.system())
             .add_system_set(
                 SystemSet::on_enter(GameState::ConsoleOpenedState)
@@ -18,7 +17,8 @@ impl Plugin for ConsolePlugin {
             .add_system_set(
                 SystemSet::on_update(GameState::ConsoleOpenedState)
                     .with_system(input::handle_input_keys.system())
-                    .with_system(input::update_enter_command.system()),
+                    .with_system(input::update_enter_command.system())
+                    .with_system(ui::update_logs_area.system()),
             )
             .add_system_to_stage(
                 CoreStage::PostUpdate,
@@ -37,15 +37,12 @@ impl Plugin for ConsolePlugin {
     }
 }
 
-fn setup(mut commands: Commands) {
-    commands.spawn_bundle(UiCameraBundle::default());
-}
-
 #[derive(Default)]
 pub struct ConsoleData {
     pub enter_command: String,
     pub is_opening: bool,
     pub fully_opened: bool,
+    pub messages: Vec<String>,
 }
 
 #[derive(Default)]
