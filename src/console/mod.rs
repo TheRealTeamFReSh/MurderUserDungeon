@@ -1,121 +1,71 @@
+mod commands;
+mod event;
+mod input;
 mod ui;
 
-use bevy::{input::keyboard::KeyboardInput, prelude::*};
+use bevy::prelude::*;
+use super::states::GameState;
+use sysinfo::{System, SystemExt};
 
 pub struct ConsolePlugin;
 
 impl Plugin for ConsolePlugin {
     fn build(&self, app: &mut AppBuilder) {
         app
-            .insert_resource(ConsoleState::default())
-            .add_startup_system(setup.system())
+            .add_event::<event::PrintConsoleEvent>()
+            .add_event::<event::EnteredConsoleCommandEvent>()
             .add_startup_system(ui::build_ui.system())
-            .add_system(open_console.system())
-            .add_system(handle_logs_area.system())
-            .add_system(update_enter_command.system());
-    }
-}
-
-fn open_console(
-    keyboard_input: Res<Input<KeyCode>>,
-    mut state: ResMut<ConsoleState>,
-) {
-    if keyboard_input.just_pressed(KeyCode::E) {
-        state.opened = !state.opened;
-        info!("Console opened: {}", state.opened);
+            .add_startup_system(setup.system())
+            .add_system_set(
+                SystemSet::on_enter(GameState::ConsoleOpenedState)
+                    .with_system(ui::open_console.system()),
+            )
+            .add_system_set(
+                SystemSet::on_update(GameState::ConsoleOpenedState)
+                    .with_system(input::handle_input_keys.system())
+                    .with_system(input::update_enter_command.system())
+                    .with_system(ui::update_logs_area.system())
+                    .with_system(commands::commands_handler.system()),
+            )
+            .add_system_to_stage(
+                CoreStage::PostUpdate,
+                ui::apply_animation.system(),
+            )
+            .add_system_set(
+                SystemSet::on_exit(GameState::ConsoleOpenedState)
+                    .with_system(ui::close_console.system()),
+            )
+            .insert_resource(ConsoleData::default())
+            .insert_resource(ConsoleAnimation {
+                moving_speed: 15.0,
+                ..Default::default()
+            })
+            .init_resource::<System>()
+            //.add_system(event::log_console_message_events.system())
+            .add_system(event::add_message_events_to_console.system())
+            .add_system(input::trigger_open_console.system());
     }
 }
 
 #[derive(Default)]
-pub struct ConsoleState {
-    pub opened: bool,
+pub struct ConsoleData {
     pub enter_command: String,
+    pub is_opening: bool,
+    pub fully_opened: bool,
+    pub messages: Vec<String>,
+}
+
+#[derive(Default)]
+pub struct ConsoleAnimation {
+    pub start_position: Vec2,
+    pub end_position: Vec2,
+    pub moving_speed: f64,
+    pub time_to_move: f64,
+    pub start_time: f64,
 }
 
 fn setup(
-    mut state: ResMut<ConsoleState>,
+    mut sys: ResMut<System>,
 ) {
-    info!("Starting ConsolePlugin");
-    state.opened = true;
-}
-
-fn handle_logs_area(
-    mut state: ResMut<ConsoleState>,
-    mut evr_keys: EventReader<KeyboardInput>,
-    keyboard_input: Res<Input<KeyCode>>,
-) {
-    for ev in evr_keys.iter() {
-        if ev.state.is_pressed() {
-            if let Some(key_code) = ev.key_code {
-                match key_code {
-                    KeyCode::Back => {
-                        if !state.enter_command.is_empty() {
-                            state.enter_command.pop();
-                        }
-                    }
-                    KeyCode::Space => {
-                        state.enter_command.push(' ');
-                    }
-                    KeyCode::Tab => {
-                        state.enter_command.push_str("  ");
-                    }
-                    KeyCode::Comma => {
-                        state.enter_command.push(',');
-                    }
-                    KeyCode::Colon => {
-                        state.enter_command.push(':');
-                    }
-                    KeyCode::Semicolon => {
-                        state.enter_command.push(';');
-                    }
-                    KeyCode::Period => {
-                        state.enter_command.push('.');
-                    }
-                    KeyCode::Asterisk => {
-                        state.enter_command.push('*');
-                    }
-                    KeyCode::Slash => {
-                        state.enter_command.push('/');
-                    }
-                    KeyCode::Apostrophe => {
-                        state.enter_command.push('\'');
-                    }
-
-                    KeyCode::LShift | KeyCode::RShift => {}
-
-                    KeyCode::Return => {
-                        state.enter_command.clear();
-                    }
-                    _ => {
-                        let key_code_str = if keyboard_input.pressed(KeyCode::LShift) || 
-                            keyboard_input.pressed(KeyCode::RShift) {
-                            format!("{:?}", key_code).to_uppercase()
-                        } else {
-                            format!("{:?}", key_code).to_lowercase()
-                        };
-
-                        trace!("Pressed key: {:?}", key_code_str);
-                        state.enter_command.push_str(&key_code_str);
-                    } 
-                }
-            }
-        }
-    }
-}
-
-fn update_enter_command(
-    mut enter_command_text: Query<&mut Text, With<ui::LogsArea>>,
-    state: Res<ConsoleState>,
-    asset_server: Res<AssetServer>,
-) {
-    let mut text = enter_command_text.single_mut().unwrap();
-    text.sections = vec![];
-    text.sections.push(TextSection {
-        value: state.enter_command.clone(),
-        style: TextStyle {
-            font: asset_server.load("fonts/FiraSans-Medium.ttf"),
-            font_size: 20.,
-            color: Color::WHITE,
-        },
-    });
+    sys.refresh_all();
 }
