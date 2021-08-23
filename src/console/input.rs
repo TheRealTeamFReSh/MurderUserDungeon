@@ -1,4 +1,5 @@
 use bevy::{input::keyboard::KeyboardInput, prelude::*};
+use rand::Rng;
 
 use super::event::EnteredConsoleCommandEvent;
 use super::{ConsoleData, ui};
@@ -33,7 +34,8 @@ pub fn handle_input_keys(
 ) {
     for ev in evr_keys.iter() {
         if ev.state.is_pressed() {
-            audio.play(asset_server.load("audio/keys/key-1.mp3"));
+            let random_key = rand::thread_rng().gen_range(1..10);
+            audio.play(asset_server.load(format!("audio/keys/key-{}.mp3", random_key).as_str()));
 
             if let Some(key_code) = ev.key_code {
                 match key_code {

@@ -3157,6 +3157,7 @@ dependencies = [
  "bevy_kira_audio",
  "bevy_prototype_debug_lines",
  "bevy_rapier2d",
+ "rand",
  "sysinfo",
 ]
 
