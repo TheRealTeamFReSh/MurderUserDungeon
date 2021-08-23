@@ -1,7 +1,7 @@
 mod interactable;
 mod player;
 
-use crate::debug::collider_debug_lines_system;
+use crate::{apartment::player::decrease_stats, debug::collider_debug_lines_system};
 use bevy::prelude::*;
 use bevy_prototype_debug_lines::*;
 use bevy_rapier2d::prelude::*;
@@ -22,6 +22,11 @@ impl Plugin for ApartmentPlugin {
         app.add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
             .add_plugin(DebugLinesPlugin)
             .add_event::<interactable::InteractableInRangeEvent>()
+            .insert_resource(player::Health(100))
+            .insert_resource(player::Hunger(100))
+            .insert_resource(player::Sleepiness(100))
+            .insert_resource(player::PeePeePooPoo(100))
+            .insert_resource(player::StatsTimer(Timer::from_seconds(1.0, true)))
             .add_startup_system(setup.system().label("apartment_setup"))
             .add_startup_system(player::spawn_player.system().after("apartment_setup"))
             .add_startup_system(
@@ -39,7 +44,8 @@ impl Plugin for ApartmentPlugin {
                 interactable::log_interactable_in_range_event_system
                     .system()
                     .after("interactable_in_range"),
-            );
+            )
+            .add_system(decrease_stats.system());
 
         if cfg!(debug_assertions) {
             app.add_system(collider_debug_lines_system.system());

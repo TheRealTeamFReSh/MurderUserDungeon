@@ -97,7 +97,5 @@ pub fn interactable_system(
 pub fn log_interactable_in_range_event_system(
     mut ev_interactable_in_range: EventReader<InteractableInRangeEvent>,
 ) {
-    for ev in ev_interactable_in_range.iter() {
-        info!("{:?} in range of player", ev.0);
-    }
+    for _ev in ev_interactable_in_range.iter() {}
 }
