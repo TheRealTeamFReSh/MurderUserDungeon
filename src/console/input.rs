@@ -1,5 +1,6 @@
 use bevy::{input::keyboard::KeyboardInput, prelude::*};
 
+use super::event::EnteredConsoleCommandEvent;
 use super::{ConsoleData, ui};
 use crate::states::GameState;
 use crate::apartment::{InteractableInRangeEvent, InteractableType};
@@ -26,9 +27,14 @@ pub fn handle_input_keys(
     mut data: ResMut<ConsoleData>,
     mut evr_keys: EventReader<KeyboardInput>,
     keyboard_input: Res<Input<KeyCode>>,
+    mut ev_writer: EventWriter<EnteredConsoleCommandEvent>,
+    asset_server: Res<AssetServer>,
+    audio: Res<Audio>,
 ) {
     for ev in evr_keys.iter() {
         if ev.state.is_pressed() {
+            audio.play(asset_server.load("audio/keys/key-1.mp3"));
+
             if let Some(key_code) = ev.key_code {
                 match key_code {
                     KeyCode::Back => {
@@ -68,9 +74,8 @@ pub fn handle_input_keys(
 
                     KeyCode::Return => {
                         if data.fully_opened {
-                            // getting the command
-                            let command = data.enter_command.clone();
-                            data.messages.push(command);
+                            // sending the command
+                            ev_writer.send(EnteredConsoleCommandEvent(data.enter_command.clone()));
                             // clearing the input
                             data.enter_command.clear();
                         }

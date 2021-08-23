@@ -1,15 +1,19 @@
 use bevy::prelude::*;
-use super::{ConsoleAnimation, ConsoleData};
+use super::{ConsoleAnimation, ConsoleData, commands::print_motd, event::PrintConsoleEvent};
 
 pub struct LogsArea;
 pub struct CommandLineText;
 pub struct ConsoleUI;
+
+use sysinfo::System;
 
 pub fn build_ui(
     mut commands: Commands, 
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut anim_data: ResMut<ConsoleAnimation>,
     window: Res<Windows>,
+    mut sys: ResMut<System>,
+    mut console_writer: EventWriter<PrintConsoleEvent>,
 ) {
     let current_window = window.get_primary().unwrap();
 
@@ -96,6 +100,8 @@ pub fn build_ui(
                         });
             });
         });
+
+    console_writer.send(PrintConsoleEvent(print_motd(&mut sys, false)));
 }
 
 pub fn open_console(

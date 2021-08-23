@@ -6,6 +6,7 @@ mod debug;
 use bevy::{prelude::*, window::WindowMode};
 #[allow(unused_imports)]
 use bevy_inspector_egui::WorldInspectorPlugin;
+use bevy_kira_audio::AudioPlugin;
 
 fn main() {
     App::build()
@@ -21,6 +22,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         //.add_system(bevy::input::system::exit_on_esc_system.system())
         .add_plugin(console::ConsolePlugin)
+        .add_plugin(AudioPlugin)
         .add_plugin(apartment::ApartmentPlugin)
         //.add_plugin(WorldInspectorPlugin::new())
         .add_state(states::GameState::MainGame)

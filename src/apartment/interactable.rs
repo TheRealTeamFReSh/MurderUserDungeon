@@ -94,6 +94,7 @@ pub fn interactable_system(
     }
 }
 
+#[allow(dead_code)]
 /// Print all interactable in range events
 pub fn log_interactable_in_range_event_system(
     mut ev_interactable_in_range: EventReader<InteractableInRangeEvent>,
