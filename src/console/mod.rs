@@ -49,36 +49,36 @@ fn handle_logs_area(
             if let Some(key_code) = ev.key_code {
                 match key_code {
                     KeyCode::Back => {
-                        if state.enter_command.len() != 0 {
+                        if !state.enter_command.is_empty() {
                             state.enter_command.pop();
                         }
                     }
                     KeyCode::Space => {
-                        state.enter_command.push_str(" ");
+                        state.enter_command.push(' ');
                     }
                     KeyCode::Tab => {
                         state.enter_command.push_str("  ");
                     }
                     KeyCode::Comma => {
-                        state.enter_command.push_str(",");
+                        state.enter_command.push(',');
                     }
                     KeyCode::Colon => {
-                        state.enter_command.push_str(":");
+                        state.enter_command.push(':');
                     }
                     KeyCode::Semicolon => {
-                        state.enter_command.push_str(";");
+                        state.enter_command.push(';');
                     }
                     KeyCode::Period => {
-                        state.enter_command.push_str(".");
+                        state.enter_command.push('.');
                     }
                     KeyCode::Asterisk => {
-                        state.enter_command.push_str("*");
+                        state.enter_command.push('*');
                     }
                     KeyCode::Slash => {
-                        state.enter_command.push_str("/");
+                        state.enter_command.push('/');
                     }
                     KeyCode::Apostrophe => {
-                        state.enter_command.push_str("'");
+                        state.enter_command.push('\'');
                     }
 
                     KeyCode::LShift | KeyCode::RShift => {}
