@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 /// Types of interactable items
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum InteractableType {
     Desk,
     Bed,
@@ -67,7 +67,8 @@ pub fn spawn_furniture_system(mut commands: Commands) {
 }
 
 /// Event for sending event if interactable in range
-pub struct InteractableInRangeEvent(InteractableType);
+#[derive(PartialEq)]
+pub struct InteractableInRangeEvent(pub InteractableType);
 
 /// Sends event if interactable item in range
 pub fn interactable_system(
@@ -93,6 +94,7 @@ pub fn interactable_system(
     }
 }
 
+#[allow(dead_code)]
 /// Print all interactable in range events
 pub fn log_interactable_in_range_event_system(
     mut ev_interactable_in_range: EventReader<InteractableInRangeEvent>,
