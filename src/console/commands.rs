@@ -58,12 +58,14 @@ pub fn print_motd(sys: &mut System, should_refresh: bool) -> String {
     let mut res = String::from("Welcome back on SafeOS 3.1\n");
     res.push_str("--------------------------\n");
 
-    res.push_str(&format!("Username: {}\n\n", sys.users().last().unwrap().name()));
+    if let Some(user) = sys.users().last() {
+        res.push_str(&format!("Username: {}\n\n", user.name()));   
+    }
 
-    res.push_str(&format!("System name:             {:?}\n", sys.name().unwrap()));
-    res.push_str(&format!("System kernel version:   {:?}\n", sys.kernel_version().unwrap()));
-    res.push_str(&format!("System OS version:       {:?}\n", sys.os_version().unwrap()));
-    res.push_str(&format!("System host name:        {:?}\n\n", sys.host_name().unwrap()));
+    res.push_str(&format!("System name:             {:?}\n", sys.name().get_or_insert("Random system".to_string())));
+    res.push_str(&format!("System kernel version:   {:?}\n", sys.kernel_version().get_or_insert("Kernel alpha".to_string())));
+    res.push_str(&format!("System OS version:       {:?}\n", sys.os_version().get_or_insert("1.0".to_string())));
+    res.push_str(&format!("System host name:        {:?}\n\n", sys.host_name().get_or_insert("localhost".to_string())));
 
     res.push_str(&format!("Processors: {} at {:.2}GHz\n",
         sys.processors().len(), 

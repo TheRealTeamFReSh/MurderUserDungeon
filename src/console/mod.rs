@@ -41,7 +41,6 @@ impl Plugin for ConsolePlugin {
                 ..Default::default()
             })
             .init_resource::<System>()
-            //.add_system(event::log_console_message_events.system())
             .add_system(event::add_message_events_to_console.system())
             .add_system(input::trigger_open_console.system());
     }

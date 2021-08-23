@@ -35,11 +35,6 @@ impl Plugin for ApartmentPlugin {
                     .system()
                     .label("interactable_in_range"),
             );
-            /* .add_system(
-                interactable::log_interactable_in_range_event_system
-                    .system()
-                    .after("interactable_in_range"),
-            ); */
 
         if cfg!(debug_assertions) {
             app.add_system(collider_debug_lines_system.system());
