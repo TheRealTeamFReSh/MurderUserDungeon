@@ -1,6 +1,26 @@
 use bevy::{input::keyboard::KeyboardInput, prelude::*};
 
-use super::ConsoleData;
+use super::{ConsoleData};
+use crate::states::GameState;
+use crate::apartment::{InteractableInRangeEvent, InteractableType};
+
+pub fn trigger_open_console(
+    mut ev_in_range: EventReader<InteractableInRangeEvent>,
+    keyboard_input: Res<Input<KeyCode>>,
+    mut app_state: ResMut<State<GameState>>,
+) {
+    for InteractableInRangeEvent(inter_type) in ev_in_range.iter() {
+        if inter_type == &InteractableType::Desk && keyboard_input.just_pressed(KeyCode::Return) && app_state.current() == &GameState::MainGame {
+            app_state.set(GameState::ConsoleOpenedState).unwrap();
+            info!("Console opened");
+        }
+    }
+
+    if app_state.current() == &GameState::ConsoleOpenedState && keyboard_input.just_pressed(KeyCode::Escape) {
+        app_state.set(GameState::MainGame).unwrap();
+        info!("Console closed");
+    }
+}
 
 pub fn handle_logs_area(
     mut state: ResMut<ConsoleData>,

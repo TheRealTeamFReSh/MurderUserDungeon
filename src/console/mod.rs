@@ -32,31 +32,12 @@ impl Plugin for ConsolePlugin {
                 moving_speed: 5.0,
                 ..Default::default()
             })
-            .add_system(trigger_open_console.system());
+            .add_system(input::trigger_open_console.system());
     }
 }
 
 fn setup(mut commands: Commands) {
     commands.spawn_bundle(UiCameraBundle::default());
-}
-
-fn trigger_open_console(
-    keyboard_input: Res<Input<KeyCode>>,
-    mut app_state: ResMut<State<GameState>>,
-) {
-    if keyboard_input.just_pressed(KeyCode::Return) {
-        match app_state.current() {
-            GameState::MainGame => {
-                app_state.set(GameState::ConsoleOpenedState).unwrap();
-                info!("Console opened");
-            } 
-
-            _ => {
-                app_state.set(GameState::MainGame).unwrap();
-                info!("Console closed");
-            }
-        }
-    }
 }
 
 #[derive(Default)]
