@@ -17,8 +17,11 @@ impl Plugin for ConsolePlugin {
             .add_system_set(
                 SystemSet::on_update(GameState::ConsoleOpenedState)
                     .with_system(input::handle_logs_area.system())
-                    .with_system(update_enter_command.system())
-                    .with_system(ui::apply_animation.system()),
+                    .with_system(update_enter_command.system()),
+            )
+            .add_system_to_stage(
+                CoreStage::PostUpdate,
+                ui::apply_animation.system(),
             )
             .add_system_set(
                 SystemSet::on_exit(GameState::ConsoleOpenedState)
@@ -64,9 +67,11 @@ pub struct ConsoleData {
 
 #[derive(Default)]
 pub struct ConsoleAnimation {
-    pub current_position: Vec2,
-    pub desired_position: Vec2,
+    pub start_position: Vec2,
+    pub end_position: Vec2,
     pub moving_speed: f64,
+    pub time_to_move: f64,
+    pub start_time: f64,
 }
 
 fn update_enter_command(
