@@ -1,7 +1,9 @@
+mod apartment;
 mod console;
+mod debug;
 
-use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy::{prelude::*, window::WindowMode};
+use bevy_inspector_egui::WorldInspectorPlugin;
 
 fn main() {
     App::build()
@@ -16,8 +18,8 @@ fn main() {
         })
         .add_plugins(DefaultPlugins)
         .add_system(bevy::input::system::exit_on_esc_system.system())
-        .add_plugin(console::ConsolePlugin)
+        //.add_plugin(console::ConsolePlugin)
+        .add_plugin(apartment::ApartmentPlugin)
         .add_plugin(WorldInspectorPlugin::new())
         .run();
 }
-
