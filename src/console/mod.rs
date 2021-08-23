@@ -66,8 +66,5 @@ pub struct ConsoleAnimation {
 fn setup(
     mut sys: ResMut<System>,
 ) {
-    sys.refresh_cpu();
-    sys.refresh_memory();
-    sys.refresh_system();
-    sys.refresh_users_list();
+    sys.refresh_all();
 }
