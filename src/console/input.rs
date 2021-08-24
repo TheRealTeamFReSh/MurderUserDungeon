@@ -102,12 +102,17 @@ pub fn handle_input_keys(
 
 pub fn update_enter_command(
     mut enter_command_text: Query<&mut Text, With<ui::CommandLineText>>,
-    state: Res<ConsoleData>,
+    mut state: ResMut<ConsoleData>,
     asset_server: Res<AssetServer>,
     time: Res<Time>,
 ) {
     let mut text = enter_command_text.single_mut().unwrap();
     text.sections = vec![];
+
+    if state.enter_command.len() > 215 {
+        let trimmed_command = state.enter_command[..215].to_string();
+        state.enter_command = trimmed_command;
+    }
 
     let mut to_show = String::from(">  ");
     to_show.push_str(&state.enter_command);

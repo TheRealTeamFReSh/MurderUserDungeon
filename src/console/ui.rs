@@ -25,8 +25,8 @@ pub fn build_ui(
     let background_component = NodeBundle {
         style: Style {
             size: Size::new(
-                Val::Percent(100.0), 
-                Val::Percent(100.0)),
+                Val::Px(current_window.width()), 
+                Val::Px(current_window.height())),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::FlexStart,
             padding: Rect {
@@ -51,11 +51,12 @@ pub fn build_ui(
             parent.spawn_bundle(NodeBundle {
                 style: Style {
                     size: Size::new(
-                        Val::Percent(80.0),
+                        Val::Px(0.75 * current_window.width()),
                         Val::Percent(95.0)
                     ),
                     justify_content: JustifyContent::Center,
                     flex_direction: FlexDirection::ColumnReverse,
+                    flex_wrap: FlexWrap::Wrap,
                     ..Default::default()
                 },
                 material: materials.add(transparent_col.into()),
@@ -67,10 +68,11 @@ pub fn build_ui(
                     .spawn_bundle(NodeBundle {
                         style: Style {
                             size: Size::new(
-                                Val::Percent(100.0), 
+                                Val::Px(0.75 * current_window.width()),
                                 Val::Percent(90.0)),
                             justify_content: JustifyContent::FlexEnd,
                             flex_direction: FlexDirection::ColumnReverse,
+                            flex_wrap: FlexWrap::Wrap,
                             ..Default::default()
                         },
                         material: materials.add(transparent_col.into()),
@@ -89,15 +91,23 @@ pub fn build_ui(
                     .spawn_bundle(NodeBundle {
                         style: Style {
                             size: Size::new(
-                                Val::Percent(100.0),
+                                Val::Px(0.75 * current_window.width()),
                                 Val::Percent(10.0)),
-                                ..Default::default()
+                            flex_wrap: FlexWrap::Wrap,
+                            ..Default::default()
                         },
                         material: materials.add(transparent_col.into()),
                         ..Default::default()
                     })
                         .with_children(|parent| {
                             parent.spawn_bundle(TextBundle {
+                                style: Style {
+                                    size: Size::new(
+                                        Val::Px(0.75 * current_window.width()),
+                                        Val::Percent(10.0)),
+                                    flex_wrap: FlexWrap::Wrap,
+                                    ..Default::default()
+                                },
                                 ..Default::default()
                             })
                             .insert(CommandLineText);
