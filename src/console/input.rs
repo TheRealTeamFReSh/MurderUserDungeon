@@ -2,23 +2,30 @@ use bevy::{input::keyboard::KeyboardInput, prelude::*};
 use rand::Rng;
 
 use super::event::EnteredConsoleCommandEvent;
-use super::{ConsoleData, ui};
+use super::{ui, ConsoleData};
+use crate::apartment::{InteractableType, PlayerComponent};
 use crate::states::GameState;
-use crate::apartment::{InteractableInRangeEvent, InteractableType};
 
 pub fn trigger_open_console(
-    mut ev_in_range: EventReader<InteractableInRangeEvent>,
+    player_query: Query<&PlayerComponent>,
     keyboard_input: Res<Input<KeyCode>>,
     mut app_state: ResMut<State<GameState>>,
 ) {
-    for InteractableInRangeEvent(inter_type) in ev_in_range.iter() {
-        if inter_type == &InteractableType::Desk && keyboard_input.just_pressed(KeyCode::E) && app_state.current() == &GameState::MainGame {
-            app_state.set(GameState::ConsoleOpenedState).unwrap();
-            info!("Console opened");
+
+    for player_component in player_query.iter() {
+        if let Some(InteractableType::Desk) = player_component.interactable_in_range {
+            if keyboard_input.just_pressed(KeyCode::E)
+                && app_state.current() == &GameState::MainGame
+            {
+                app_state.set(GameState::ConsoleOpenedState).unwrap();
+                info!("Console opened");
+            }
         }
     }
 
-    if app_state.current() == &GameState::ConsoleOpenedState && keyboard_input.just_pressed(KeyCode::Escape) {
+    if app_state.current() == &GameState::ConsoleOpenedState
+        && keyboard_input.just_pressed(KeyCode::Escape)
+    {
         app_state.set(GameState::MainGame).unwrap();
         info!("Console closed");
     }
@@ -84,8 +91,9 @@ pub fn handle_input_keys(
                         data.enter_command.clear();
                     }
                     _ => {
-                        let key_code_str = if keyboard_input.pressed(KeyCode::LShift) || 
-                            keyboard_input.pressed(KeyCode::RShift) {
+                        let key_code_str = if keyboard_input.pressed(KeyCode::LShift)
+                            || keyboard_input.pressed(KeyCode::RShift)
+                        {
                             format!("{:?}", key_code).to_uppercase()
                         } else {
                             format!("{:?}", key_code).to_lowercase()
@@ -93,7 +101,7 @@ pub fn handle_input_keys(
 
                         trace!("Pressed key: {:?}", key_code_str);
                         data.enter_command.push_str(&key_code_str);
-                    } 
+                    }
                 }
             }
         }
@@ -116,7 +124,7 @@ pub fn update_enter_command(
 
     let mut to_show = String::from(">  ");
     to_show.push_str(&state.enter_command);
-    
+
     if (time.seconds_since_startup() * 3.0) as u64 % 2 == 0 {
         to_show.push('_');
     }
