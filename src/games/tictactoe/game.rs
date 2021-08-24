@@ -123,11 +123,13 @@ pub fn game_loop(
                 console_writer.send(PrintConsoleEvent("CONGRATS!!! You won".to_string()));
                 cg_data.loaded_game = GameList::None;
                 ttt_data.reset();
+                return;
             }
             2 => {
                 console_writer.send(PrintConsoleEvent("You lost like a *****".to_string()));
                 cg_data.loaded_game = GameList::None;
                 ttt_data.reset();
+                return;
             }
             _ => ()
         }
@@ -136,7 +138,8 @@ pub fn game_loop(
         if !ttt_data.has_space_available() {
             console_writer.send(PrintConsoleEvent("It's a tie... What are you doing ??!".to_string()));
             cg_data.loaded_game = GameList::None;
-            ttt_data.reset()
+            ttt_data.reset();
+            return;
         }
 
         match ttt_data.current_turn {
