@@ -11,9 +11,10 @@ pub fn trigger_open_console(
     keyboard_input: Res<Input<KeyCode>>,
     mut app_state: ResMut<State<GameState>>,
 ) {
+
     for player_component in player_query.iter() {
         if let Some(InteractableType::Desk) = player_component.interactable_in_range {
-            if keyboard_input.just_pressed(KeyCode::Return)
+            if keyboard_input.just_pressed(KeyCode::E)
                 && app_state.current() == &GameState::MainGame
             {
                 app_state.set(GameState::ConsoleOpenedState).unwrap();
@@ -38,6 +39,9 @@ pub fn handle_input_keys(
     asset_server: Res<AssetServer>,
     audio: Res<Audio>,
 ) {
+    // if the console is not open yet
+    if !data.fully_opened { return; }
+
     for ev in evr_keys.iter() {
         if ev.state.is_pressed() {
             let random_key = rand::thread_rng().gen_range(1..10);
@@ -50,43 +54,45 @@ pub fn handle_input_keys(
                             data.enter_command.pop();
                         }
                     }
-                    KeyCode::Space => {
-                        data.enter_command.push(' ');
-                    }
-                    KeyCode::Tab => {
-                        data.enter_command.push_str("  ");
-                    }
-                    KeyCode::Comma => {
-                        data.enter_command.push(',');
-                    }
-                    KeyCode::Colon => {
-                        data.enter_command.push(':');
-                    }
-                    KeyCode::Semicolon => {
-                        data.enter_command.push(';');
-                    }
-                    KeyCode::Period => {
-                        data.enter_command.push('.');
-                    }
-                    KeyCode::Asterisk => {
-                        data.enter_command.push('*');
-                    }
-                    KeyCode::Slash => {
-                        data.enter_command.push('/');
-                    }
-                    KeyCode::Apostrophe => {
-                        data.enter_command.push('\'');
-                    }
+                    KeyCode::Space      => data.enter_command.push(' '),
+                    KeyCode::Tab        => data.enter_command.push_str("  "),
+                    KeyCode::Comma      => data.enter_command.push(','),
+                    KeyCode::Colon      => data.enter_command.push(':'),
+                    KeyCode::Semicolon  => data.enter_command.push(';'),
+                    KeyCode::Apostrophe => data.enter_command.push('\''),
+                    KeyCode::At         => data.enter_command.push('@'),
+                    KeyCode::LBracket   => data.enter_command.push('['),
+                    KeyCode::RBracket   => data.enter_command.push(']'),
+                    KeyCode::Minus    | KeyCode::NumpadSubtract  => data.enter_command.push('-'),
+                    KeyCode::Period   | KeyCode::NumpadDecimal   => data.enter_command.push('.'),
+                    KeyCode::Asterisk | KeyCode::NumpadMultiply  => data.enter_command.push('*'),
+                    KeyCode::Slash    | KeyCode::NumpadDivide    => data.enter_command.push('/'),
+                    KeyCode::Plus     | KeyCode::NumpadAdd       => data.enter_command.push('+'),
+                    KeyCode::Key0 | KeyCode::Numpad0 => data.enter_command.push('0'),
+                    KeyCode::Key1 | KeyCode::Numpad1 => data.enter_command.push('1'),
+                    KeyCode::Key2 | KeyCode::Numpad2 => data.enter_command.push('2'),
+                    KeyCode::Key3 | KeyCode::Numpad3 => data.enter_command.push('3'),
+                    KeyCode::Key4 | KeyCode::Numpad4 => data.enter_command.push('4'),
+                    KeyCode::Key5 | KeyCode::Numpad5 => data.enter_command.push('5'),
+                    KeyCode::Key6 | KeyCode::Numpad6 => data.enter_command.push('6'),
+                    KeyCode::Key7 | KeyCode::Numpad7 => data.enter_command.push('7'),
+                    KeyCode::Key8 | KeyCode::Numpad8 => data.enter_command.push('8'),
+                    KeyCode::Key9 | KeyCode::Numpad9 => data.enter_command.push('9'),
 
-                    KeyCode::LShift | KeyCode::RShift | KeyCode::Escape => {}
+                    KeyCode::LShift | KeyCode::RShift | KeyCode::Escape | 
+                    KeyCode::LAlt | KeyCode::RAlt | KeyCode::LControl | 
+                    KeyCode::RControl | KeyCode::F1 |
+                    KeyCode::F2 | KeyCode::F3 | KeyCode::F4 | KeyCode::F5 |
+                    KeyCode::F6 | KeyCode::F7 | KeyCode::F8 | KeyCode::F9 | 
+                    KeyCode::F10 | KeyCode::F11 | KeyCode::F12 |
+                    KeyCode::Insert | KeyCode::Delete |
+                    KeyCode::Grave | KeyCode::Backslash => {}
 
                     KeyCode::Return => {
-                        if data.fully_opened {
-                            // sending the command
-                            ev_writer.send(EnteredConsoleCommandEvent(data.enter_command.clone()));
-                            // clearing the input
-                            data.enter_command.clear();
-                        }
+                        // sending the command
+                        ev_writer.send(EnteredConsoleCommandEvent(data.enter_command.clone()));
+                        // clearing the input
+                        data.enter_command.clear();
                     }
                     _ => {
                         let key_code_str = if keyboard_input.pressed(KeyCode::LShift)
@@ -108,12 +114,17 @@ pub fn handle_input_keys(
 
 pub fn update_enter_command(
     mut enter_command_text: Query<&mut Text, With<ui::CommandLineText>>,
-    state: Res<ConsoleData>,
+    mut state: ResMut<ConsoleData>,
     asset_server: Res<AssetServer>,
     time: Res<Time>,
 ) {
     let mut text = enter_command_text.single_mut().unwrap();
     text.sections = vec![];
+
+    if state.enter_command.len() > 144 {
+        let trimmed_command = state.enter_command[..144].to_string();
+        state.enter_command = trimmed_command;
+    }
 
     let mut to_show = String::from(">  ");
     to_show.push_str(&state.enter_command);
