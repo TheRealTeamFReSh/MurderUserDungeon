@@ -2,7 +2,7 @@ mod animation;
 mod interactable;
 mod player;
 
-use crate::debug::collider_debug_lines_system;
+use crate::{debug::collider_debug_lines_system, states::GameState};
 use bevy::prelude::*;
 use bevy_prototype_debug_lines::*;
 use bevy_rapier2d::prelude::*;
@@ -37,35 +37,42 @@ impl Plugin for ApartmentPlugin {
                 .unwrap(),
             )
             .add_event::<interactable::InteractableInRangeEvent>()
-            .add_startup_system(setup.system().label("apartment_setup"))
-            .add_startup_system(player::spawn_player.system().after("apartment_setup"))
-            .add_startup_system(
-                interactable::spawn_furniture_system
-                    .system()
-                    .after("apartment_setup"),
+            .add_system_set(
+                SystemSet::on_enter(GameState::MainGame)
+                    .with_system(setup.system().label("apartment_setup"))
+                    .with_system(player::spawn_player.system().after("apartment_setup"))
+                    .with_system(
+                        interactable::spawn_furniture_system
+                        .system()
+                        .after("apartment_setup"),
+                    ),
             )
-            .add_system(
-                player::player_movement_system
-                    .system()
-                    .label("player_movement"),
-            )
-            .add_system(
-                interactable::check_interactables_system
-                    .system()
-                    .label("check_interactables"),
-            )
-            .add_system(
-                player::set_player_animation_system
-                    .system()
-                    .after("player_movement")
-                    .label("set_player_animation"),
-            )
-            .add_system(
-                animation::animate_character_system
-                    .system()
-                    .after("set_player_animation"),
-            )
-            .add_system(animation::basic_sprite_animation_system.system());
+            .add_system_set(
+                SystemSet::on_update(GameState::MainGame)
+                    .with_system(
+                        player::player_movement_system
+                        .system()
+                        .label("player_movement"),
+                    )
+                    .with_system(
+                        interactable::check_interactables_system
+                            .system()
+                            .label("check_interactables"),
+                    )
+                    .with_system(
+                        player::set_player_animation_system
+                            .system()
+                            .after("player_movement")
+                            .label("set_player_animation"),
+                    )
+                    .with_system(
+                        animation::animate_character_system
+                            .system()
+                            .after("set_player_animation"),
+                    )
+                    .with_system(animation::basic_sprite_animation_system.system())
+
+            );
 
         if cfg!(debug_assertions) {
             app.add_system(collider_debug_lines_system.system());
