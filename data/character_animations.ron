@@ -1,0 +1,12 @@
+(
+	animations: {
+		ForwardIdle: (0, 5, 0.4),
+		LeftIdle: (6, 11, 0.4),
+		BackwardIdle: (12, 17, 0.4),
+		RightIdle: (18, 23, 0.4),
+		ForwardMove: (24, 29, 0.15),
+		LeftMove: (30, 35, 0.15),
+		BackwardMove: (36, 41, 0.15),
+		RightMove: (42, 47, 0.15),
+	}
+)

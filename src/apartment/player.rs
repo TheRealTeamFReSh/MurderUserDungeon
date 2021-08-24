@@ -1,26 +1,65 @@
-use crate::{apartment::PLAYER_Z, states::GameState};
+use crate::{
+    apartment::{
+        animation::{
+            CharacterAnimationComponent, CharacterAnimationResource, CharacterAnimationType,
+        },
+        PLAYER_Z,
+    },
+    states::GameState,
+};
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
+use super::InteractableType;
+
+pub const PLAYER_SPRITE_SCALE: f32 = 2.0;
+
 /// Stores core attributes of player
+#[derive(Debug)]
 pub struct PlayerComponent {
     pub speed: f32,
+    pub interactable_in_range: Option<InteractableType>,
 }
 
 /// Spawns a player
 pub fn spawn_player(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
+    character_animations: Res<CharacterAnimationResource>,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
     // spawn player
-    let texture_handle = asset_server.load("textures/player.png");
+    let character_starting_animation = CharacterAnimationType::ForwardIdle;
+    let texture_handle = asset_server.load("textures/player_spritesheet.png");
+    let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(32.0, 46.0), 6, 8);
+    let texture_atlas_handle = texture_atlases.add(texture_atlas);
+
+    let sprite_transform = Transform {
+        translation: Vec3::new(0.0, 0.0, PLAYER_Z),
+        scale: Vec3::new(PLAYER_SPRITE_SCALE, PLAYER_SPRITE_SCALE, 0.0),
+        ..Default::default()
+    };
+
     commands
         .spawn()
-        .insert(PlayerComponent { speed: 1.5 })
-        .insert_bundle(SpriteBundle {
-            material: materials.add(texture_handle.into()),
-            transform: Transform::from_translation(Vec3::new(0.0, 0.0, PLAYER_Z)),
+        .insert(PlayerComponent {
+            speed: 1.5,
+            interactable_in_range: None,
+        })
+        .insert(CharacterAnimationComponent {
+            timer: Timer::from_seconds(
+                character_animations.animations[&character_starting_animation].2,
+                true,
+            ),
+            animation_type: character_starting_animation.clone(),
+        })
+        .insert_bundle(SpriteSheetBundle {
+            texture_atlas: texture_atlas_handle,
+            transform: sprite_transform,
+            sprite: TextureAtlasSprite {
+                index: character_animations.animations[&character_starting_animation].0,
+                ..Default::default()
+            },
             ..Default::default()
         })
         .insert_bundle(RigidBodyBundle {
@@ -45,6 +84,63 @@ pub fn spawn_player(
         });
 }
 
+/// Set the player's animation based on what the player is doing
+pub fn set_player_animation_system(
+    keyboard_input: Res<Input<KeyCode>>,
+    character_animations: Res<CharacterAnimationResource>,
+    mut player_query: Query<
+        (
+            &mut CharacterAnimationComponent,
+            &mut TextureAtlasSprite,
+            &RigidBodyVelocity,
+        ),
+        With<PlayerComponent>,
+    >,
+) {
+    for (mut character_animation, mut sprite, rb_vels) in player_query.iter_mut() {
+        let mut restart_animation = false;
+
+        // set to idle animation if velocity is 0 and key is released
+        if rb_vels.linvel.x == 0.0 && rb_vels.linvel.y == 0.0 {
+            if keyboard_input.just_released(KeyCode::A) {
+                character_animation.animation_type = CharacterAnimationType::LeftIdle;
+                restart_animation = true;
+            } else if keyboard_input.just_released(KeyCode::D) {
+                character_animation.animation_type = CharacterAnimationType::RightIdle;
+                restart_animation = true;
+            } else if keyboard_input.just_released(KeyCode::W) {
+                character_animation.animation_type = CharacterAnimationType::BackwardIdle;
+                restart_animation = true;
+            } else if keyboard_input.just_released(KeyCode::S) {
+                character_animation.animation_type = CharacterAnimationType::ForwardIdle;
+                restart_animation = true;
+            }
+        }
+        // set to move animation if key pressed
+        if keyboard_input.just_pressed(KeyCode::A) {
+            character_animation.animation_type = CharacterAnimationType::LeftMove;
+            restart_animation = true;
+        } else if keyboard_input.just_pressed(KeyCode::D) {
+            character_animation.animation_type = CharacterAnimationType::RightMove;
+            restart_animation = true;
+        } else if keyboard_input.just_pressed(KeyCode::W) {
+            character_animation.animation_type = CharacterAnimationType::BackwardMove;
+            restart_animation = true;
+        } else if keyboard_input.just_pressed(KeyCode::S) {
+            character_animation.animation_type = CharacterAnimationType::ForwardMove;
+            restart_animation = true;
+        }
+
+        // if animation changed restart the timer, sprite, and set animation type
+        if restart_animation {
+            let animation_data =
+                character_animations.animations[&character_animation.animation_type];
+            sprite.index = animation_data.0;
+            character_animation.timer = Timer::from_seconds(animation_data.2, true);
+        }
+    }
+}
+
 // Move player by modifying velocity with input
 pub fn player_movement_system(
     keyboard_input: Res<Input<KeyCode>>,
@@ -53,7 +149,9 @@ pub fn player_movement_system(
     app_state: Res<State<GameState>>,
 ) {
     // if we are not playing the game prevent the player from moving
-    if app_state.current() != &GameState::MainGame { return; }
+    if app_state.current() != &GameState::MainGame {
+        return;
+    }
 
     for (player, mut rb_vels) in player_info.iter_mut() {
         // get key presses
