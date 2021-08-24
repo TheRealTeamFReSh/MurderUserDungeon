@@ -1,3 +1,4 @@
+mod animation;
 mod interactable;
 mod player;
 
@@ -5,6 +6,7 @@ use crate::debug::collider_debug_lines_system;
 use bevy::prelude::*;
 use bevy_prototype_debug_lines::*;
 use bevy_rapier2d::prelude::*;
+use ron::de::from_bytes;
 
 pub use self::{
     interactable::{InteractableComponent, InteractableInRangeEvent, InteractableType},
@@ -16,11 +18,24 @@ pub struct ApartmentPlugin;
 pub const BACKGROUND_Z: f32 = 0.0;
 pub const PLAYER_Z: f32 = 1.0;
 pub const FOREGROUND_Z: f32 = 10.0;
+pub const INTERACTABLE_ICON_Z: f32 = 11.0;
 
 impl Plugin for ApartmentPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
             .add_plugin(DebugLinesPlugin)
+            .insert_resource(
+                from_bytes::<animation::CharacterAnimationResource>(include_bytes!(
+                    "../../data/character_animations.ron"
+                ))
+                .unwrap(),
+            )
+            .insert_resource(
+                from_bytes::<interactable::InteractablesResource>(include_bytes!(
+                    "../../data/interactables.ron"
+                ))
+                .unwrap(),
+            )
             .add_event::<interactable::InteractableInRangeEvent>()
             .add_startup_system(setup.system().label("apartment_setup"))
             .add_startup_system(player::spawn_player.system().after("apartment_setup"))
@@ -29,12 +44,28 @@ impl Plugin for ApartmentPlugin {
                     .system()
                     .after("apartment_setup"),
             )
-            .add_system(player::player_movement_system.system())
             .add_system(
-                interactable::interactable_system
+                player::player_movement_system
                     .system()
-                    .label("interactable_in_range"),
-            );
+                    .label("player_movement"),
+            )
+            .add_system(
+                interactable::check_interactables_system
+                    .system()
+                    .label("check_interactables"),
+            )
+            .add_system(
+                player::set_player_animation_system
+                    .system()
+                    .after("player_movement")
+                    .label("set_player_animation"),
+            )
+            .add_system(
+                animation::animate_character_system
+                    .system()
+                    .after("set_player_animation"),
+            )
+            .add_system(animation::basic_sprite_animation_system.system());
 
         if cfg!(debug_assertions) {
             app.add_system(collider_debug_lines_system.system());
