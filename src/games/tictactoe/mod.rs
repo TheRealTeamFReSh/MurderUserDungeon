@@ -1,9 +1,9 @@
 mod commands;
 mod game;
 
-use bevy::prelude::*;
+use bevy::{ecs::schedule::ShouldRun, prelude::*};
 
-use crate::{console::event::PrintConsoleEvent, games::GameList, states::GameState};
+use crate::{games::GameList, states::GameState};
 
 use super::ConsoleGamesData;
 
@@ -11,19 +11,14 @@ pub struct TicTacToePlugin;
 
 impl Plugin for TicTacToePlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.insert_resource(TicTacToeData {
-            has_seen_tutorial: false,
-        });
+        app.insert_resource(game::TicTacToeData::default());
         app.add_system_set(
             SystemSet::on_update(GameState::ConsoleOpenedState)
-                .with_system(game_loop.system())
-                .with_system(commands::commands_handler.system()),
+                .with_run_criteria(should_run.system())
+                .with_system(game::game_loop.system())
+                .with_system(commands::commands_handler.system()).before("send_console_input"),
         );
     }
-}
-
-pub struct TicTacToeData {
-    pub has_seen_tutorial: bool,
 }
 
 pub fn start_game(
@@ -33,15 +28,13 @@ pub fn start_game(
     info!("Starting tictactoe game");
 }
 
-pub fn game_loop(
+pub fn should_run(
     cg_data: Res<ConsoleGamesData>,
-    mut ttt_data: ResMut<TicTacToeData>,
-    mut console_writer: EventWriter<PrintConsoleEvent>,
-) {
-    if cg_data.loaded_game != GameList::TicTacToe { return ; }
-
-    if !ttt_data.has_seen_tutorial {
-        console_writer.send(PrintConsoleEvent(game::display_tutorial()));
-        ttt_data.has_seen_tutorial = true;
+) -> ShouldRun
+{
+    if cg_data.loaded_game == GameList::TicTacToe {
+        ShouldRun::Yes
+    } else {
+        ShouldRun::No
     }
 }

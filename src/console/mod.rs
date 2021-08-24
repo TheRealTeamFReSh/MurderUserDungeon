@@ -3,6 +3,8 @@ pub mod event;
 mod input;
 mod ui;
 
+use self::commands::should_run_cmd_handler;
+
 use super::states::GameState;
 use bevy::prelude::*;
 use sysinfo::{System, SystemExt};
@@ -21,10 +23,14 @@ impl Plugin for ConsolePlugin {
             )
             .add_system_set(
                 SystemSet::on_update(GameState::ConsoleOpenedState)
-                    .with_system(input::handle_input_keys.system())
+                    .with_system(input::handle_input_keys.system().label("send_console_input"))
                     .with_system(input::update_enter_command.system())
-                    .with_system(ui::update_logs_area.system())
-                    .with_system(commands::commands_handler.system()),
+                    .with_system(ui::update_logs_area.system()),
+            )
+            .add_system_set(
+                SystemSet::on_update(GameState::ConsoleOpenedState)
+                    .with_run_criteria(should_run_cmd_handler.system())
+                    .with_system(commands::commands_handler.system()).before("send_console_input"),
             )
             .add_system_to_stage(CoreStage::PostUpdate, ui::apply_animation.system())
             .add_system_set(
