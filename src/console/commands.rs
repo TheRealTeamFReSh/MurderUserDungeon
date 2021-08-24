@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use sysinfo::{ProcessorExt, System, SystemExt, UserExt};
 
 use super::{ConsoleData, event::{EnteredConsoleCommandEvent, PrintConsoleEvent}};
+use crate::games;
 
 pub fn commands_handler(
     mut cmd_reader: EventReader<EnteredConsoleCommandEvent>,
@@ -26,6 +27,7 @@ pub fn commands_handler(
             "clear" => data.messages.clear(),
             "help" => console_writer.send(PrintConsoleEvent(display_help())),
             "motd" => console_writer.send(PrintConsoleEvent(print_motd(&mut sys, true))),
+            "play" => games::handle_play_command(&args[0..args.len()], &mut console_writer),
 
             _ => {
                 console_writer.send(PrintConsoleEvent(format!("I didn't understand the command: \"{}\"", args[0])));
@@ -43,6 +45,7 @@ fn display_help() -> String {
     res.push_str("- help : Displays this message\n");
     res.push_str("- clear : Clears commands on the screen\n");
     res.push_str("- motd : Prints informations about YOUR computer\n");
+    res.push_str("- play <game> : Plays the game <game>\n");
 
     res
 }

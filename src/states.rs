@@ -2,4 +2,5 @@
 pub enum GameState {
     MainGame,
     ConsoleOpenedState,
+    ConsoleGame,
 }

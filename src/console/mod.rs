@@ -1,5 +1,5 @@
 mod commands;
-mod event;
+pub mod event;
 mod input;
 mod ui;
 
