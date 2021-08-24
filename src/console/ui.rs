@@ -28,7 +28,11 @@ pub fn build_ui(
                 Val::Percent(100.0), 
                 Val::Percent(100.0)),
             justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
+            align_items: AlignItems::FlexStart,
+            padding: Rect {
+                left: Val::Percent(2.0),
+                ..Default::default()
+            },
             flex_direction: FlexDirection::ColumnReverse,
             ..Default::default()
         },
@@ -47,7 +51,7 @@ pub fn build_ui(
             parent.spawn_bundle(NodeBundle {
                 style: Style {
                     size: Size::new(
-                        Val::Percent(95.0),
+                        Val::Percent(80.0),
                         Val::Percent(95.0)
                     ),
                     justify_content: JustifyContent::Center,

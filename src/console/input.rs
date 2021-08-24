@@ -12,7 +12,7 @@ pub fn trigger_open_console(
     mut app_state: ResMut<State<GameState>>,
 ) {
     for InteractableInRangeEvent(inter_type) in ev_in_range.iter() {
-        if inter_type == &InteractableType::Desk && keyboard_input.just_pressed(KeyCode::Return) && app_state.current() == &GameState::MainGame {
+        if inter_type == &InteractableType::Desk && keyboard_input.just_pressed(KeyCode::E) && app_state.current() == &GameState::MainGame {
             app_state.set(GameState::ConsoleOpenedState).unwrap();
             info!("Console opened");
         }
@@ -32,6 +32,9 @@ pub fn handle_input_keys(
     asset_server: Res<AssetServer>,
     audio: Res<Audio>,
 ) {
+    // if the console is not open yet
+    if !data.fully_opened { return; }
+
     for ev in evr_keys.iter() {
         if ev.state.is_pressed() {
             let random_key = rand::thread_rng().gen_range(1..10);
@@ -75,12 +78,10 @@ pub fn handle_input_keys(
                     KeyCode::LShift | KeyCode::RShift | KeyCode::Escape => {}
 
                     KeyCode::Return => {
-                        if data.fully_opened {
-                            // sending the command
-                            ev_writer.send(EnteredConsoleCommandEvent(data.enter_command.clone()));
-                            // clearing the input
-                            data.enter_command.clear();
-                        }
+                        // sending the command
+                        ev_writer.send(EnteredConsoleCommandEvent(data.enter_command.clone()));
+                        // clearing the input
+                        data.enter_command.clear();
                     }
                     _ => {
                         let key_code_str = if keyboard_input.pressed(KeyCode::LShift) || 
