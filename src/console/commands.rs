@@ -1,15 +1,20 @@
-use bevy::prelude::*;
+use bevy::{app::Events, prelude::*};
 use sysinfo::{ProcessorExt, System, SystemExt, UserExt};
 
 use super::{ConsoleData, event::{EnteredConsoleCommandEvent, PrintConsoleEvent}};
-use crate::games;
+use crate::{games::{self, ConsoleGamesData, GameList}};
 
 pub fn commands_handler(
     mut cmd_reader: EventReader<EnteredConsoleCommandEvent>,
     mut console_writer: EventWriter<PrintConsoleEvent>,
     mut data: ResMut<ConsoleData>,
     mut sys: ResMut<System>,
+    mut cg_data: ResMut<ConsoleGamesData>,
 ) {
+    if cg_data.loaded_game != GameList::None { return ; }
+
+    let mut events = Events::<EnteredConsoleCommandEvent>::default();
+
     for EnteredConsoleCommandEvent(cmd) in cmd_reader.iter() {
         // Don't do anything if the string is empty
         if cmd.is_empty() { return ; }
@@ -27,13 +32,16 @@ pub fn commands_handler(
             "clear" => data.messages.clear(),
             "help" => console_writer.send(PrintConsoleEvent(display_help())),
             "motd" => console_writer.send(PrintConsoleEvent(print_motd(&mut sys, true))),
-            "play" => games::handle_play_command(&args[0..args.len()], &mut console_writer),
+            "play" => games::handle_play_command(&args[0..args.len()], &mut console_writer, &mut cg_data),
 
             _ => {
                 console_writer.send(PrintConsoleEvent(format!("I didn't understand the command: \"{}\"", args[0])));
             }
         }
     }
+    
+    // consuming events
+    events.drain().count();
 }
 
 fn display_help() -> String {

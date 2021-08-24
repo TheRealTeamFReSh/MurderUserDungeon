@@ -24,6 +24,7 @@ fn main() {
         .add_plugin(console::ConsolePlugin)
         .add_plugin(AudioPlugin)
         .add_plugin(apartment::ApartmentPlugin)
+        .add_plugin(games::ConsoleGamesPlugin)
         //.add_plugin(WorldInspectorPlugin::new())
         .add_state(states::GameState::MainGame)
         .add_system(exit_on_esc_system.system())
