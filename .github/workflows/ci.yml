@@ -1,4 +1,4 @@
-name: Rust
+name: CI
 
 on:
     push:
@@ -63,10 +63,10 @@ jobs:
                   override: true
             - name: Install alsa and udev
               run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev
-            - name: FMT project
-              run: cargo fmt --all -- --check
-            - name: Check with Clippy
-              run: cargo clippy --workspace --all-targets --all-features -- -D warnings -A clippy::type_complexity
+            #- name: FMT project
+            #  run: cargo fmt --all -- --check
+            #- name: Check with Clippy
+            #  run: cargo clippy --workspace --all-targets --all-features -- -D warnings -A clippy::type_complexity
             - name: Build files
               run: cargo build --release --all-features
 
