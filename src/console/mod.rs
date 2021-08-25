@@ -1,18 +1,19 @@
 mod commands;
-mod event;
+pub mod event;
 mod input;
 mod ui;
 
-use bevy::prelude::*;
+use self::commands::should_run_cmd_handler;
+
 use super::states::GameState;
+use bevy::prelude::*;
 use sysinfo::{System, SystemExt};
 
 pub struct ConsolePlugin;
 
 impl Plugin for ConsolePlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app
-            .add_event::<event::PrintConsoleEvent>()
+        app.add_event::<event::PrintConsoleEvent>()
             .add_event::<event::EnteredConsoleCommandEvent>()
             .add_startup_system(ui::build_ui.system())
             .add_startup_system(setup.system())
@@ -22,15 +23,16 @@ impl Plugin for ConsolePlugin {
             )
             .add_system_set(
                 SystemSet::on_update(GameState::ConsoleOpenedState)
-                    .with_system(input::handle_input_keys.system())
+                    .with_system(input::handle_input_keys.system().label("send_console_input"))
                     .with_system(input::update_enter_command.system())
-                    .with_system(ui::update_logs_area.system())
-                    .with_system(commands::commands_handler.system()),
+                    .with_system(ui::update_logs_area.system()),
             )
-            .add_system_to_stage(
-                CoreStage::PostUpdate,
-                ui::apply_animation.system(),
+            .add_system_set(
+                SystemSet::on_update(GameState::ConsoleOpenedState)
+                    .with_run_criteria(should_run_cmd_handler.system())
+                    .with_system(commands::commands_handler.system()).before("send_console_input"),
             )
+            .add_system_to_stage(CoreStage::PostUpdate, ui::apply_animation.system())
             .add_system_set(
                 SystemSet::on_exit(GameState::ConsoleOpenedState)
                     .with_system(ui::close_console.system()),
@@ -42,7 +44,11 @@ impl Plugin for ConsolePlugin {
             })
             .init_resource::<System>()
             .add_system(event::add_message_events_to_console.system())
-            .add_system(input::trigger_open_console.system());
+            .add_system(
+                input::trigger_open_console
+                    .system()
+                    .after("check_interactables"),
+            );
     }
 }
 
@@ -63,8 +69,6 @@ pub struct ConsoleAnimation {
     pub start_time: f64,
 }
 
-fn setup(
-    mut sys: ResMut<System>,
-) {
+fn setup(mut sys: ResMut<System>) {
     sys.refresh_all();
 }

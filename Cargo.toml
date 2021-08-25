@@ -13,6 +13,8 @@ bevy_prototype_debug_lines = { git = "https://github.com/Toqozz/bevy_debug_lines
 sysinfo = "0.20.0"
 bevy_kira_audio = "0.5.1"
 rand = "0.8.4"
+serde = "1.0.127"
+ron = "0.6.4"
 
 # Enable optimizations for dependencies (incl. Bevy) but not our code
 [profile.dev.package."*"]
