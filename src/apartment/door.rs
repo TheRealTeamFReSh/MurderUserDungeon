@@ -18,6 +18,7 @@ pub fn interact_door_system(
     app_state: Res<State<GameState>>,
     asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    audio: Res<Audio>,
 ) {
     for player_component in player_query.iter() {
         if let Some(InteractableType::ClosedDoor) = player_component.interactable_in_range {
@@ -34,6 +35,7 @@ pub fn interact_door_system(
                             &interactable_icon_query,
                         );
                         super::despawn_hallway_cover(&mut commands, &hallway_cover_query);
+                        audio.play(asset_server.load("audio/door_opening.mp3"));
                     }
                 }
 
@@ -53,7 +55,8 @@ pub fn interact_door_system(
                             &mut commands,
                             &interactable_icon_query,
                         );
-                        super::spawn_hallway_cover(&mut commands, &asset_server, &mut materials)
+                        super::spawn_hallway_cover(&mut commands, &asset_server, &mut materials);
+                        audio.play(asset_server.load("audio/door_shutting.mp3"));
                     }
                 }
 
