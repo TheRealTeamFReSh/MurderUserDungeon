@@ -10,14 +10,16 @@ use bevy_rapier2d::prelude::*;
 use ron::de::from_bytes;
 
 pub use self::{
+    animation::BasicAnimationComponent,
     interactable::{InteractableComponent, InteractableType, InteractablesResource},
-    player::PlayerComponent,
+    player::{PlayerComponent, PLAYER_SPRITE_SCALE},
 };
 
 pub struct ApartmentPlugin;
 
 pub const BACKGROUND_Z: f32 = 0.0;
 pub const HALLWAY_COVER_Z: f32 = 1.0;
+pub const NPC_Z: f32 = 4.0;
 pub const PLAYER_Z: f32 = 5.0;
 pub const FOREGROUND_Z: f32 = 10.0;
 pub const INTERACTABLE_ICON_Z: f32 = 11.0;

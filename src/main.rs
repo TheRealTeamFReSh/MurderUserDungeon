@@ -3,6 +3,7 @@ mod console;
 mod debug;
 mod games;
 mod states;
+mod vulnerability;
 
 use bevy::{app::AppExit, prelude::*, window::WindowMode};
 #[allow(unused_imports)]
@@ -24,6 +25,7 @@ fn main() {
         .add_plugin(console::ConsolePlugin)
         .add_plugin(AudioPlugin)
         .add_plugin(apartment::ApartmentPlugin)
+        .add_plugin(vulnerability::VulnerabilityPlugin)
         .add_plugin(games::ConsoleGamesPlugin)
         .add_plugin(WorldInspectorPlugin::new())
         .add_state(states::GameState::MainGame)
