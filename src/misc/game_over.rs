@@ -25,6 +25,7 @@ pub struct TextTitleContainer;
 pub struct TextTitle;
 pub struct TextReasonContainer;
 pub struct TextReason;
+pub struct GameOverAnimationComponent;
 
 fn build_ui(
     mut commands: Commands,
@@ -141,18 +142,23 @@ fn build_ui(
     commands.spawn_bundle(UiCameraBundle::default());
     commands.spawn_bundle(background)
         .insert(GameOverBackground)
+        .insert(GameOverAnimationComponent)
         .with_children(|parent| {
             parent.spawn_bundle(container).with_children(|parent| {
                 parent.spawn_bundle(title_text_container)
                     .insert(TextTitleContainer)
                     .with_children(|parent| {
-                        parent.spawn_bundle(title_text).insert(TextTitle);
+                        parent.spawn_bundle(title_text)
+                            .insert(TextTitle)
+                            .insert(GameOverAnimationComponent);
                     });
 
                 parent.spawn_bundle(reason_text_container)
                     .insert(TextReasonContainer)
                     .with_children(|parent| {
-                        parent.spawn_bundle(reason_text).insert(TextReason);
+                        parent.spawn_bundle(reason_text)
+                            .insert(GameOverAnimationComponent)
+                            .insert(TextReason);
                     });
             });
         });
@@ -160,16 +166,13 @@ fn build_ui(
 
 fn on_enter_game_over(
     mut anim_data: ResMut<GameOverAnimation>,
-    windows: Res<Windows>,
     time: Res<Time>,
 ) {
-    let current_window = windows.get_primary().unwrap();
-
     info!("Enter game over state");
-    anim_data.start_position = Vec2::new(0.0, -current_window.height());
-    anim_data.end_position = Vec2::new(0.0, 0.0);
+    anim_data.start_opacity = 0.0;
+    anim_data.end_opacity = 1.0;
     anim_data.start_time = time.seconds_since_startup();
-    anim_data.moving_speed = 0.5;
+    anim_data.speed = 0.4;
 }
 
 fn show_game_over_screen(
@@ -181,24 +184,32 @@ fn show_game_over_screen(
 
 #[derive(Default)]
 pub struct GameOverAnimation {
-    pub start_position: Vec2,
-    pub end_position: Vec2,
-    pub moving_speed: f64,
-    pub time_to_move: f64,
+    pub start_opacity: f32,
+    pub end_opacity: f32,
     pub start_time: f64,
+    pub speed: f64,
 }
 
 pub fn apply_animation(
-    mut console_query: Query<(&GameOverBackground, &mut Style)>,
+    mut mat_query: Query<(&Node, &mut Handle<ColorMaterial>, With<GameOverAnimationComponent>)>,
+    mut font_query: Query<(&mut Text, With<GameOverAnimationComponent>)>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
     anim_data: Res<GameOverAnimation>,
     time: Res<Time>,
 ) {
     let delta_t = time.seconds_since_startup() - anim_data.start_time;
-    let value = 1.0 - (-(delta_t * anim_data.moving_speed)).exp();
-    let new_position = anim_data.start_position.lerp(anim_data.end_position, value as f32);
+    let value = 1.0 - (-(delta_t * anim_data.speed)).exp();
 
-    if let Ok((_, mut style)) = console_query.single_mut() {
-        style.position.top = Val::Px(new_position.y);
-        style.position.left = Val::Px(new_position.x); 
+    // changing material opacity
+    for (_, color, _) in mat_query.iter_mut() {
+        let color_mat = materials.get_mut(color.id).unwrap();
+        color_mat.color.set_a(value as f32);
+    }
+
+    // changin font opacity
+    for (mut text, _) in font_query.iter_mut() {
+        for section in text.sections.iter_mut() {
+            section.style.color.set_a(value as f32);
+        }
     }
 }
