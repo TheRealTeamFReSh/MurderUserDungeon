@@ -102,31 +102,45 @@ pub fn set_player_animation_system(
 
         // set to idle animation if velocity is 0 and key is released
         if rb_vels.linvel.x == 0.0 && rb_vels.linvel.y == 0.0 {
-            if keyboard_input.just_released(KeyCode::A) {
+            if keyboard_input.just_released(KeyCode::A)
+                || keyboard_input.just_pressed(KeyCode::Left)
+            {
                 character_animation.animation_type = CharacterAnimationType::LeftIdle;
                 restart_animation = true;
-            } else if keyboard_input.just_released(KeyCode::D) {
+            } else if keyboard_input.just_released(KeyCode::D)
+                || keyboard_input.just_pressed(KeyCode::Right)
+            {
                 character_animation.animation_type = CharacterAnimationType::RightIdle;
                 restart_animation = true;
-            } else if keyboard_input.just_released(KeyCode::W) {
+            } else if keyboard_input.just_released(KeyCode::W)
+                || keyboard_input.just_pressed(KeyCode::Up)
+            {
                 character_animation.animation_type = CharacterAnimationType::BackwardIdle;
                 restart_animation = true;
-            } else if keyboard_input.just_released(KeyCode::S) {
+            } else if keyboard_input.just_released(KeyCode::S)
+                || keyboard_input.just_pressed(KeyCode::Down)
+            {
                 character_animation.animation_type = CharacterAnimationType::ForwardIdle;
                 restart_animation = true;
             }
         }
         // set to move animation if key pressed
-        if keyboard_input.just_pressed(KeyCode::A) {
+        if keyboard_input.just_pressed(KeyCode::A) || keyboard_input.just_pressed(KeyCode::Left) {
             character_animation.animation_type = CharacterAnimationType::LeftMove;
             restart_animation = true;
-        } else if keyboard_input.just_pressed(KeyCode::D) {
+        } else if keyboard_input.just_pressed(KeyCode::D)
+            || keyboard_input.just_pressed(KeyCode::Right)
+        {
             character_animation.animation_type = CharacterAnimationType::RightMove;
             restart_animation = true;
-        } else if keyboard_input.just_pressed(KeyCode::W) {
+        } else if keyboard_input.just_pressed(KeyCode::W)
+            || keyboard_input.just_pressed(KeyCode::Up)
+        {
             character_animation.animation_type = CharacterAnimationType::BackwardMove;
             restart_animation = true;
-        } else if keyboard_input.just_pressed(KeyCode::S) {
+        } else if keyboard_input.just_pressed(KeyCode::S)
+            || keyboard_input.just_pressed(KeyCode::Down)
+        {
             character_animation.animation_type = CharacterAnimationType::ForwardMove;
             restart_animation = true;
         }

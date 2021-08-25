@@ -1,4 +1,5 @@
 mod animation;
+mod door;
 mod interactable;
 mod player;
 
@@ -9,7 +10,7 @@ use bevy_rapier2d::prelude::*;
 use ron::de::from_bytes;
 
 pub use self::{
-    interactable::{InteractableComponent, InteractableInRangeEvent, InteractableType},
+    interactable::{InteractableComponent, InteractableType, InteractablesResource},
     player::PlayerComponent,
 };
 
@@ -36,7 +37,6 @@ impl Plugin for ApartmentPlugin {
                 ))
                 .unwrap(),
             )
-            .add_event::<interactable::InteractableInRangeEvent>()
             .add_startup_system(setup.system().label("apartment_setup"))
             .add_startup_system(player::spawn_player.system().after("apartment_setup"))
             .add_startup_system(
@@ -65,7 +65,12 @@ impl Plugin for ApartmentPlugin {
                     .system()
                     .after("set_player_animation"),
             )
-            .add_system(animation::basic_sprite_animation_system.system());
+            .add_system(animation::basic_sprite_animation_system.system())
+            .add_system(
+                door::interact_door_system
+                    .system()
+                    .after("check_interactables"),
+            );
 
         if cfg!(debug_assertions) {
             app.add_system(collider_debug_lines_system.system());
@@ -110,16 +115,16 @@ fn setup(
         .insert(Name::new("Foreground"));
 
     // create walls
-    // top wall
+    // top wall right
     commands
         .spawn()
         .insert_bundle(RigidBodyBundle {
             body_type: RigidBodyType::Static,
-            position: Vec2::new(-5.3, 6.5).into(),
+            position: Vec2::new(1.5, 6.5).into(),
             ..Default::default()
         })
         .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(27.5, 1.0),
+            shape: ColliderShape::cuboid(19.5, 1.0),
             material: ColliderMaterial {
                 friction: 0.0,
                 restitution: 0.0,
@@ -128,7 +133,27 @@ fn setup(
             ..Default::default()
         })
         .insert(RigidBodyPositionSync::Discrete)
-        .insert(Name::new("Top Wall"));
+        .insert(Name::new("Top-Right Wall"));
+
+    // top wall left
+    commands
+        .spawn()
+        .insert_bundle(RigidBodyBundle {
+            body_type: RigidBodyType::Static,
+            position: Vec2::new(-28.5, 6.5).into(),
+            ..Default::default()
+        })
+        .insert_bundle(ColliderBundle {
+            shape: ColliderShape::cuboid(2.5, 1.0),
+            material: ColliderMaterial {
+                friction: 0.0,
+                restitution: 0.0,
+                ..Default::default()
+            },
+            ..Default::default()
+        })
+        .insert(RigidBodyPositionSync::Discrete)
+        .insert(Name::new("Top-Left Wall"));
 
     // bottom wall
     commands

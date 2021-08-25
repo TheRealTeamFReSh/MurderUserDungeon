@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use super::INTERACTABLE_ICON_Z;
 
 const INTERACTABLE_ICON_SPRITE_SCALE: f32 = 2.5;
-const INTERACTABLE_ICON_Y_OFFSET: f32 = 4.0;
+const INTERACTABLE_ICON_Y_OFFSET: f32 = 6.0;
 const INTERACTABLE_ICON_FRAME_TIME: f32 = 0.15;
 
 /// Types of interactable items
@@ -15,12 +15,14 @@ const INTERACTABLE_ICON_FRAME_TIME: f32 = 0.15;
 pub enum InteractableType {
     Desk,
     Bed,
+    ClosedDoor,
+    OpenDoor,
 }
 
 /// Stores data about sizes, locations, and ranges of interactables
 #[derive(Deserialize)]
 pub struct InteractablesResource {
-    interactables: HashMap<InteractableType, InteractableData>,
+    pub interactables: HashMap<InteractableType, InteractableData>,
 }
 
 #[derive(Deserialize)]
@@ -32,26 +34,36 @@ pub struct InteractableData {
 
 /// Stores data specific interactable item
 pub struct InteractableComponent {
-    interactable_type: InteractableType,
-    range: f32,
+    pub interactable_type: InteractableType,
+    pub range: f32,
 }
 
 /// Spawn collider, rigidbody, and possible interactable component for furniture
-pub fn spawn_furniture_system(mut commands: Commands) {
+pub fn spawn_furniture_system(
+    mut commands: Commands,
+    interactables_resource: Res<InteractablesResource>,
+) {
     //spawn desk
+
+    let interactable_type = InteractableType::Desk;
+    let interactable_data = &interactables_resource.interactables[&interactable_type];
+
     commands
         .spawn()
         .insert(InteractableComponent {
-            interactable_type: InteractableType::Desk,
-            range: 70.0,
+            interactable_type,
+            range: interactable_data.range,
         })
         .insert_bundle(RigidBodyBundle {
             body_type: RigidBodyType::Static,
-            position: Vec2::new(-27.0, -19.0).into(),
+            position: interactable_data.position.into(),
             ..Default::default()
         })
         .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(3.0, 5.0),
+            shape: ColliderShape::cuboid(
+                interactable_data.collider_size.x,
+                interactable_data.collider_size.y,
+            ),
             material: ColliderMaterial {
                 friction: 0.0,
                 restitution: 0.0,
@@ -63,19 +75,24 @@ pub fn spawn_furniture_system(mut commands: Commands) {
         .insert(Name::new("Desk"));
 
     // spawn bed
+    let interactable_type = InteractableType::Bed;
+    let interactable_data = &interactables_resource.interactables[&interactable_type];
     commands
         .spawn()
         .insert(InteractableComponent {
-            interactable_type: InteractableType::Bed,
-            range: 60.0,
+            interactable_type,
+            range: interactable_data.range,
         })
         .insert_bundle(RigidBodyBundle {
             body_type: RigidBodyType::Static,
-            position: Vec2::new(11.0, 5.0).into(),
+            position: interactable_data.position.into(),
             ..Default::default()
         })
         .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(8.5, 4.5),
+            shape: ColliderShape::cuboid(
+                interactable_data.collider_size.x,
+                interactable_data.collider_size.y,
+            ),
             material: ColliderMaterial {
                 friction: 0.0,
                 restitution: 0.0,
@@ -85,11 +102,19 @@ pub fn spawn_furniture_system(mut commands: Commands) {
         })
         .insert(RigidBodyPositionSync::Discrete)
         .insert(Name::new("Bed"));
+
+    super::door::spawn_closed_door(&mut commands, &interactables_resource);
 }
 
-/// Event for sending event if interactable in range
-#[derive(PartialEq)]
-pub struct InteractableInRangeEvent(pub InteractableType);
+/// Despawns all interactable icons
+pub fn despawn_interactable_icons(
+    commands: &mut Commands,
+    interactable_icon_query: &Query<Entity, With<InteractableIconComponent>>,
+) {
+    for interactable_icon_entity in interactable_icon_query.iter() {
+        commands.entity(interactable_icon_entity).despawn();
+    }
+}
 
 pub fn check_interactables_system(
     mut commands: Commands,
@@ -110,7 +135,7 @@ pub fn check_interactables_system(
             // get distance between player and interactable
             let distance = interactable_position.distance(player_position);
 
-            // send event if distance is less than interactable's range
+            // set interactable in range if within distance
             if distance < interactable_component.range {
                 interactable_in_range = Some(interactable_component.interactable_type.clone());
             }
@@ -184,14 +209,4 @@ fn spawn_interact_icon(
             ..Default::default()
         })
         .insert(Name::new("Interactable Icon"));
-}
-
-#[allow(dead_code)]
-/// Print all interactable in range events
-pub fn log_interactable_in_range_event_system(
-    mut ev_interactable_in_range: EventReader<InteractableInRangeEvent>,
-) {
-    for ev in ev_interactable_in_range.iter() {
-        info!("{:?} in range of player", ev.0);
-    }
 }
