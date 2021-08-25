@@ -3,11 +3,12 @@ mod door;
 mod interactable;
 mod player;
 
-use crate::{debug::collider_debug_lines_system, states::GameState};
 use bevy::prelude::*;
 use bevy_prototype_debug_lines::*;
 use bevy_rapier2d::prelude::*;
 use ron::de::from_bytes;
+
+use crate::{apartment::player::decrease_stats, debug::collider_debug_lines_system, states::GameState};
 
 pub use self::{
     animation::BasicAnimationComponent,
@@ -28,6 +29,11 @@ impl Plugin for ApartmentPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
             .add_plugin(DebugLinesPlugin)
+            .insert_resource(player::Health(100))
+            .insert_resource(player::Hunger(100))
+            .insert_resource(player::Sleepiness(100))
+            .insert_resource(player::PeePeePooPoo(100))
+            .insert_resource(player::StatsTimer(Timer::from_seconds(1.0, true)))
             .insert_resource(
                 from_bytes::<animation::CharacterAnimationResource>(include_bytes!(
                     "../../data/character_animations.ron"
@@ -78,9 +84,10 @@ impl Plugin for ApartmentPlugin {
                         door::interact_door_system
                             .system()
                             .after("check_interactables"),
-                    ),
+                    )
+                    .with_system(decrease_stats.system()),
             );
-            
+
         if cfg!(debug_assertions) {
             app.add_system_set(
                 SystemSet::on_update(GameState::MainGame)

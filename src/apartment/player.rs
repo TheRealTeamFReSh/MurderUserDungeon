@@ -68,8 +68,14 @@ pub fn spawn_player(
             position: Vec2::new(10.0, 0.0).into(),
             ..Default::default()
         })
-        .insert(RigidBodyPositionSync::Discrete)
-        .insert(Name::new("Player"))
+        .insert_bundle((
+            RigidBodyPositionSync::Discrete,
+            Name::new("Player"),
+            PlayerComponent {
+                speed: 1.5,
+                interactable_in_range: None,
+            },
+        ))
         .with_children(|parent| {
             parent.spawn().insert_bundle(ColliderBundle {
                 shape: ColliderShape::cuboid(3.0, 1.0),
@@ -193,5 +199,45 @@ pub fn player_movement_system(
         } else {
             rb_vels.linvel.y = 0.0;
         }
+    }
+}
+
+pub struct Hunger(pub u32);
+pub struct Sleepiness(pub u32);
+pub struct PeePeePooPoo(pub u32);
+pub struct Health(pub u32);
+pub struct StatsTimer(pub Timer);
+
+pub fn decrease_stats(
+    mut hunger: ResMut<Hunger>,
+    mut sleepiness: ResMut<Sleepiness>,
+    mut peepeepoopoo: ResMut<PeePeePooPoo>,
+    mut timer: ResMut<StatsTimer>,
+    time: Res<Time>,
+) {
+    timer.0.tick(time.delta());
+    if timer.0.finished() {
+        let hunger_reduction = 5;
+        if hunger.0 >= hunger_reduction {
+            hunger.0 -= hunger_reduction
+        } else {
+            hunger.0 = 0
+        };
+        let sleepiness_reduction = 5;
+        if sleepiness.0 >= sleepiness_reduction {
+            sleepiness.0 -= sleepiness_reduction;
+        } else {
+            sleepiness.0 = 0
+        }
+        let peepeepoopoo_reduction = 5;
+        if peepeepoopoo.0 >= peepeepoopoo_reduction {
+            peepeepoopoo.0 -= peepeepoopoo_reduction;
+        } else {
+            peepeepoopoo.0 = 0
+        }
+        info!(
+            "Hunger: {}, sleepiness: {}, peepeepoopoo: {}",
+            hunger.0, sleepiness.0, peepeepoopoo.0
+        );
     }
 }
