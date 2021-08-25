@@ -12,9 +12,12 @@ pub fn interact_door_system(
     player_query: Query<&PlayerComponent>,
     interactable_query: Query<(Entity, &InteractableComponent)>,
     interactable_icon_query: Query<Entity, With<super::interactable::InteractableIconComponent>>,
+    hallway_cover_query: Query<Entity, With<super::HallwayCoverComponent>>,
     interactables_resource: Res<InteractablesResource>,
     keyboard_input: Res<Input<KeyCode>>,
     app_state: Res<State<GameState>>,
+    asset_server: Res<AssetServer>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     for player_component in player_query.iter() {
         if let Some(InteractableType::ClosedDoor) = player_component.interactable_in_range {
@@ -30,6 +33,7 @@ pub fn interact_door_system(
                             &mut commands,
                             &interactable_icon_query,
                         );
+                        super::despawn_hallway_cover(&mut commands, &hallway_cover_query);
                     }
                 }
 
@@ -49,6 +53,7 @@ pub fn interact_door_system(
                             &mut commands,
                             &interactable_icon_query,
                         );
+                        super::spawn_hallway_cover(&mut commands, &asset_server, &mut materials)
                     }
                 }
 

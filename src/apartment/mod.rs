@@ -17,7 +17,8 @@ pub use self::{
 pub struct ApartmentPlugin;
 
 pub const BACKGROUND_Z: f32 = 0.0;
-pub const PLAYER_Z: f32 = 1.0;
+pub const HALLWAY_COVER_Z: f32 = 1.0;
+pub const PLAYER_Z: f32 = 5.0;
 pub const FOREGROUND_Z: f32 = 10.0;
 pub const INTERACTABLE_ICON_Z: f32 = 11.0;
 
@@ -102,6 +103,8 @@ fn setup(
             ..Default::default()
         })
         .insert(Name::new("Background"));
+
+    spawn_hallway_cover(&mut commands, &asset_server, &mut materials);
 
     // create foreground
     let texture_handle = asset_server.load("textures/apartment_foreground.png");
@@ -214,4 +217,33 @@ fn setup(
         })
         .insert(RigidBodyPositionSync::Discrete)
         .insert(Name::new("Left Wall"));
+}
+
+pub struct HallwayCoverComponent;
+
+pub fn spawn_hallway_cover(
+    commands: &mut Commands,
+    asset_server: &AssetServer,
+    materials: &mut Assets<ColorMaterial>,
+) {
+    // create background
+    let texture_handle = asset_server.load("textures/apartment_hallway_cover.png");
+    commands
+        .spawn()
+        .insert(HallwayCoverComponent)
+        .insert_bundle(SpriteBundle {
+            material: materials.add(texture_handle.into()),
+            transform: Transform::from_translation(Vec3::new(0.0, 0.0, HALLWAY_COVER_Z)),
+            ..Default::default()
+        })
+        .insert(Name::new("Hallway Cover"));
+}
+
+pub fn despawn_hallway_cover(
+    commands: &mut Commands,
+    hallway_cover_query: &Query<Entity, With<HallwayCoverComponent>>,
+) {
+    for hallway_cover in hallway_cover_query.iter() {
+        commands.entity(hallway_cover).despawn();
+    }
 }
