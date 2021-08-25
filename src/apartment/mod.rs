@@ -1,4 +1,5 @@
 mod animation;
+mod door;
 mod interactable;
 mod player;
 
@@ -9,14 +10,17 @@ use bevy_rapier2d::prelude::*;
 use ron::de::from_bytes;
 
 pub use self::{
-    interactable::{InteractableComponent, InteractableInRangeEvent, InteractableType},
-    player::PlayerComponent,
+    animation::BasicAnimationComponent,
+    interactable::{InteractableComponent, InteractableType, InteractablesResource},
+    player::{PlayerComponent, PLAYER_SPRITE_SCALE},
 };
 
 pub struct ApartmentPlugin;
 
 pub const BACKGROUND_Z: f32 = 0.0;
-pub const PLAYER_Z: f32 = 1.0;
+pub const HALLWAY_COVER_Z: f32 = 1.0;
+pub const NPC_Z: f32 = 4.0;
+pub const PLAYER_Z: f32 = 5.0;
 pub const FOREGROUND_Z: f32 = 10.0;
 pub const INTERACTABLE_ICON_Z: f32 = 11.0;
 
@@ -36,7 +40,6 @@ impl Plugin for ApartmentPlugin {
                 ))
                 .unwrap(),
             )
-            .add_event::<interactable::InteractableInRangeEvent>()
             .add_startup_system(setup.system().label("apartment_setup"))
             .add_startup_system(player::spawn_player.system().after("apartment_setup"))
             .add_startup_system(
@@ -65,7 +68,12 @@ impl Plugin for ApartmentPlugin {
                     .system()
                     .after("set_player_animation"),
             )
-            .add_system(animation::basic_sprite_animation_system.system());
+            .add_system(animation::basic_sprite_animation_system.system())
+            .add_system(
+                door::interact_door_system
+                    .system()
+                    .after("check_interactables"),
+            );
 
         if cfg!(debug_assertions) {
             app.add_system(collider_debug_lines_system.system());
@@ -98,6 +106,8 @@ fn setup(
         })
         .insert(Name::new("Background"));
 
+    spawn_hallway_cover(&mut commands, &asset_server, &mut materials);
+
     // create foreground
     let texture_handle = asset_server.load("textures/apartment_foreground.png");
     commands
@@ -110,16 +120,16 @@ fn setup(
         .insert(Name::new("Foreground"));
 
     // create walls
-    // top wall
+    // top wall right
     commands
         .spawn()
         .insert_bundle(RigidBodyBundle {
             body_type: RigidBodyType::Static,
-            position: Vec2::new(-5.3, 6.5).into(),
+            position: Vec2::new(12.0, 11.7).into(),
             ..Default::default()
         })
         .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(27.5, 1.0),
+            shape: ColliderShape::cuboid(30.0, 6.2),
             material: ColliderMaterial {
                 friction: 0.0,
                 restitution: 0.0,
@@ -128,7 +138,27 @@ fn setup(
             ..Default::default()
         })
         .insert(RigidBodyPositionSync::Discrete)
-        .insert(Name::new("Top Wall"));
+        .insert(Name::new("Top-Right Wall"));
+
+    // top wall left
+    commands
+        .spawn()
+        .insert_bundle(RigidBodyBundle {
+            body_type: RigidBodyType::Static,
+            position: Vec2::new(-33.3, 11.7).into(),
+            ..Default::default()
+        })
+        .insert_bundle(ColliderBundle {
+            shape: ColliderShape::cuboid(7.0, 6.2),
+            material: ColliderMaterial {
+                friction: 0.0,
+                restitution: 0.0,
+                ..Default::default()
+            },
+            ..Default::default()
+        })
+        .insert(RigidBodyPositionSync::Discrete)
+        .insert(Name::new("Top-Left Wall"));
 
     // bottom wall
     commands
@@ -189,4 +219,93 @@ fn setup(
         })
         .insert(RigidBodyPositionSync::Discrete)
         .insert(Name::new("Left Wall"));
+
+    // hallway wall
+    commands
+        .spawn()
+        .insert_bundle(RigidBodyBundle {
+            body_type: RigidBodyType::Static,
+            position: Vec2::new(0.0, 25.0).into(),
+            ..Default::default()
+        })
+        .insert_bundle(ColliderBundle {
+            shape: ColliderShape::cuboid(40.0, 1.0),
+            material: ColliderMaterial {
+                friction: 0.0,
+                restitution: 0.0,
+                ..Default::default()
+            },
+            ..Default::default()
+        })
+        .insert(RigidBodyPositionSync::Discrete)
+        .insert(Name::new("Hallway Back Wall"));
+
+    // hallway right wall
+    commands
+        .spawn()
+        .insert_bundle(RigidBodyBundle {
+            body_type: RigidBodyType::Static,
+            position: Vec2::new(41.5, 21.5).into(),
+            ..Default::default()
+        })
+        .insert_bundle(ColliderBundle {
+            shape: ColliderShape::cuboid(1.0, 4.0),
+            material: ColliderMaterial {
+                friction: 0.0,
+                restitution: 0.0,
+                ..Default::default()
+            },
+            ..Default::default()
+        })
+        .insert(RigidBodyPositionSync::Discrete)
+        .insert(Name::new("Hallway Right Wall"));
+
+    // hallway left wall
+    commands
+        .spawn()
+        .insert_bundle(RigidBodyBundle {
+            body_type: RigidBodyType::Static,
+            position: Vec2::new(-41.5, 21.5).into(),
+            ..Default::default()
+        })
+        .insert_bundle(ColliderBundle {
+            shape: ColliderShape::cuboid(1.0, 4.0),
+            material: ColliderMaterial {
+                friction: 0.0,
+                restitution: 0.0,
+                ..Default::default()
+            },
+            ..Default::default()
+        })
+        .insert(RigidBodyPositionSync::Discrete)
+        .insert(Name::new("Hallway Left Wall"));
+}
+
+pub struct HallwayCoverComponent;
+
+pub fn spawn_hallway_cover(
+    commands: &mut Commands,
+    asset_server: &AssetServer,
+    materials: &mut Assets<ColorMaterial>,
+) {
+    // create background
+    let texture_handle = asset_server.load("textures/apartment_hallway_cover.png");
+    commands
+        .spawn()
+        .insert(HallwayCoverComponent)
+        .insert_bundle(SpriteBundle {
+            material: materials.add(texture_handle.into()),
+            transform: Transform::from_translation(Vec3::new(0.0, 0.0, HALLWAY_COVER_Z)),
+            ..Default::default()
+        })
+        .insert(Name::new("Hallway Cover"));
+}
+
+pub fn despawn_hallway_cover(
+    commands: &mut Commands,
+    hallway_cover_query: &Query<Entity, With<HallwayCoverComponent>>,
+) {
+    for hallway_cover in hallway_cover_query.iter() {
+        commands.entity(hallway_cover).despawn();
+    }
 }
