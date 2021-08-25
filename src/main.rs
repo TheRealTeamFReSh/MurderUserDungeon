@@ -1,12 +1,20 @@
+// Configure clippy for Bevy usage
+#![allow(clippy::type_complexity)]
+#![allow(clippy::too_many_arguments)]
+#![allow(clippy::too_many_lines)]
+#![allow(clippy::must_use_candidate)]
+#![allow(clippy::needless_pass_by_value)]
+#![allow(clippy::enum_glob_use)]
+
 mod apartment;
 mod console;
 mod debug;
 mod games;
+mod hud;
 mod states;
 mod vulnerability;
 
 use bevy::{app::AppExit, prelude::*, window::WindowMode};
-#[allow(unused_imports)]
 use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_kira_audio::AudioPlugin;
 
@@ -28,6 +36,7 @@ fn main() {
         .add_plugin(vulnerability::VulnerabilityPlugin)
         .add_plugin(games::ConsoleGamesPlugin)
         .add_plugin(WorldInspectorPlugin::new())
+        .add_plugin(hud::Plugin)
         .add_state(states::GameState::MainGame)
         .add_system(exit_on_esc_system.system())
         .run();
