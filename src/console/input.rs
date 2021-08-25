@@ -23,7 +23,7 @@ pub fn trigger_open_console(
         }
     }
 
-    if app_state.current() == &GameState::ConsoleOpenedState
+    if (app_state.current() == &GameState::ConsoleOpenedState)
         && keyboard_input.just_pressed(KeyCode::Escape)
     {
         app_state.set(GameState::MainGame).unwrap();
@@ -82,6 +82,7 @@ pub fn handle_input_keys(
                     KeyCode::LShift | KeyCode::RShift | KeyCode::Escape | 
                     KeyCode::LAlt | KeyCode::RAlt | KeyCode::LControl | 
                     KeyCode::RControl | KeyCode::F1 |
+                    KeyCode::Up | KeyCode::Down | KeyCode::Right | KeyCode::Left |
                     KeyCode::F2 | KeyCode::F3 | KeyCode::F4 | KeyCode::F5 |
                     KeyCode::F6 | KeyCode::F7 | KeyCode::F8 | KeyCode::F9 | 
                     KeyCode::F10 | KeyCode::F11 | KeyCode::F12 |

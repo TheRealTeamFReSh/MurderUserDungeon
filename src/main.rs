@@ -2,6 +2,7 @@ mod apartment;
 mod console;
 mod states;
 mod debug;
+mod games;
 
 use bevy::{app::AppExit, prelude::*, window::WindowMode};
 #[allow(unused_imports)]
@@ -23,7 +24,8 @@ fn main() {
         .add_plugin(console::ConsolePlugin)
         .add_plugin(AudioPlugin)
         .add_plugin(apartment::ApartmentPlugin)
-        .add_plugin(WorldInspectorPlugin::new())
+        .add_plugin(games::ConsoleGamesPlugin)
+        //.add_plugin(WorldInspectorPlugin::new())
         .add_state(states::GameState::MainGame)
         .add_system(exit_on_esc_system.system())
         .run();
