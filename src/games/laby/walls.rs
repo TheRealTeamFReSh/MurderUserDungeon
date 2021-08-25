@@ -1,4 +1,4 @@
-/*use rand::Rng;
+/* use rand::Rng;
 
 pub const ALL_DIRECTIONS: &str = "
     
@@ -136,15 +136,22 @@ pub const RIGHT: &str = "
   /              \\ 
  /                \\ 
 /                  \\
-";
+";*/
 
+#[derive(PartialEq)]
 pub enum Directions {
     All,
-    LeftFront,
+    /*LeftFront,
     Left,
     RightFront,
     Right,
-    Front,
+    Front,*/
+}
+
+/*pub enum Movement {
+    Forward,
+    Left,
+    Right,
 }
 
 impl Directions {
@@ -169,5 +176,31 @@ impl Directions {
             4 => Directions::Right,
             _ => Directions::Front,
         }
+    }
+
+    pub fn can_go_direction(&self, mov: Movement) -> bool {
+        if self == &Directions::All { return true; }
+
+        match mov {
+            Movement::Forward => {
+                if self == &Directions::LeftFront || self == &Directions::RightFront {
+                    return true;
+                }
+            }
+
+            Movement::Left => {
+                if self == &Directions::LeftFront || self == &Directions::Left {
+                    return true;
+                }
+            }
+
+            Movement::Right => {
+                if self == &Directions::RightFront || self == &Directions::Right {
+                    return true;
+                }
+            }
+        }
+
+        false
     }
 }*/
