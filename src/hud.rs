@@ -2,6 +2,7 @@ use crate::apartment::player::Health;
 use crate::apartment::player::Hunger;
 use crate::apartment::player::PeePeePooPoo;
 use crate::apartment::player::Sleepiness;
+use crate::states::GameState;
 use bevy::prelude;
 use bevy::prelude::*;
 
@@ -9,8 +10,12 @@ pub struct Plugin;
 
 impl prelude::Plugin for Plugin {
     fn build(&self, app: &mut prelude::AppBuilder) {
-        app.add_startup_system(build_stat_hud.system())
-            .add_system(refresh_stat_hud.system());
+        app.add_system_set(
+            SystemSet::on_enter(GameState::MainGame).with_system(build_stat_hud.system()),
+        )
+        .add_system_set(
+            SystemSet::on_update(GameState::MainGame).with_system(refresh_stat_hud.system()),
+        );
     }
 }
 
