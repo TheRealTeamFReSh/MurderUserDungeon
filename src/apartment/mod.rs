@@ -123,11 +123,11 @@ fn setup(
         .spawn()
         .insert_bundle(RigidBodyBundle {
             body_type: RigidBodyType::Static,
-            position: Vec2::new(1.5, 6.5).into(),
+            position: Vec2::new(12.0, 11.7).into(),
             ..Default::default()
         })
         .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(19.5, 1.0),
+            shape: ColliderShape::cuboid(30.0, 6.2),
             material: ColliderMaterial {
                 friction: 0.0,
                 restitution: 0.0,
@@ -143,11 +143,11 @@ fn setup(
         .spawn()
         .insert_bundle(RigidBodyBundle {
             body_type: RigidBodyType::Static,
-            position: Vec2::new(-28.5, 6.5).into(),
+            position: Vec2::new(-33.3, 11.7).into(),
             ..Default::default()
         })
         .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(2.5, 1.0),
+            shape: ColliderShape::cuboid(7.0, 6.2),
             material: ColliderMaterial {
                 friction: 0.0,
                 restitution: 0.0,
@@ -217,6 +217,66 @@ fn setup(
         })
         .insert(RigidBodyPositionSync::Discrete)
         .insert(Name::new("Left Wall"));
+
+    // hallway wall
+    commands
+        .spawn()
+        .insert_bundle(RigidBodyBundle {
+            body_type: RigidBodyType::Static,
+            position: Vec2::new(0.0, 25.0).into(),
+            ..Default::default()
+        })
+        .insert_bundle(ColliderBundle {
+            shape: ColliderShape::cuboid(40.0, 1.0),
+            material: ColliderMaterial {
+                friction: 0.0,
+                restitution: 0.0,
+                ..Default::default()
+            },
+            ..Default::default()
+        })
+        .insert(RigidBodyPositionSync::Discrete)
+        .insert(Name::new("Hallway Back Wall"));
+
+    // hallway right wall
+    commands
+        .spawn()
+        .insert_bundle(RigidBodyBundle {
+            body_type: RigidBodyType::Static,
+            position: Vec2::new(41.5, 21.5).into(),
+            ..Default::default()
+        })
+        .insert_bundle(ColliderBundle {
+            shape: ColliderShape::cuboid(1.0, 4.0),
+            material: ColliderMaterial {
+                friction: 0.0,
+                restitution: 0.0,
+                ..Default::default()
+            },
+            ..Default::default()
+        })
+        .insert(RigidBodyPositionSync::Discrete)
+        .insert(Name::new("Hallway Right Wall"));
+
+    // hallway left wall
+    commands
+        .spawn()
+        .insert_bundle(RigidBodyBundle {
+            body_type: RigidBodyType::Static,
+            position: Vec2::new(-41.5, 21.5).into(),
+            ..Default::default()
+        })
+        .insert_bundle(ColliderBundle {
+            shape: ColliderShape::cuboid(1.0, 4.0),
+            material: ColliderMaterial {
+                friction: 0.0,
+                restitution: 0.0,
+                ..Default::default()
+            },
+            ..Default::default()
+        })
+        .insert(RigidBodyPositionSync::Discrete)
+        .insert(Name::new("Hallway Left Wall"));
 }
 
 pub struct HallwayCoverComponent;
