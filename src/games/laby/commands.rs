@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{console::{ConsoleData, event::{EnteredConsoleCommandEvent, PrintConsoleEvent}}, games::{ConsoleGamesData, GameList}};
 
-use super::{data::{GameState, LabyrinthData, LabyrinthResourceFile, Movement}, game::new_turn};
+use super::{data::{GameState, LabyrinthData, LabyrinthResourceFile, Movement, RoomType}, game::new_turn};
 
 pub fn commands_handler(
     mut cmd_reader: EventReader<EnteredConsoleCommandEvent>,
@@ -57,6 +57,16 @@ pub fn commands_handler(
                     console_writer.send(PrintConsoleEvent("There is nothing to continue...".to_string()));
                 }
             }
+            "skip" => {
+                if laby_data.game_state == GameState::Exploring && 
+                    (laby_data.room_type == RoomType::Enemy || laby_data.room_type == RoomType::Item)
+                {
+                    console_writer.send(PrintConsoleEvent("Skipping room...".to_string()));
+                    new_turn(&mut laby_data, &laby_res);
+                    laby_data.has_shown_turn_infos = false;
+                    laby_data.wait_for_continue = false;
+                }
+            }
             "go" => {
                 if args.len() == 1 {
                     console_writer.send(PrintConsoleEvent("You specified no direction...".to_string()));
@@ -67,10 +77,15 @@ pub fn commands_handler(
                 if let Some(movement) = Movement::from_string(args[1]) {
                     if laby_data.next_directions.can_go_direction(movement) {
                         new_turn(&mut laby_data, &laby_res);
+                        laby_data.has_shown_turn_infos = false;
+                    laby_data.wait_for_continue = false;
                     } else {
                         console_writer.send(PrintConsoleEvent("There is no path in this direction...".to_string()));
                     }
                     return;
+                } else {
+                    console_writer.send(PrintConsoleEvent("Please enter a valid direction...".to_string()));
+                    console_writer.send(PrintConsoleEvent("Usage: go <direction>, valid: (FORWARD, LEFT, RIGHT)".to_string()));
                 }
             }
 

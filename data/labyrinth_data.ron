@@ -26,7 +26,23 @@ other people here are the ones shooting her***
 *hum hum* people looking for troubles *hum 
 hum* looking for adventure!
 
+You may encounter creatures, other people and
+find treasures inside -=[The Labyrinth]=-
+
 Be brave and face and the fun and the dangers
 -=[The Labyrinth]=- (TM) has to offer you.
-(No refunds)"
+(No refunds)",
+
+    enemy_desc: {
+        "rat": "
+With its big black eyes, you may believe this
+rat is harmless. But look at the tail, this
+disgusting tail. Now look at yours?
+        ",
+        "bat": "
+This king of the night is so big relative to
+the corridor. You won't be able to go through
+whitout killing this monstruosity.
+        "
+    }
 )

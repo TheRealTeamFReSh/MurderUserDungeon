@@ -3,7 +3,7 @@ use rand::Rng;
 
 use crate::{console::{ConsoleData, event::PrintConsoleEvent}, games::laby::data::Directions};
 
-use super::data::{GameState, LabyrinthData, LabyrinthResourceFile};
+use super::{data::{GameState, LabyrinthData, LabyrinthResourceFile, RoomType}, enemies::EnemyType, items::ItemType};
 
 pub fn game_loop(
     mut laby_data: ResMut<LabyrinthData>,
@@ -17,14 +17,22 @@ pub fn game_loop(
     console_data.messages.clear();
 
     match laby_data.game_state {
+        // if we're going through the tutorial
         GameState::Tutorial => {
             console_writer.send(PrintConsoleEvent(display_tutorial(&laby_res)));
             laby_data.wait_for_continue = true;
         },
 
-        GameState::Exploring => console_writer.send(PrintConsoleEvent(turn_display(
-            &laby_data,
-        ))),
+        // if it's just about exploring
+        GameState::Exploring => {
+            match laby_data.room_type {
+                RoomType::Corridor => console_writer.send(PrintConsoleEvent(turn_display(&laby_data))),
+
+                RoomType::Enemy => console_writer.send(PrintConsoleEvent(enemy_display(&laby_data, &laby_res))),
+
+                RoomType::Item => console_writer.send(PrintConsoleEvent(item_display(&laby_data, &laby_res))),
+            }
+        },  
     };
 
     // in order to not see this message again
@@ -65,13 +73,56 @@ fn turn_display(
     res
 }
 
+fn enemy_display(
+    laby_data: &ResMut<LabyrinthData>,
+    laby_res: &Res<LabyrinthResourceFile>,
+) -> String {
+    let mut res = String::from("----------------------[View]----------------------\n");
+    res.push_str(laby_data.enemy_type.get_ascii_art());
+    res.push('\n');
+
+    // Description
+    res.push_str("-------------------[Description]------------------\n");
+    res.push_str(&format!("{}\n\n", laby_res.enemy_desc.get(laby_data.enemy_type.to_display_str()).unwrap()));
+
+    res
+}
+
+fn item_display(
+    laby_data: &ResMut<LabyrinthData>,
+    _laby_res: &Res<LabyrinthResourceFile>,
+) -> String {
+    let mut res = String::from("----------------------[View]----------------------\n");
+    res.push_str(laby_data.item_type.get_ascii_art());
+    res.push('\n');
+
+    // Description
+    res.push_str("-------------------[Description]------------------\n");
+    //res.push_str(&format!("{}\n\n", laby_res.enemy_desc.get(laby_data.enemy_type.to_display_str()).unwrap()));
+
+    res
+}
+
 pub fn new_turn(
     laby_data: &mut ResMut<LabyrinthData>,
     laby_res: &Res<LabyrinthResourceFile>,
 ) {
     laby_data.steps_number += 1;
-    laby_data.next_directions = Directions::get_random_direction();
-    
-    let index = rand::thread_rng().gen_range(0..laby_res.descriptions.len());
-    laby_data.description = laby_res.descriptions.get(index).unwrap().clone();
+
+    let is_next_enemy = rand::thread_rng().gen_ratio(1, 3);
+    let is_next_item = rand::thread_rng().gen_ratio(1, 3);
+
+    if is_next_enemy {
+        laby_data.room_type = RoomType::Enemy;
+        laby_data.enemy_type = EnemyType::get_random_enemy();
+    } else if is_next_item {
+        laby_data.room_type = RoomType::Item;
+        laby_data.item_type = ItemType::get_random_item();
+    } else {
+        laby_data.room_type = RoomType::Corridor;
+        laby_data.next_directions = Directions::get_random_direction();
+
+        let index = rand::thread_rng().gen_range(0..laby_res.descriptions.len());
+        laby_data.description = laby_res.descriptions.get(index).unwrap().clone();
+    }
 }

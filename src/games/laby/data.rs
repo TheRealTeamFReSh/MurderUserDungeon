@@ -1,7 +1,8 @@
+use bevy::utils::HashMap;
 use rand::Rng;
 use serde::Deserialize;
 
-use super::art;
+use super::{art, enemies::EnemyType, items::ItemType};
 
 #[derive(PartialEq)]
 pub enum GameState {
@@ -9,8 +10,18 @@ pub enum GameState {
     Exploring,
 }
 
+#[derive(PartialEq)]
+pub enum RoomType {
+    Corridor,
+    Enemy,
+    Item,
+}
+
 pub struct LabyrinthData {
     pub steps_number: usize,
+    pub room_type: RoomType,
+    pub enemy_type: EnemyType,
+    pub item_type: ItemType,
     pub next_directions: Directions,
     pub has_shown_turn_infos: bool,
     pub wait_for_continue: bool,
@@ -25,8 +36,11 @@ impl Default for LabyrinthData {
             game_state: GameState::Tutorial,
             has_shown_turn_infos: false,
             steps_number: 0,
+            room_type: RoomType::Corridor,
             wait_for_continue: false,
             description: String::from(""),
+            enemy_type: EnemyType::Rat,
+            item_type: ItemType::Chest,
         }
     }
 }
@@ -46,6 +60,7 @@ impl LabyrinthData {
 pub struct LabyrinthResourceFile {
     pub tutorial: String,
     pub descriptions: Vec<String>,
+    pub enemy_desc: HashMap<String, String>, 
 }
 
 #[derive(PartialEq)]
@@ -115,7 +130,7 @@ impl Directions {
 
         match mov {
             Movement::Forward => {
-                if self == &Directions::LeftFront || self == &Directions::RightFront {
+                if self == &Directions::LeftFront || self == &Directions::RightFront || self == &Directions::Front {
                     return true;
                 }
             }

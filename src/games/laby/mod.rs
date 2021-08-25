@@ -2,6 +2,8 @@ mod commands;
 mod game;
 mod data;
 mod art;
+mod enemies;
+mod items;
 
 use bevy::{ecs::schedule::ShouldRun, prelude::*};
 use ron::de::from_bytes;
