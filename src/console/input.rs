@@ -16,7 +16,7 @@ pub fn trigger_open_console(
             if keyboard_input.just_pressed(KeyCode::E)
                 && app_state.current() == &GameState::MainGame
             {
-                app_state.set(GameState::ConsoleOpenedState).unwrap();
+                app_state.push(GameState::ConsoleOpenedState).unwrap();
                 info!("Console opened");
             }
         }
@@ -25,7 +25,7 @@ pub fn trigger_open_console(
     if (app_state.current() == &GameState::ConsoleOpenedState)
         && keyboard_input.just_pressed(KeyCode::Escape)
     {
-        app_state.set(GameState::MainGame).unwrap();
+        app_state.pop().unwrap();
         info!("Console closed");
     }
 }

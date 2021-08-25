@@ -29,8 +29,7 @@ fn main() {
         .add_plugin(vulnerability::VulnerabilityPlugin)
         .add_plugin(games::ConsoleGamesPlugin)
         .add_plugin(misc::game_over::GameOverPlugin)
-        .add_plugin(WorldInspectorPlugin::new())
-        .add_plugin(WorldInspectorPlugin::new())
+        //.add_plugin(WorldInspectorPlugin::new())
         .add_state(states::GameState::MainGame)
         .add_system(exit_on_esc_system.system())
         .run();
