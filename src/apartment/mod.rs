@@ -1,7 +1,7 @@
 mod animation;
 mod door;
 mod interactable;
-mod player;
+pub mod player;
 
 use crate::{apartment::player::decrease_stats, debug::collider_debug_lines_system};
 use bevy::prelude::*;
