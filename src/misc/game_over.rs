@@ -179,7 +179,6 @@ fn show_game_over_screen(
     mut query: Query<(&Transform, With<GameOverBackground>)>,
 ) {
     let (_transform, _) = query.single_mut().unwrap();
-    //info!("{:?}", transform.translation);
 }
 
 #[derive(Default)]

@@ -98,7 +98,6 @@ fn item_display(
 
     // Description
     res.push_str("-------------------[Description]------------------\n");
-    //res.push_str(&format!("{}\n\n", laby_res.enemy_desc.get(laby_data.enemy_type.to_display_str()).unwrap()));
 
     res
 }
