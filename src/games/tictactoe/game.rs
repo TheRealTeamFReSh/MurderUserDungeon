@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use rand::Rng;
 
-use crate::{console::event::PrintConsoleEvent, games::{ConsoleGamesData, GameList}};
+use crate::{console::event::PrintConsoleEvent, games::{ConsoleGamesData, GameList}, vulnerability::{BoolVulnerabilityType, VulnerabilityResource}};
 
 #[derive(Default)]
 pub struct TicTacToeData {
@@ -62,7 +62,7 @@ impl TicTacToeData {
             if self.grid[0][k] == self.grid[1][k] && self.grid[1][k] == self.grid[2][k] && self.grid[0][k] != 0 { return self.grid[0][k]; }
         }
         if ((self.grid[0][0] == self.grid[1][1] && self.grid[1][1] == self.grid[2][2]) ||
-            (self.grid[2][0] == self.grid[1][1] && self.grid[1][1] == self.grid[0][2])) && self.grid[1][1] != 0 { return self.grid[0][0]; }
+            (self.grid[2][0] == self.grid[1][1] && self.grid[1][1] == self.grid[0][2])) && self.grid[1][1] != 0 { return self.grid[1][1]; }
 
         0
     }
@@ -105,6 +105,7 @@ pub fn game_loop(
     mut cg_data: ResMut<ConsoleGamesData>,
     mut ttt_data: ResMut<TicTacToeData>,
     mut console_writer: EventWriter<PrintConsoleEvent>,
+    mut vuln_res: ResMut<VulnerabilityResource>,
 ) {
     if !ttt_data.has_seen_tutorial {
         ttt_data.turn_number = 1;
@@ -129,6 +130,10 @@ pub fn game_loop(
                 console_writer.send(PrintConsoleEvent("You lost like a *****".to_string()));
                 cg_data.loaded_game = GameList::None;
                 ttt_data.reset();
+                *vuln_res
+                    .bool_vulnerabilities
+                    .get_mut(&BoolVulnerabilityType::TicTacToeLosing)
+                    .unwrap() = true;
                 return;
             }
             _ => ()

@@ -29,6 +29,7 @@ impl Plugin for GameOverPlugin {
 pub enum GameOverReason {
     DoorLeftOpen,
     TooManyRageQuit,
+    TicTacToeLosing,
 }
 
 impl GameOverReason {
@@ -36,6 +37,7 @@ impl GameOverReason {
         match self {
             GameOverReason::DoorLeftOpen => "Don't forget to close the door when focusing on something else.",
             GameOverReason::TooManyRageQuit => "You ragequitted too many times, \nyou went in fury mode and made an heart attack.",
+            GameOverReason::TicTacToeLosing => "How dare you... lose a game of TicTacToe...\n(There is no AI, it's like losing to a baby...)",
         }
     }
 }
