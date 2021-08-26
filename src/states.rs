@@ -2,5 +2,8 @@
 pub enum GameState {
     MainGame,
     ConsoleOpenedState,
-    GameOverState,
+    PlayerSleepingState,
+    GameOverState, 
+    PlayerPeeingState,
 }
+

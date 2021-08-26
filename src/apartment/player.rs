@@ -1,12 +1,9 @@
-use crate::{
-    apartment::{
+use crate::{apartment::{
         animation::{
             CharacterAnimationComponent, CharacterAnimationResource, CharacterAnimationType,
         },
         PLAYER_Z,
-    },
-    states::GameState,
-};
+    }, misc::game_over::GameOverData, states::GameState};
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
@@ -157,6 +154,23 @@ pub fn set_player_animation_system(
                 character_animations.animations[&character_animation.animation_type];
             sprite.index = animation_data.0;
             character_animation.timer = Timer::from_seconds(animation_data.2, true);
+        }
+    }
+}
+
+// Hide player in designated states
+pub fn hide_player_system(
+    app_state: Res<State<GameState>>,
+    mut player_sprite_query: Query<&mut TextureAtlasSprite, With<PlayerComponent>>,
+    go_data: Res<GameOverData>
+) {
+    for mut sprite in player_sprite_query.iter_mut() {
+        sprite.color = if app_state.current() == &GameState::PlayerSleepingState || 
+            (app_state.current() == &GameState::GameOverState && go_data.hide_player_sprite)
+        {
+            Color::NONE
+        } else {
+            Color::WHITE
         }
     }
 }

@@ -1,14 +1,18 @@
 mod animation;
+mod bed;
 mod door;
 mod interactable;
 pub mod player;
+mod toilet;
 
 use bevy::prelude::*;
 use bevy_prototype_debug_lines::*;
 use bevy_rapier2d::prelude::*;
 use ron::de::from_bytes;
 
-use crate::{apartment::player::decrease_stats, debug::collider_debug_lines_system, states::GameState};
+use crate::{
+    apartment::player::decrease_stats, debug::collider_debug_lines_system, states::GameState,
+};
 
 pub use self::{
     animation::BasicAnimationComponent,
@@ -20,6 +24,7 @@ pub struct ApartmentPlugin;
 
 pub const BACKGROUND_Z: f32 = 0.0;
 pub const HALLWAY_COVER_Z: f32 = 1.0;
+pub const PLAYER_IN_BED_Z: f32 = 2.0;
 pub const NPC_Z: f32 = 4.0;
 pub const PLAYER_Z: f32 = 5.0;
 pub const FOREGROUND_Z: f32 = 10.0;
@@ -34,6 +39,12 @@ impl Plugin for ApartmentPlugin {
             .insert_resource(player::Sleepiness(100))
             .insert_resource(player::PeePeePooPoo(100))
             .insert_resource(player::StatsTimer(Timer::from_seconds(1.0, true)))
+            .insert_resource(bed::SleepingResource {
+                sleep_timer: Timer::from_seconds(bed::SLEEP_TIME, false),
+            })
+            .insert_resource(toilet::PeeingResource {
+                pee_timer: Timer::from_seconds(toilet::PEE_TIME, false),
+            })
             .insert_resource(
                 from_bytes::<animation::CharacterAnimationResource>(include_bytes!(
                     "../../data/character_animations.ron"
@@ -75,18 +86,32 @@ impl Plugin for ApartmentPlugin {
                             .label("set_player_animation"),
                     )
                     .with_system(
-                        animation::animate_character_system
-                            .system()
-                            .after("set_player_animation"),
-                    )
-                    .with_system(animation::basic_sprite_animation_system.system())
-                    .with_system(
                         door::interact_door_system
                             .system()
                             .after("check_interactables"),
+
                     )
-                    .with_system(decrease_stats.system()),
+                    .with_system(
+                        bed::interact_bed_system
+                            .system()
+                            .after("check_interactables"),
+                    )
+                    .with_system(
+                        toilet::interact_toilet_system
+                            .system()
+                            .after("check_interactables"),
+                    ),
             );
+        app.add_system(animation::basic_sprite_animation_system.system());
+        app.add_system(bed::sleeping_system.system())
+            .add_system(toilet::peeing_system.system())
+            .add_system(player::hide_player_system.system());
+        app.add_system(
+            animation::animate_character_system
+                .system()
+                .after("set_player_animation"),
+        );
+        app.add_system(decrease_stats.system());
 
         if cfg!(debug_assertions) {
             app.add_system_set(
@@ -295,6 +320,26 @@ fn setup(
         })
         .insert(RigidBodyPositionSync::Discrete)
         .insert(Name::new("Hallway Left Wall"));
+
+    // bathroom wall
+    commands
+        .spawn()
+        .insert_bundle(RigidBodyBundle {
+            body_type: RigidBodyType::Static,
+            position: Vec2::new(11.1, -10.8).into(),
+            ..Default::default()
+        })
+        .insert_bundle(ColliderBundle {
+            shape: ColliderShape::cuboid(8.2, 6.2),
+            material: ColliderMaterial {
+                friction: 0.0,
+                restitution: 0.0,
+                ..Default::default()
+            },
+            ..Default::default()
+        })
+        .insert(RigidBodyPositionSync::Discrete)
+        .insert(Name::new("Bathroom Wall"));
 }
 
 pub struct HallwayCoverComponent;
@@ -323,5 +368,34 @@ pub fn despawn_hallway_cover(
 ) {
     for hallway_cover in hallway_cover_query.iter() {
         commands.entity(hallway_cover).despawn();
+    }
+}
+
+pub struct PlayerInBedComponent;
+
+pub fn spawn_player_in_bed(
+    commands: &mut Commands,
+    asset_server: &AssetServer,
+    materials: &mut Assets<ColorMaterial>,
+) {
+    // create background
+    let texture_handle = asset_server.load("textures/player_in_bed.png");
+    commands
+        .spawn()
+        .insert(PlayerInBedComponent)
+        .insert_bundle(SpriteBundle {
+            material: materials.add(texture_handle.into()),
+            transform: Transform::from_translation(Vec3::new(0.0, 0.0, PLAYER_IN_BED_Z)),
+            ..Default::default()
+        })
+        .insert(Name::new("Player in Bed"));
+}
+
+pub fn despawn_player_in_bed(
+    commands: &mut Commands,
+    player_in_bed_query: &Query<Entity, With<PlayerInBedComponent>>,
+) {
+    for player_in_bed in player_in_bed_query.iter() {
+        commands.entity(player_in_bed).despawn();
     }
 }
