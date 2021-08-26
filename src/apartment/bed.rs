@@ -1,7 +1,8 @@
 use crate::apartment::{
     player::{PlayerComponent, Sleepiness},
-    InteractableType, PlayerInBedComponent,
+    InteractableComponent, InteractableType, PlayerInBedComponent,
 };
+use crate::vulnerability::{spawn_npc, BoolVulnerabilityType, VulnerabilityResource};
 
 use crate::states::GameState;
 use bevy::prelude::*;
@@ -11,6 +12,8 @@ pub const SLEEP_TIME: f32 = 4.0;
 /// Handles interacting with bed
 pub fn interact_bed_system(
     mut commands: Commands,
+    interactables_query: Query<&InteractableComponent>,
+    mut vulnerability_resource: ResMut<VulnerabilityResource>,
     player_query: Query<&PlayerComponent>,
     sleepiness: Res<Sleepiness>,
     keyboard_input: Res<Input<KeyCode>>,
@@ -31,6 +34,15 @@ pub fn interact_bed_system(
                         app_state.set(GameState::PlayerSleepingState).unwrap();
                     }
                     super::spawn_player_in_bed(&mut commands, &asset_server, &mut materials);
+
+                    for interactable_component in interactables_query.iter() {
+                        if InteractableType::OpenDoor == interactable_component.interactable_type {
+                            *vulnerability_resource
+                                .bool_vulnerabilities
+                                .get_mut(&BoolVulnerabilityType::BedDoorLeftOpen)
+                                .unwrap() = true;
+                        }
+                    }
                 } else {
                     info!("Not tired");
                     // TODO: notify the player that he is not tired
@@ -55,6 +67,8 @@ pub fn sleeping_system(
     time: Res<Time>,
     asset_server: Res<AssetServer>,
     audio: Res<Audio>,
+    vulnerability_resource: Res<VulnerabilityResource>,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
     if app_state.current() == &GameState::PlayerSleepingState {
         sleep_resource.sleep_timer.tick(time.delta());
@@ -62,11 +76,28 @@ pub fn sleeping_system(
         // wake up player when timer finished
         if sleep_resource.sleep_timer.just_finished() {
             sleep_resource.sleep_timer.reset();
-            if app_state.current() == &GameState::PlayerSleepingState {
-                app_state.set(GameState::MainGame).unwrap();
+
+            // if vulnerable, jumpscare and game over, otherwise wake up
+            if vulnerability_resource.bool_vulnerabilities[&BoolVulnerabilityType::BedDoorLeftOpen]
+            {
+                audio.play(asset_server.load("audio/dramatic_scare.mp3"));
+                spawn_npc(
+                    "textures/npcs/npc_1_right_spritesheet.png",
+                    Vec2::new(-18.0, 57.0),
+                    &mut commands,
+                    &asset_server,
+                    &mut texture_atlases,
+                );
+                if app_state.current() == &GameState::PlayerSleepingState {
+                    app_state.set(GameState::GameOverState(true)).unwrap();
+                }
+            } else {
                 super::despawn_player_in_bed(&mut commands, &player_in_bed_query);
                 audio.play(asset_server.load("audio/get_out_bed.mp3"));
                 sleepiness.0 = 100;
+                if app_state.current() == &GameState::PlayerSleepingState {
+                    app_state.set(GameState::MainGame).unwrap();
+                }
                 info!("Player woke up");
             }
         }

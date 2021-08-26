@@ -167,7 +167,9 @@ pub fn hide_player_system(
     mut player_sprite_query: Query<&mut TextureAtlasSprite, With<PlayerComponent>>,
 ) {
     for mut sprite in player_sprite_query.iter_mut() {
-        sprite.color = if app_state.current() == &GameState::PlayerSleepingState {
+        sprite.color = if app_state.current() == &GameState::PlayerSleepingState
+            || app_state.current() == &GameState::GameOverState(true)
+        {
             Color::NONE
         } else {
             Color::WHITE
