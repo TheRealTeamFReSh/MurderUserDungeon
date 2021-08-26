@@ -11,6 +11,7 @@ mod console;
 mod debug;
 mod games;
 mod hud;
+mod npcs;
 mod states;
 mod vulnerability;
 
@@ -37,6 +38,7 @@ fn main() {
         .add_plugin(games::ConsoleGamesPlugin)
         .add_plugin(WorldInspectorPlugin::new())
         .add_plugin(hud::Plugin)
+        .add_plugin(npcs::NPCsPlugin)
         .add_state(states::GameState::MainGame)
         .add_system(exit_on_esc_system.system())
         .run();

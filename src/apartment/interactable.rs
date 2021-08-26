@@ -17,6 +17,7 @@ pub enum InteractableType {
     Bed,
     ClosedDoor,
     OpenDoor,
+    Toilet,
 }
 
 /// Stores data about sizes, locations, and ranges of interactables
@@ -102,6 +103,23 @@ pub fn spawn_furniture_system(
         })
         .insert(RigidBodyPositionSync::Discrete)
         .insert(Name::new("Bed"));
+
+    // spawn toilet
+    let interactable_type = InteractableType::Toilet;
+    let interactable_data = &interactables_resource.interactables[&interactable_type];
+    commands
+        .spawn()
+        .insert(InteractableComponent {
+            interactable_type,
+            range: interactable_data.range,
+        })
+        .insert_bundle(RigidBodyBundle {
+            body_type: RigidBodyType::Static,
+            position: interactable_data.position.into(),
+            ..Default::default()
+        })
+        .insert(RigidBodyPositionSync::Discrete)
+        .insert(Name::new("Toilet"));
 
     super::door::spawn_closed_door(&mut commands, &interactables_resource);
 }

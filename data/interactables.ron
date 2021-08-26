@@ -19,6 +19,11 @@
 			position: (-22.0, 6.5),
 			collider_size: (4.0, 1.0),
 			range: 19.0,
-		)
+		),
+		Toilet: (
+			position: (16.5, -16.0),
+			collider_size: (1.0, 1.0),
+			range: 19.0,
+		),
 	}
 )
