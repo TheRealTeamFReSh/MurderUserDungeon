@@ -161,6 +161,22 @@ pub fn set_player_animation_system(
     }
 }
 
+// Hide player in designated states
+pub fn hide_player_system(
+    app_state: Res<State<GameState>>,
+    mut player_sprite_query: Query<&mut TextureAtlasSprite, With<PlayerComponent>>,
+) {
+    for mut sprite in player_sprite_query.iter_mut() {
+        sprite.color = if app_state.current() == &GameState::PlayerSleepingState
+            || app_state.current() == &GameState::GameOverState(true)
+        {
+            Color::NONE
+        } else {
+            Color::WHITE
+        }
+    }
+}
+
 // Move player by modifying velocity with input
 pub fn player_movement_system(
     keyboard_input: Res<Input<KeyCode>>,

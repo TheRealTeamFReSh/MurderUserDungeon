@@ -8,12 +8,12 @@ impl Plugin for GameOverPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.insert_resource(GameOverAnimation::default());
         app.add_system_set(
-            SystemSet::on_enter(GameState::GameOverState)
+            SystemSet::on_enter(GameState::GameOverState(true))
                 .with_system(on_enter_game_over.system())
                 .with_system(build_ui.system()),
         );
         app.add_system_set(
-            SystemSet::on_update(GameState::GameOverState)
+            SystemSet::on_update(GameState::GameOverState(true))
                 .with_system(show_game_over_screen.system())
                 .with_system(apply_animation.system()),
         );    
