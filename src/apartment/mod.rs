@@ -1,7 +1,7 @@
 mod animation;
 mod door;
 mod interactable;
-mod player;
+pub mod player;
 
 use bevy::prelude::*;
 use bevy_prototype_debug_lines::*;
