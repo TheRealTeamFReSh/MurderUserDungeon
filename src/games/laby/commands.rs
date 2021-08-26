@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{console::{ConsoleData, event::{EnteredConsoleCommandEvent, PrintConsoleEvent}}, games::ConsoleGamesData, vulnerability::VulnerabilityResource};
+use crate::{console::{ConsoleData, event::{EnteredConsoleCommandEvent, PrintConsoleEvent}}, games::ConsoleGamesData, npcs::{NPCsResource, UsernamesResource}, vulnerability::VulnerabilityResource};
 
 use super::{data::{GameState, LabyrinthData, LabyrinthResourceFile, Movement, PlayerStats, RoomType}, game::new_turn};
 
@@ -13,6 +13,8 @@ pub fn commands_handler(
     laby_res: Res<LabyrinthResourceFile>,
     mut vuln_res: ResMut<VulnerabilityResource>,
     mut player: ResMut<PlayerStats>,
+    username_res: Res<UsernamesResource>,
+    npc_res: Res<NPCsResource>,
 ) {
     for EnteredConsoleCommandEvent(cmd) in cmd_reader.iter() {
         // Don't do anything if the string is empty
@@ -52,7 +54,7 @@ pub fn commands_handler(
             "continue" => {
                 if laby_data.game_state == GameState::Tutorial {
                     laby_data.game_state = GameState::Exploring;
-                    new_turn(&mut laby_data, &laby_res, &mut player);
+                    new_turn(&mut laby_data, &laby_res, &mut player, &username_res, &npc_res);
                     laby_data.has_shown_turn_infos = false;
                     laby_data.wait_for_continue = false;
                 } else {
@@ -65,7 +67,7 @@ pub fn commands_handler(
                 {
                     console_writer.send(PrintConsoleEvent("Skipping room...".to_string()));
                     laby_data.status_message = "Skipping room...".to_string();
-                    new_turn(&mut laby_data, &laby_res, &mut player);
+                    new_turn(&mut laby_data, &laby_res, &mut player, &username_res, &npc_res);
                     laby_data.has_shown_turn_infos = false;
                     laby_data.wait_for_continue = false;
                 }
@@ -79,7 +81,7 @@ pub fn commands_handler(
 
                 if let Some(movement) = Movement::from_string(args[1]) {
                     if laby_data.next_directions.can_go_direction(movement) {
-                        new_turn(&mut laby_data, &laby_res, &mut player);
+                        new_turn(&mut laby_data, &laby_res, &mut player, &username_res, &npc_res);
                         laby_data.has_shown_turn_infos = false;
                         laby_data.wait_for_continue = false;
                     } else {

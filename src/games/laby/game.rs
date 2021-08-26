@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use rand::Rng;
 
-use crate::{console::{ConsoleData, event::PrintConsoleEvent}, games::laby::{data::Directions, utils::{self, display_bar}}, vulnerability::{BoolVulnerabilityType, VulnerabilityResource}};
+use crate::{console::{ConsoleData, event::PrintConsoleEvent}, games::laby::{art, data::Directions, utils::{self, display_bar}}, npcs::{NPCData, NPCsResource, UsernamesResource}, vulnerability::{BoolVulnerabilityType, VulnerabilityResource}};
 
 use super::{data::{GameState, LabyrinthData, LabyrinthResourceFile, PlayerStats, RoomType}, enemies::Enemy, items::ItemType};
 
@@ -12,6 +12,8 @@ pub fn game_loop(
     mut console_data: ResMut<ConsoleData>,
     mut player: ResMut<PlayerStats>,
     mut vuln_res: ResMut<VulnerabilityResource>,
+    username_res: Res<UsernamesResource>,
+    npc_res: Res<NPCsResource>,
 ) {
     if laby_data.has_shown_turn_infos || laby_data.wait_for_continue { return; }
 
@@ -41,7 +43,7 @@ pub fn game_loop(
                 RoomType::Enemy => {
                     if laby_data.enemy.health <= 0.0 {
                         laby_data.enemy.health = laby_data.enemy.health.max(0.0);
-                        new_turn(&mut laby_data, &laby_res, &mut player);
+                        new_turn(&mut laby_data, &laby_res, &mut player, &username_res, &npc_res);
                         laby_data.wait_for_continue = false;
                         laby_data.has_shown_turn_infos = false;
                         laby_data.status_message = format!("Enemy killed! Congrats!\nYou gained {} Exp", laby_data.enemy.exp);
@@ -53,6 +55,8 @@ pub fn game_loop(
                 },
 
                 RoomType::Item => console_writer.send(PrintConsoleEvent(item_display(&laby_data, &laby_res))),
+
+                RoomType::Npc => console_writer.send(PrintConsoleEvent(npc_display(&laby_data))),
             };
             console_writer.send(PrintConsoleEvent(player_infos(&player)));
 
@@ -144,6 +148,24 @@ fn item_display(
     res
 }
 
+fn npc_display(
+    laby_data: &ResMut<LabyrinthData>,
+) -> String {
+    let mut res = String::from("----------------------[View]----------------------\n");
+    res.push_str(art::KNIGHT);
+    res.push('\n');
+
+    res.push_str(&format!("Username: {}\n", laby_data.npc.username));
+
+    // Description
+    res.push_str("---------------------[Talking]--------------------\n");
+    res.push_str("<Put the npc pickup line here>\n\n\n");
+
+    res.push_str("Type 'talk' to speak with him or 'skip' to go to the next room\n");
+
+    res
+}
+
 fn player_infos(
     player: &ResMut<PlayerStats>,
 ) -> String {
@@ -156,7 +178,7 @@ fn player_infos(
     ));
     res.push_str(&format!(
         "Health: {}\n",
-        utils::display_bar(20, player.health.into(), player.max_health.into())
+        utils::display_bar(20, player.health as f64, player.max_health as f64)
     ));
 
     res
@@ -166,14 +188,17 @@ pub fn new_turn(
     laby_data: &mut ResMut<LabyrinthData>,
     laby_res: &Res<LabyrinthResourceFile>,
     player: &mut ResMut<PlayerStats>,
+    username_res: &Res<UsernamesResource>,
+    npc_res: &Res<NPCsResource>,
 ) {
     laby_data.steps_number += 1;
 
     player.health += 1.0;
-    player.health = player.health.max(player.max_health);
+    player.health = player.health.min(player.max_health);
 
     let is_next_enemy = rand::thread_rng().gen_ratio(1, 3);
     let is_next_item = rand::thread_rng().gen_ratio(1, 3);
+    let is_next_npc = rand::thread_rng().gen_ratio(1, 3);
 
     if is_next_enemy {
         laby_data.room_type = RoomType::Enemy;
@@ -181,7 +206,14 @@ pub fn new_turn(
     } else if is_next_item {
         laby_data.room_type = RoomType::Item;
         laby_data.item_type = ItemType::get_random_item();
-    } else {
+    } else if is_next_npc {
+        laby_data.room_type = RoomType::Npc;
+        laby_data.npc = {
+            let index = rand::thread_rng().gen_range(0..npc_res.npcs.values().count());
+
+            npc_res.npcs.values().nth(index).unwrap().clone()
+        };
+    }else {
         laby_data.room_type = RoomType::Corridor;
         laby_data.next_directions = Directions::get_random_direction();
 

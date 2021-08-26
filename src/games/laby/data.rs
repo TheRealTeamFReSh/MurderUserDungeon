@@ -1,6 +1,8 @@
 use rand::Rng;
 use serde::Deserialize;
 
+use crate::npcs::NPCData;
+
 use super::{art, enemies::Enemy, items::ItemType};
 
 #[derive(PartialEq)]
@@ -9,6 +11,7 @@ pub enum GameState {
     Exploring,
 }
 
+#[derive(Debug)]
 pub struct PlayerStats {
     pub health: f32,
     pub max_health: f32,
@@ -34,12 +37,14 @@ pub enum RoomType {
     Corridor,
     Enemy,
     Item,
+    Npc,
 }
 
 pub struct LabyrinthData {
     pub steps_number: usize,
     pub room_type: RoomType,
     pub enemy: Enemy,
+    pub npc: NPCData,
     pub item_type: ItemType,
     pub next_directions: Directions,
     pub has_shown_turn_infos: bool,
@@ -62,6 +67,7 @@ impl Default for LabyrinthData {
             enemy: Enemy::default(),
             item_type: ItemType::Chest,
             status_message: String::from(""),
+            npc: NPCData { sprite_id:0, username: "".to_string() }
         }
     }
 }
