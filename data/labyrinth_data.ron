@@ -42,6 +42,8 @@ rat is harmless. But look at the tail, this
 disgusting tail. Now look at yours?",
             max_health: 3.0,
             health: 3.0,
+            exp: 5,
+            damages: 1.5,
         ),
         Enemy(
             kind: Bat,
@@ -51,6 +53,8 @@ the corridor. You won't be able to go through
 without killing this monstruosity.",
             max_health: 2.0,
             health: 2.0,
+            exp: 2,
+            damages: 0.5,
         ),
     ]
 )

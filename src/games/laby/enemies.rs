@@ -9,6 +9,8 @@ pub struct Enemy {
     pub description: String,
     pub health: f32,
     pub max_health: f32,
+    pub exp: usize,
+    pub damages: f32,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -47,6 +49,8 @@ impl Default for Enemy {
             description: "Rat description".to_string(),
             max_health: 3.0,
             health: 3.0,
+            exp: 5,
+            damages: 0.5,
         }
     }
 }

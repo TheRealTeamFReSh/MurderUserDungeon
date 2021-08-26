@@ -30,6 +30,7 @@ pub enum GameOverReason {
     DoorLeftOpen,
     TooManyRageQuit,
     TicTacToeLosing,
+    LabyrinthLosing,
 }
 
 impl GameOverReason {
@@ -38,6 +39,7 @@ impl GameOverReason {
             GameOverReason::DoorLeftOpen => "Don't forget to close the door when focusing on something else.",
             GameOverReason::TooManyRageQuit => "You ragequitted too many times, \nyou went in fury mode and made an heart attack.",
             GameOverReason::TicTacToeLosing => "How dare you... lose a game of TicTacToe...\n(There is no AI, it's like losing to a baby...)",
+            GameOverReason::LabyrinthLosing => "It's hard to stay alive there...\nMaybe in another life you will thrive and be a real MLG!",
         }
     }
 }

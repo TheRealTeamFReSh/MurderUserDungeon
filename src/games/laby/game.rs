@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use rand::Rng;
 
-use crate::{console::{ConsoleData, event::PrintConsoleEvent}, games::laby::{data::Directions, utils::{self, display_bar}}};
+use crate::{console::{ConsoleData, event::PrintConsoleEvent}, games::laby::{data::Directions, utils::{self, display_bar}}, vulnerability::{BoolVulnerabilityType, VulnerabilityResource}};
 
 use super::{data::{GameState, LabyrinthData, LabyrinthResourceFile, PlayerStats, RoomType}, enemies::Enemy, items::ItemType};
 
@@ -10,9 +10,18 @@ pub fn game_loop(
     laby_res: Res<LabyrinthResourceFile>,
     mut console_writer: EventWriter<PrintConsoleEvent>,
     mut console_data: ResMut<ConsoleData>,
-    player: Res<PlayerStats>,
+    mut player: ResMut<PlayerStats>,
+    mut vuln_res: ResMut<VulnerabilityResource>,
 ) {
     if laby_data.has_shown_turn_infos || laby_data.wait_for_continue { return; }
+
+    if player.health <= 0.0 {
+        *vuln_res
+            .bool_vulnerabilities
+            .get_mut(&BoolVulnerabilityType::LabyrinthLosing)
+            .unwrap() = true;
+        return;
+    }
 
     // first we clear the screen
     console_data.messages.clear();
@@ -32,9 +41,11 @@ pub fn game_loop(
                 RoomType::Enemy => {
                     if laby_data.enemy.health <= 0.0 {
                         laby_data.enemy.health = laby_data.enemy.health.max(0.0);
-                        new_turn(&mut laby_data, &laby_res);
+                        new_turn(&mut laby_data, &laby_res, &mut player);
                         laby_data.wait_for_continue = false;
                         laby_data.has_shown_turn_infos = false;
+                        laby_data.status_message = format!("Enemy killed! Congrats!\nYou gained {} Exp", laby_data.enemy.exp);
+                        player.exp += laby_data.enemy.exp;
                         return;
                     }
 
@@ -44,11 +55,24 @@ pub fn game_loop(
                 RoomType::Item => console_writer.send(PrintConsoleEvent(item_display(&laby_data, &laby_res))),
             };
             console_writer.send(PrintConsoleEvent(player_infos(&player)));
+
+            console_writer.send(PrintConsoleEvent(display_status(&laby_data)));
         },  
     };
 
     // in order to not see this message again
     laby_data.has_shown_turn_infos = true;
+    // clear the status message for the next pass
+    laby_data.status_message = String::from("");
+}
+
+fn display_status(
+    laby_data: & ResMut<LabyrinthData>,
+) -> String {
+    let mut res = String::from("");
+    res.push_str(&format!("{}\n", laby_data.status_message));
+
+    res
 }
 
 fn display_tutorial(
@@ -121,9 +145,9 @@ fn item_display(
 }
 
 fn player_infos(
-    player: &Res<PlayerStats>,
+    player: &ResMut<PlayerStats>,
 ) -> String {
-    let mut res = String::from("------------------[Player Stats]------------------\n");
+    let mut res = String::from("------------------[Player Stats]------------------\n\n");
 
     res.push_str(&format!(
         "Level: {} | Exp: {} | Gold: 0\n",
@@ -141,8 +165,12 @@ fn player_infos(
 pub fn new_turn(
     laby_data: &mut ResMut<LabyrinthData>,
     laby_res: &Res<LabyrinthResourceFile>,
+    player: &mut ResMut<PlayerStats>,
 ) {
     laby_data.steps_number += 1;
+
+    player.health += 1.0;
+    player.health = player.health.max(player.max_health);
 
     let is_next_enemy = rand::thread_rng().gen_ratio(1, 3);
     let is_next_item = rand::thread_rng().gen_ratio(1, 3);

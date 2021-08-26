@@ -14,6 +14,7 @@ pub struct PlayerStats {
     pub max_health: f32,
     pub level: usize,
     pub exp: usize,
+    pub damages: f32,
 }
 
 impl Default for PlayerStats {
@@ -23,6 +24,7 @@ impl Default for PlayerStats {
             max_health: 10.0,
             level: 1,
             exp: 0,
+            damages: 1.0,
         }
     }
 }
@@ -44,6 +46,7 @@ pub struct LabyrinthData {
     pub wait_for_continue: bool,
     pub game_state: GameState,
     pub description: String,
+    pub status_message: String,
 }
 
 impl Default for LabyrinthData {
@@ -58,6 +61,7 @@ impl Default for LabyrinthData {
             description: String::from(""),
             enemy: Enemy::default(),
             item_type: ItemType::Chest,
+            status_message: String::from(""),
         }
     }
 }
