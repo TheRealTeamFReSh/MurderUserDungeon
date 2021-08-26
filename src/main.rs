@@ -12,6 +12,7 @@ mod debug;
 mod games;
 mod misc;
 mod hud;
+mod npcs;
 mod states;
 mod vulnerability;
 
@@ -39,6 +40,7 @@ fn main() {
         .add_plugin(misc::game_over::GameOverPlugin)
         .add_plugin(WorldInspectorPlugin::new())
         .add_plugin(hud::Plugin)
+        .add_plugin(npcs::NPCsPlugin)
         .add_state(states::GameState::MainGame)
         .add_system(exit_on_esc_system.system())
         .run();

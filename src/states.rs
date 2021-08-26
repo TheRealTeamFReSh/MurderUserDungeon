@@ -3,5 +3,7 @@ pub enum GameState {
     MainGame,
     ConsoleOpenedState,
     PlayerSleepingState,
-    GameOverState, // bool indicates whether to hide the player's sprite
+    GameOverState, 
+    PlayerPeeingState,
 }
+

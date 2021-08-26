@@ -91,6 +91,7 @@ pub fn sleeping_system(
                 );
                 if app_state.current() == &GameState::PlayerSleepingState {
                     go_data.reason = Some(GameOverReason::DoorLeftOpen);
+                    go_data.hide_player_sprite = true;
                     app_state.set(GameState::GameOverState).unwrap();
                 }
             } else {
