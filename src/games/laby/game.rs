@@ -1,15 +1,16 @@
 use bevy::prelude::*;
 use rand::Rng;
 
-use crate::{console::{ConsoleData, event::PrintConsoleEvent}, games::laby::data::Directions};
+use crate::{console::{ConsoleData, event::PrintConsoleEvent}, games::laby::{data::Directions, utils::{self, display_bar}}};
 
-use super::{data::{GameState, LabyrinthData, LabyrinthResourceFile, RoomType}, enemies::EnemyType, items::ItemType};
+use super::{data::{GameState, LabyrinthData, LabyrinthResourceFile, PlayerStats, RoomType}, enemies::Enemy, items::ItemType};
 
 pub fn game_loop(
     mut laby_data: ResMut<LabyrinthData>,
     laby_res: Res<LabyrinthResourceFile>,
     mut console_writer: EventWriter<PrintConsoleEvent>,
     mut console_data: ResMut<ConsoleData>,
+    player: Res<PlayerStats>,
 ) {
     if laby_data.has_shown_turn_infos || laby_data.wait_for_continue { return; }
 
@@ -28,10 +29,21 @@ pub fn game_loop(
             match laby_data.room_type {
                 RoomType::Corridor => console_writer.send(PrintConsoleEvent(turn_display(&laby_data))),
 
-                RoomType::Enemy => console_writer.send(PrintConsoleEvent(enemy_display(&laby_data, &laby_res))),
+                RoomType::Enemy => {
+                    if laby_data.enemy.health <= 0.0 {
+                        laby_data.enemy.health = laby_data.enemy.health.max(0.0);
+                        new_turn(&mut laby_data, &laby_res);
+                        laby_data.wait_for_continue = false;
+                        laby_data.has_shown_turn_infos = false;
+                        return;
+                    }
+
+                    console_writer.send(PrintConsoleEvent(enemy_display(&laby_data)));
+                },
 
                 RoomType::Item => console_writer.send(PrintConsoleEvent(item_display(&laby_data, &laby_res))),
-            }
+            };
+            console_writer.send(PrintConsoleEvent(player_infos(&player)));
         },  
     };
 
@@ -68,22 +80,27 @@ fn turn_display(
 
     // Description
     res.push_str("-------------------[Description]------------------\n");
-    res.push_str(&format!("{}\n\n", laby_data.description));
+    res.push_str(&format!("{}\n", laby_data.description));
 
     res
 }
 
 fn enemy_display(
     laby_data: &ResMut<LabyrinthData>,
-    laby_res: &Res<LabyrinthResourceFile>,
 ) -> String {
     let mut res = String::from("----------------------[View]----------------------\n");
-    res.push_str(laby_data.enemy_type.get_ascii_art());
+    res.push_str(laby_data.enemy.get_ascii_art());
+    res.push('\n');
+
+    res.push_str(&format!(
+        "Health: {}\n",
+        display_bar(20, laby_data.enemy.health.into(), laby_data.enemy.max_health.into())
+    ));
     res.push('\n');
 
     // Description
     res.push_str("-------------------[Description]------------------\n");
-    res.push_str(&format!("{}\n\n", laby_res.enemy_desc.get(laby_data.enemy_type.to_display_str()).unwrap()));
+    res.push_str(&format!("{}\n", laby_data.enemy.description));
 
     res
 }
@@ -98,6 +115,25 @@ fn item_display(
 
     // Description
     res.push_str("-------------------[Description]------------------\n");
+    res.push_str("<Put the item description here>\n\n\n");
+
+    res
+}
+
+fn player_infos(
+    player: &Res<PlayerStats>,
+) -> String {
+    let mut res = String::from("------------------[Player Stats]------------------\n");
+
+    res.push_str(&format!(
+        "Level: {} | Exp: {} | Gold: 0\n",
+        player.level,
+        player.exp,
+    ));
+    res.push_str(&format!(
+        "Health: {}\n",
+        utils::display_bar(20, player.health.into(), player.max_health.into())
+    ));
 
     res
 }
@@ -113,7 +149,7 @@ pub fn new_turn(
 
     if is_next_enemy {
         laby_data.room_type = RoomType::Enemy;
-        laby_data.enemy_type = EnemyType::get_random_enemy();
+        laby_data.enemy = Enemy::get_random_enemy(&laby_res.enemies).clone();
     } else if is_next_item {
         laby_data.room_type = RoomType::Item;
         laby_data.item_type = ItemType::get_random_item();

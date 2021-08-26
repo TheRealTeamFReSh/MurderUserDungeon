@@ -79,7 +79,7 @@ pub fn commands_handler(
                     if laby_data.next_directions.can_go_direction(movement) {
                         new_turn(&mut laby_data, &laby_res);
                         laby_data.has_shown_turn_infos = false;
-                    laby_data.wait_for_continue = false;
+                        laby_data.wait_for_continue = false;
                     } else {
                         console_writer.send(PrintConsoleEvent("There is no path in this direction...".to_string()));
                     }
@@ -87,6 +87,18 @@ pub fn commands_handler(
                 } else {
                     console_writer.send(PrintConsoleEvent("Please enter a valid direction...".to_string()));
                     console_writer.send(PrintConsoleEvent("Usage: go <direction>, valid: (FORWARD, LEFT, RIGHT)".to_string()));
+                }
+            }
+            "attack" => {
+                if laby_data.room_type == RoomType::Enemy {
+                    console_writer.send(PrintConsoleEvent("Attacking the enemy for 1 (one) damage".to_string()));
+                    laby_data.enemy.health -= 1.0;
+
+                    laby_data.has_shown_turn_infos = false;
+                    laby_data.wait_for_continue = false;
+                } else {
+                    console_writer.send(PrintConsoleEvent("You punch... uh... the wall!".to_string()));
+                    console_writer.send(PrintConsoleEvent("In fustration, you see there is nothing else to punch here!".to_string()));
                 }
             }
 
@@ -112,6 +124,8 @@ fn display_help(page_number: usize) -> String {
         res.push_str("- infos: Display informations about the place you stand\n");
     } else {
         res.push_str("- continue: to continue a story/speech\n");
+        res.push_str("- skip: skip this room to go to the next\n");
+        res.push_str("- attack: attacks the monster / NPC\n");
     }
 
     res.push_str(&format!("\n============({}/2)===========\n", page_number));

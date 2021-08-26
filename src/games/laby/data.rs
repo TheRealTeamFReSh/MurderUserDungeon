@@ -1,13 +1,30 @@
-use bevy::utils::HashMap;
 use rand::Rng;
 use serde::Deserialize;
 
-use super::{art, enemies::EnemyType, items::ItemType};
+use super::{art, enemies::Enemy, items::ItemType};
 
 #[derive(PartialEq)]
 pub enum GameState {
     Tutorial,
     Exploring,
+}
+
+pub struct PlayerStats {
+    pub health: f32,
+    pub max_health: f32,
+    pub level: usize,
+    pub exp: usize,
+}
+
+impl Default for PlayerStats {
+    fn default() -> Self {
+        PlayerStats {
+            health: 10.0,
+            max_health: 10.0,
+            level: 1,
+            exp: 0,
+        }
+    }
 }
 
 #[derive(PartialEq)]
@@ -20,7 +37,7 @@ pub enum RoomType {
 pub struct LabyrinthData {
     pub steps_number: usize,
     pub room_type: RoomType,
-    pub enemy_type: EnemyType,
+    pub enemy: Enemy,
     pub item_type: ItemType,
     pub next_directions: Directions,
     pub has_shown_turn_infos: bool,
@@ -39,7 +56,7 @@ impl Default for LabyrinthData {
             room_type: RoomType::Corridor,
             wait_for_continue: false,
             description: String::from(""),
-            enemy_type: EnemyType::Rat,
+            enemy: Enemy::default(),
             item_type: ItemType::Chest,
         }
     }
@@ -56,11 +73,11 @@ impl LabyrinthData {
 }
 
 // Stores data about the labyrinth
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct LabyrinthResourceFile {
-    pub tutorial: String,
     pub descriptions: Vec<String>,
-    pub enemy_desc: HashMap<String, String>, 
+    pub tutorial: String,
+    pub enemies: Vec<Enemy>, 
 }
 
 #[derive(PartialEq)]

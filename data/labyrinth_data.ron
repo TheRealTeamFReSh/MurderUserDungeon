@@ -33,16 +33,24 @@ Be brave and face and the fun and the dangers
 -=[The Labyrinth]=- (TM) has to offer you.
 (No refunds)",
 
-    enemy_desc: {
-        "rat": "
+    enemies: [
+        Enemy(
+            kind: Rat,
+            description: "
 With its big black eyes, you may believe this
 rat is harmless. But look at the tail, this
-disgusting tail. Now look at yours?
-        ",
-        "bat": "
+disgusting tail. Now look at yours?",
+            max_health: 3.0,
+            health: 3.0,
+        ),
+        Enemy(
+            kind: Bat,
+            description: "
 This king of the night is so big relative to
 the corridor. You won't be able to go through
-without killing this monstruosity.
-        "
-    }
+without killing this monstruosity.",
+            max_health: 2.0,
+            health: 2.0,
+        ),
+    ]
 )
