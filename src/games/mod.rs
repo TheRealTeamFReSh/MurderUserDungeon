@@ -9,7 +9,7 @@ use crate::console::event::PrintConsoleEvent;
 pub enum GameList {
     None,
     TicTacToe,
-    //Labyrinth,
+    Labyrinth,
 }
 
 pub struct ConsoleGamesPlugin;
@@ -47,7 +47,7 @@ pub fn handle_play_command(
     }
 
     match args[1].to_lowercase().as_str() {
-        "labyrinth" => laby::start_game(),
+        "labyrinth" => laby::start_game(&mut cg_data),
         "tictactoe" => tictactoe::start_game(&mut cg_data),
 
         _ => {

@@ -185,7 +185,7 @@ pub fn update_logs_area(
                     style: TextStyle {
                         font: asset_server.load("fonts/VT323-Regular.ttf"),
                         font_size: 16.,
-                        color: Color::rgba_u8(102, 255, 102, 255),
+                        color: Color::rgba_u8(76, 207, 76, 255),
                     },
                 },
             ])

@@ -1,7 +1,48 @@
 (
-    descriptions: (
-        "It's cold here...",
-        "Oh look theres a rat in the corner!",
-        "Damn, I should have kept my coat"
-    )
+    descriptions: [
+"It's cold here... You think about your life
+and pretty much regret every decision you've
+taken so far (including coming here).",
+
+"Oh look theres a rat in the corner! Maybe he
+is friendly? *pets the rat* 
+Outch that hurt, you son of a ...",
+
+"Damn, I should have kept my coat, it's raining
+now (I really hope it's actual water and not
+pee)."
+    ],
+
+    tutorial: "
+This could be the start of a great story,
+however you are here.. in the sewers hiding for
+your responsibilities...
+
+Anyway..
+
+Welcome to -=[The Labyrinth]=- (TM) a magical
+place where friends are long gone and the only
+other people here are the ones shooting her***
+*hum hum* people looking for troubles *hum 
+hum* looking for adventure!
+
+You may encounter creatures, other people and
+find treasures inside -=[The Labyrinth]=-
+
+Be brave and face and the fun and the dangers
+-=[The Labyrinth]=- (TM) has to offer you.
+(No refunds)",
+
+    enemy_desc: {
+        "rat": "
+With its big black eyes, you may believe this
+rat is harmless. But look at the tail, this
+disgusting tail. Now look at yours?
+        ",
+        "bat": "
+This king of the night is so big relative to
+the corridor. You won't be able to go through
+without killing this monstruosity.
+        "
+    }
 )
