@@ -28,12 +28,14 @@ impl Plugin for GameOverPlugin {
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum GameOverReason {
     DoorLeftOpen,
+    TooManyRageQuit,
 }
 
 impl GameOverReason {
     pub fn get_message(&self) -> &str {
         match self {
-            GameOverReason::DoorLeftOpen => "Don't forget to close the door when focusing on something else."
+            GameOverReason::DoorLeftOpen => "Don't forget to close the door when focusing on something else.",
+            GameOverReason::TooManyRageQuit => "You ragequitted too many times, \nyou went in fury mode and made an heart attack.",
         }
     }
 }

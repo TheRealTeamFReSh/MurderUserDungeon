@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{console::{ConsoleData, event::{EnteredConsoleCommandEvent, PrintConsoleEvent}}, games::{ConsoleGamesData, GameList}};
+use crate::{console::{ConsoleData, event::{EnteredConsoleCommandEvent, PrintConsoleEvent}}, games::ConsoleGamesData, vulnerability::VulnerabilityResource};
 
 use super::{data::{GameState, LabyrinthData, LabyrinthResourceFile, Movement, RoomType}, game::new_turn};
 
@@ -11,6 +11,7 @@ pub fn commands_handler(
     mut data: ResMut<ConsoleData>,
     mut laby_data: ResMut<LabyrinthData>,
     laby_res: Res<LabyrinthResourceFile>,
+    mut vuln_res: ResMut<VulnerabilityResource>,
 ) {
     for EnteredConsoleCommandEvent(cmd) in cmd_reader.iter() {
         // Don't do anything if the string is empty
@@ -38,7 +39,7 @@ pub fn commands_handler(
             "ragequit" => {
                 console_writer.send(PrintConsoleEvent("Quitting Labyrinth...".to_string()));
                 laby_data.reset();
-                cg_data.loaded_game = GameList::None;
+                cg_data.ragequit(&mut vuln_res);
             },
             "tutorial" => {
                 laby_data.game_state = GameState::Tutorial;

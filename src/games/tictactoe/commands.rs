@@ -31,6 +31,7 @@ pub fn commands_handler(
                 ttt_data.reset();
                 console_writer.send(PrintConsoleEvent("Quitting TicTacToe...".to_string()));
                 cg_data.loaded_game = GameList::None;
+                cg_data.ragequit_count += 1;
             },
             "tutorial" => console_writer.send(PrintConsoleEvent(game::display_tutorial())),
 
