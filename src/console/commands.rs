@@ -90,7 +90,7 @@ pub fn print_motd(sys: &mut System, should_refresh: bool) -> String {
 fn display_bar(width: usize, value: f64, total_value: f64) -> String {
     let percent = value / total_value;
     let nb_full_tiles = (percent * (width - 2) as f64) as usize;
-    let rest_tiles = width - nb_full_tiles;
+    let rest_tiles = width - 2 - nb_full_tiles;
 
     let mut res = String::from("[");
     res.push_str(&String::from("=").repeat(nb_full_tiles));

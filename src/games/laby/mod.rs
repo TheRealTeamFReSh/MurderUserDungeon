@@ -4,6 +4,7 @@ mod data;
 mod art;
 mod enemies;
 mod items;
+mod utils;
 
 use bevy::{ecs::schedule::ShouldRun, prelude::*};
 use ron::de::from_bytes;
@@ -17,6 +18,7 @@ pub struct LabyrinthGamePlugin;
 impl Plugin for LabyrinthGamePlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.insert_resource(data::LabyrinthData::default());
+        app.insert_resource(data::PlayerStats::default());
         app.insert_resource(
             from_bytes::<data::LabyrinthResourceFile>(include_bytes!(
                 "../../../data/labyrinth_data.ron"

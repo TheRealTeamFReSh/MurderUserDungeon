@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
-use crate::{console::{ConsoleData, event::{EnteredConsoleCommandEvent, PrintConsoleEvent}}, games::{ConsoleGamesData, GameList}};
+use crate::{console::{ConsoleData, event::{EnteredConsoleCommandEvent, PrintConsoleEvent}}, games::ConsoleGamesData, npcs::{NPCsResource, UsernamesResource}, vulnerability::VulnerabilityResource};
 
-use super::{data::{GameState, LabyrinthData, LabyrinthResourceFile, Movement, RoomType}, game::new_turn};
+use super::{data::{GameState, LabyrinthData, LabyrinthResourceFile, Movement, PlayerStats, RoomType}, game::new_turn};
 
 pub fn commands_handler(
     mut cmd_reader: EventReader<EnteredConsoleCommandEvent>,
@@ -11,6 +11,10 @@ pub fn commands_handler(
     mut data: ResMut<ConsoleData>,
     mut laby_data: ResMut<LabyrinthData>,
     laby_res: Res<LabyrinthResourceFile>,
+    mut vuln_res: ResMut<VulnerabilityResource>,
+    mut player: ResMut<PlayerStats>,
+    username_res: Res<UsernamesResource>,
+    npc_res: Res<NPCsResource>,
 ) {
     for EnteredConsoleCommandEvent(cmd) in cmd_reader.iter() {
         // Don't do anything if the string is empty
@@ -38,7 +42,7 @@ pub fn commands_handler(
             "ragequit" => {
                 console_writer.send(PrintConsoleEvent("Quitting Labyrinth...".to_string()));
                 laby_data.reset();
-                cg_data.loaded_game = GameList::None;
+                cg_data.ragequit(&mut vuln_res);
             },
             "tutorial" => {
                 laby_data.game_state = GameState::Tutorial;
@@ -50,7 +54,7 @@ pub fn commands_handler(
             "continue" => {
                 if laby_data.game_state == GameState::Tutorial {
                     laby_data.game_state = GameState::Exploring;
-                    new_turn(&mut laby_data, &laby_res);
+                    new_turn(&mut laby_data, &laby_res, &mut player, &username_res, &npc_res);
                     laby_data.has_shown_turn_infos = false;
                     laby_data.wait_for_continue = false;
                 } else {
@@ -62,7 +66,8 @@ pub fn commands_handler(
                     (laby_data.room_type == RoomType::Enemy || laby_data.room_type == RoomType::Item)
                 {
                     console_writer.send(PrintConsoleEvent("Skipping room...".to_string()));
-                    new_turn(&mut laby_data, &laby_res);
+                    laby_data.status_message = "Skipping room...".to_string();
+                    new_turn(&mut laby_data, &laby_res, &mut player, &username_res, &npc_res);
                     laby_data.has_shown_turn_infos = false;
                     laby_data.wait_for_continue = false;
                 }
@@ -76,9 +81,9 @@ pub fn commands_handler(
 
                 if let Some(movement) = Movement::from_string(args[1]) {
                     if laby_data.next_directions.can_go_direction(movement) {
-                        new_turn(&mut laby_data, &laby_res);
+                        new_turn(&mut laby_data, &laby_res, &mut player, &username_res, &npc_res);
                         laby_data.has_shown_turn_infos = false;
-                    laby_data.wait_for_continue = false;
+                        laby_data.wait_for_continue = false;
                     } else {
                         console_writer.send(PrintConsoleEvent("There is no path in this direction...".to_string()));
                     }
@@ -86,6 +91,30 @@ pub fn commands_handler(
                 } else {
                     console_writer.send(PrintConsoleEvent("Please enter a valid direction...".to_string()));
                     console_writer.send(PrintConsoleEvent("Usage: go <direction>, valid: (FORWARD, LEFT, RIGHT)".to_string()));
+                }
+            }
+            "attack" => {
+                if laby_data.room_type == RoomType::Enemy {
+                    // player phase
+                    let atk_msg = format!("Attacking the enemy for {} damage", player.damages);
+                    console_writer.send(PrintConsoleEvent(atk_msg.clone()));
+                    laby_data.status_message = atk_msg.clone();
+                    laby_data.enemy.health -= player.damages;
+
+                    laby_data.has_shown_turn_infos = false;
+                    laby_data.wait_for_continue = false;
+
+                    // AI phase
+                    let damages = laby_data.enemy.damages;
+                    laby_data.status_message.push_str(&format!(
+                        "\nThe enemy attacks you for {} HP.",
+                        damages,
+                    ));
+                    player.health -= damages;
+                    player.health = player.health.max(0.0);
+                } else {
+                    console_writer.send(PrintConsoleEvent("You punch... uh... the wall!".to_string()));
+                    console_writer.send(PrintConsoleEvent("In fustration, you see there is nothing else to punch here!".to_string()));
                 }
             }
 
@@ -111,6 +140,8 @@ fn display_help(page_number: usize) -> String {
         res.push_str("- infos: Display informations about the place you stand\n");
     } else {
         res.push_str("- continue: to continue a story/speech\n");
+        res.push_str("- skip: skip this room to go to the next\n");
+        res.push_str("- attack: attacks the monster / NPC\n");
     }
 
     res.push_str(&format!("\n============({}/2)===========\n", page_number));

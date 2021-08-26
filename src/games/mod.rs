@@ -3,7 +3,7 @@ mod tictactoe;
 
 use bevy::prelude::*;
 
-use crate::console::event::PrintConsoleEvent;
+use crate::{console::event::PrintConsoleEvent, vulnerability::{VulnerabilityResource, BoolVulnerabilityType}};
 
 #[derive(PartialEq)]
 pub enum GameList {
@@ -18,6 +18,7 @@ impl Plugin for ConsoleGamesPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.insert_resource(ConsoleGamesData {
             loaded_game: GameList::None,
+            ragequit_count: 0,
         });
         app.add_startup_system(setup.system());
         app.add_plugin(laby::LabyrinthGamePlugin);
@@ -28,6 +29,24 @@ impl Plugin for ConsoleGamesPlugin {
 
 pub struct ConsoleGamesData {
     pub loaded_game: GameList,
+    pub ragequit_count: usize,
+}
+
+impl ConsoleGamesData {
+    pub fn ragequit(
+        &mut self,
+        vuln_res: &mut ResMut<VulnerabilityResource>,
+    ) {
+        self.loaded_game = GameList::None;
+        self.ragequit_count += 1;
+
+        if self.ragequit_count > 3 {
+            *vuln_res
+                .bool_vulnerabilities
+                .get_mut(&BoolVulnerabilityType::TooManyRageQuit)
+                .unwrap() = true;
+        }
+    }
 }
 
 fn setup() {
