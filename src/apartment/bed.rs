@@ -1,7 +1,7 @@
-use crate::apartment::{
+use crate::{apartment::{
     player::{PlayerComponent, Sleepiness},
     InteractableComponent, InteractableType, PlayerInBedComponent,
-};
+}, misc::game_over::{GameOverData, GameOverReason}};
 use crate::vulnerability::{spawn_npc, BoolVulnerabilityType, VulnerabilityResource};
 
 use crate::states::GameState;
@@ -69,6 +69,7 @@ pub fn sleeping_system(
     audio: Res<Audio>,
     vulnerability_resource: Res<VulnerabilityResource>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    mut go_data: ResMut<GameOverData>,
 ) {
     if app_state.current() == &GameState::PlayerSleepingState {
         sleep_resource.sleep_timer.tick(time.delta());
@@ -89,7 +90,8 @@ pub fn sleeping_system(
                     &mut texture_atlases,
                 );
                 if app_state.current() == &GameState::PlayerSleepingState {
-                    app_state.set(GameState::GameOverState(true)).unwrap();
+                    go_data.reason = Some(GameOverReason::DoorLeftOpen);
+                    app_state.set(GameState::GameOverState).unwrap();
                 }
             } else {
                 super::despawn_player_in_bed(&mut commands, &player_in_bed_query);
