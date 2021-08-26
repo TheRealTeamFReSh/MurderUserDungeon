@@ -10,6 +10,7 @@ mod apartment;
 mod console;
 mod debug;
 mod games;
+mod misc;
 mod hud;
 mod states;
 mod vulnerability;
@@ -35,6 +36,7 @@ fn main() {
         .add_plugin(apartment::ApartmentPlugin)
         .add_plugin(vulnerability::VulnerabilityPlugin)
         .add_plugin(games::ConsoleGamesPlugin)
+        .add_plugin(misc::game_over::GameOverPlugin)
         .add_plugin(WorldInspectorPlugin::new())
         .add_plugin(hud::Plugin)
         .add_state(states::GameState::MainGame)
