@@ -1,4 +1,5 @@
 mod animation;
+mod bed;
 mod door;
 mod interactable;
 pub mod player;
@@ -19,6 +20,7 @@ pub struct ApartmentPlugin;
 
 pub const BACKGROUND_Z: f32 = 0.0;
 pub const HALLWAY_COVER_Z: f32 = 1.0;
+pub const PLAYER_IN_BED_Z: f32 = 0.9;
 pub const NPC_Z: f32 = 4.0;
 pub const PLAYER_Z: f32 = 5.0;
 pub const FOREGROUND_Z: f32 = 10.0;
@@ -33,6 +35,9 @@ impl Plugin for ApartmentPlugin {
             .insert_resource(player::Sleepiness(100))
             .insert_resource(player::PeePeePooPoo(100))
             .insert_resource(player::StatsTimer(Timer::from_seconds(1.0, true)))
+            .insert_resource(bed::SleepingResource {
+                sleep_timer: Timer::from_seconds(bed::SLEEP_TIME, false),
+            })
             .insert_resource(
                 from_bytes::<animation::CharacterAnimationResource>(include_bytes!(
                     "../../data/character_animations.ron"
@@ -79,7 +84,14 @@ impl Plugin for ApartmentPlugin {
                     .system()
                     .after("check_interactables"),
             )
-            .add_system(decrease_stats.system());
+            .add_system(decrease_stats.system())
+            .add_system(
+                bed::interact_bed_system
+                    .system()
+                    .after("check_interactables"),
+            )
+            .add_system(bed::sleeping_system.system())
+            .add_system(player::hide_player_system.system());
 
         if cfg!(debug_assertions) {
             app.add_system(collider_debug_lines_system.system());
@@ -313,5 +325,34 @@ pub fn despawn_hallway_cover(
 ) {
     for hallway_cover in hallway_cover_query.iter() {
         commands.entity(hallway_cover).despawn();
+    }
+}
+
+pub struct PlayerInBedComponent;
+
+pub fn spawn_player_in_bed(
+    commands: &mut Commands,
+    asset_server: &AssetServer,
+    materials: &mut Assets<ColorMaterial>,
+) {
+    // create background
+    let texture_handle = asset_server.load("textures/player_in_bed.png");
+    commands
+        .spawn()
+        .insert(PlayerInBedComponent)
+        .insert_bundle(SpriteBundle {
+            material: materials.add(texture_handle.into()),
+            transform: Transform::from_translation(Vec3::new(0.0, 0.0, PLAYER_IN_BED_Z)),
+            ..Default::default()
+        })
+        .insert(Name::new("Player in Bed"));
+}
+
+pub fn despawn_player_in_bed(
+    commands: &mut Commands,
+    player_in_bed_query: &Query<Entity, With<PlayerInBedComponent>>,
+) {
+    for player_in_bed in player_in_bed_query.iter() {
+        commands.entity(player_in_bed).despawn();
     }
 }
