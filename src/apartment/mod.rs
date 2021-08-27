@@ -126,7 +126,8 @@ impl Plugin for ApartmentPlugin {
                         phone::interact_phone_system
                             .system()
                             .after("check_interactables"),
-                    ),
+                    )
+                    .with_system(decrease_stats.system()),
             );
         app.add_system(animation::basic_sprite_animation_system.system());
         app.add_system(bed::sleeping_system.system())
@@ -140,7 +141,6 @@ impl Plugin for ApartmentPlugin {
                 .system()
                 .after("set_player_animation"),
         );
-        app.add_system(decrease_stats.system());
 
         if cfg!(debug_assertions) {
             app.add_system_set(
