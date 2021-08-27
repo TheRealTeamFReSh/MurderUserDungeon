@@ -253,6 +253,7 @@ pub fn decrease_stats(
         } else {
             peepeepoopoo.0 = 0.
         }
+        #[cfg(debug_assertions)]
         info!(
             "Hunger: {}, sleepiness: {}, peepeepoopoo: {}",
             hunger.0, sleepiness.0, peepeepoopoo.0

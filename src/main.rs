@@ -22,32 +22,36 @@ use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_kira_audio::AudioPlugin;
 
 fn main() {
-    App::build()
-        .insert_resource(WindowDescriptor {
-            width: 800.0,
-            height: 600.0,
-            title: "RustyJam".to_string(),
-            vsync: false,
-            mode: WindowMode::Windowed,
-            resizable: false,
-            ..Default::default()
-        })
-        .add_plugins(DefaultPlugins)
-        .add_plugin(console::ConsolePlugin)
-        .add_plugin(AudioPlugin)
-        .add_plugin(apartment::ApartmentPlugin)
-        .add_plugin(vulnerability::VulnerabilityPlugin)
-        .add_plugin(games::ConsoleGamesPlugin)
-        .add_plugin(misc::game_over::GameOverPlugin)
-        .add_plugin(WorldInspectorPlugin::new())
-        .add_plugin(hud::Plugin)
-        .add_plugin(npcs::NPCsPlugin)
-        .add_plugin(misc::day_cycle::DayCyclePlugin)
-        .add_plugin(main_menu::Plugin)
-        .add_state(states::GameState::MainMenu)
-        .add_startup_system(spawn_ui_camera.system())
-        .add_system(exit_on_esc_system.system())
-        .run();
+    let mut app = App::build();
+
+    app.insert_resource(WindowDescriptor {
+        width: 800.0,
+        height: 600.0,
+        title: "RustyJam".to_string(),
+        vsync: false,
+        mode: WindowMode::Windowed,
+        resizable: false,
+        ..Default::default()
+    })
+    .add_plugins(DefaultPlugins)
+    .add_plugin(console::ConsolePlugin)
+    .add_plugin(AudioPlugin)
+    .add_plugin(apartment::ApartmentPlugin)
+    .add_plugin(vulnerability::VulnerabilityPlugin)
+    .add_plugin(games::ConsoleGamesPlugin)
+    .add_plugin(misc::game_over::GameOverPlugin)
+    .add_plugin(hud::Plugin)
+    .add_plugin(npcs::NPCsPlugin)
+    .add_plugin(misc::day_cycle::DayCyclePlugin)
+    .add_plugin(main_menu::Plugin)
+    .add_state(states::GameState::MainMenu)
+    .add_startup_system(spawn_ui_camera.system())
+    .add_system(exit_on_esc_system.system());
+
+    #[cfg(debug_assertions)]
+    app.add_plugin(WorldInspectorPlugin::new());
+
+    app.run();
 }
 
 pub fn exit_on_esc_system(

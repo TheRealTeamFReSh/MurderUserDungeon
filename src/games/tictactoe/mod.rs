@@ -24,6 +24,7 @@ impl Plugin for TicTacToePlugin {
 
 pub fn start_game(cg_data: &mut ResMut<ConsoleGamesData>) {
     cg_data.loaded_game = GameList::TicTacToe;
+    #[cfg(debug_assertions)]
     info!("Starting tictactoe game");
 }
 
