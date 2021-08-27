@@ -84,12 +84,14 @@ fn day_cycle_system(
     }
     for color in lighting_query.iter_mut() {
         let color_mat = materials.get_mut(color.id).unwrap();
+        /*
         println!(
             "day {} hour: {} minute: {}",
             day_cycle_resource.days_passed,
             day_cycle_resource.get_hour(),
             day_cycle_resource.get_minute()
         );
+        */
         color_mat.color.set_a(day_cycle_resource.get_alpha());
     }
 }

@@ -2,6 +2,7 @@ mod animation;
 mod bed;
 mod door;
 mod interactable;
+mod phone;
 pub mod player;
 mod toilet;
 
@@ -11,7 +12,8 @@ use bevy_rapier2d::prelude::*;
 use ron::de::from_bytes;
 
 use crate::{
-    apartment::player::decrease_stats, debug::collider_debug_lines_system, states::GameState,
+    apartment::player::decrease_stats, debug::collider_debug_lines_system, misc::day_cycle,
+    states::GameState,
 };
 
 pub use self::{
@@ -25,6 +27,7 @@ pub struct ApartmentPlugin;
 pub const BACKGROUND_Z: f32 = 0.0;
 pub const HALLWAY_COVER_Z: f32 = 1.0;
 pub const PLAYER_IN_BED_Z: f32 = 2.0;
+pub const PIZZA_Z: f32 = 2.0;
 pub const NPC_Z: f32 = 4.0;
 pub const PLAYER_Z: f32 = 5.0;
 pub const FOREGROUND_Z: f32 = 10.0;
@@ -45,6 +48,19 @@ impl Plugin for ApartmentPlugin {
             })
             .insert_resource(toilet::PeeingResource {
                 pee_timer: Timer::from_seconds(toilet::PEE_TIME, false),
+            })
+            .insert_resource(phone::OrderingPizzaResource {
+                call_timer: Timer::from_seconds(phone::CALL_TIME, false),
+            })
+            .insert_resource(phone::EatingResource {
+                eating_timer: Timer::from_seconds(phone::EAT_TIME, false),
+            })
+            .insert_resource(phone::PizzaDeliveryResource {
+                status: phone::PizzaDeliveryStatus::Unordered,
+                delivery_timer: Timer::from_seconds(
+                    day_cycle::DAY_LENGTH * ((phone::DELIVERY_TIME) / 24.0),
+                    true,
+                ),
             })
             .insert_resource(
                 from_bytes::<animation::CharacterAnimationResource>(include_bytes!(
@@ -100,11 +116,24 @@ impl Plugin for ApartmentPlugin {
                         toilet::interact_toilet_system
                             .system()
                             .after("check_interactables"),
+                    )
+                    .with_system(
+                        phone::interact_pizza_system
+                            .system()
+                            .after("check_interactables"),
+                    )
+                    .with_system(
+                        phone::interact_phone_system
+                            .system()
+                            .after("check_interactables"),
                     ),
             );
         app.add_system(animation::basic_sprite_animation_system.system());
         app.add_system(bed::sleeping_system.system())
             .add_system(toilet::peeing_system.system())
+            .add_system(phone::ordering_pizza_system.system())
+            .add_system(phone::eating_system.system())
+            .add_system(phone::pizza_delivery_system.system())
             .add_system(player::hide_player_system.system());
         app.add_system(
             animation::animate_character_system
@@ -340,6 +369,46 @@ fn setup(
         })
         .insert(RigidBodyPositionSync::Discrete)
         .insert(Name::new("Bathroom Wall"));
+
+    // spawn dining table
+    commands
+        .spawn()
+        .insert_bundle(RigidBodyBundle {
+            body_type: RigidBodyType::Static,
+            position: Vec2::new(-9.6, -10.1).into(),
+            ..Default::default()
+        })
+        .insert_bundle(ColliderBundle {
+            shape: ColliderShape::cuboid(4.5, 3.1),
+            material: ColliderMaterial {
+                friction: 0.0,
+                restitution: 0.0,
+                ..Default::default()
+            },
+            ..Default::default()
+        })
+        .insert(RigidBodyPositionSync::Discrete)
+        .insert(Name::new("Dining Table"));
+
+    // spawn desk chair
+    commands
+        .spawn()
+        .insert_bundle(RigidBodyBundle {
+            body_type: RigidBodyType::Static,
+            position: Vec2::new(-22.0, -22.0).into(),
+            ..Default::default()
+        })
+        .insert_bundle(ColliderBundle {
+            shape: ColliderShape::cuboid(3.0, 2.5),
+            material: ColliderMaterial {
+                friction: 0.0,
+                restitution: 0.0,
+                ..Default::default()
+            },
+            ..Default::default()
+        })
+        .insert(RigidBodyPositionSync::Discrete)
+        .insert(Name::new("Desk Chair"));
 }
 
 pub struct HallwayCoverComponent;
@@ -397,5 +466,31 @@ pub fn despawn_player_in_bed(
 ) {
     for player_in_bed in player_in_bed_query.iter() {
         commands.entity(player_in_bed).despawn();
+    }
+}
+
+pub struct PizzaComponent;
+
+pub fn spawn_pizza(
+    commands: &mut Commands,
+    asset_server: &AssetServer,
+    materials: &mut Assets<ColorMaterial>,
+) {
+    // create background
+    let texture_handle = asset_server.load("textures/pizza.png");
+    commands
+        .spawn()
+        .insert(PizzaComponent)
+        .insert_bundle(SpriteBundle {
+            material: materials.add(texture_handle.into()),
+            transform: Transform::from_translation(Vec3::new(0.0, 0.0, PIZZA_Z)),
+            ..Default::default()
+        })
+        .insert(Name::new("Pizza"));
+}
+
+pub fn despawn_pizza(commands: &mut Commands, pizza_query: &Query<Entity, With<PizzaComponent>>) {
+    for pizza in pizza_query.iter() {
+        commands.entity(pizza).despawn();
     }
 }
