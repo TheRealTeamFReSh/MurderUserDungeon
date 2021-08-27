@@ -500,12 +500,13 @@ pub fn despawn_pizza(commands: &mut Commands, pizza_query: &Query<Entity, With<P
 pub struct PeepholeComponent;
 
 pub fn spawn_peephole(
+    path: &str,
     commands: &mut Commands,
     asset_server: &AssetServer,
     materials: &mut Assets<ColorMaterial>,
 ) {
     // create background
-    let texture_handle = asset_server.load("textures/peepholes/peephole_none.png");
+    let texture_handle = asset_server.load(path);
     commands
         .spawn()
         .insert(PeepholeComponent)

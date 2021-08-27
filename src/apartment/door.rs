@@ -1,5 +1,9 @@
-use crate::apartment::{
-    player::PlayerComponent, InteractableComponent, InteractableType, InteractablesResource,
+use crate::{
+    apartment::{
+        interactable::despawn_interactable_icons, player::PlayerComponent, InteractableComponent,
+        InteractableType, InteractablesResource,
+    },
+    vulnerability::VulnerabilityResource,
 };
 
 use crate::states::GameState;
@@ -18,6 +22,7 @@ pub fn interact_door_system(
     mut app_state: ResMut<State<GameState>>,
     asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    vulnerability_resource: Res<VulnerabilityResource>,
     audio: Res<Audio>,
 ) {
     for player_component in player_query.iter() {
@@ -46,6 +51,28 @@ pub fn interact_door_system(
                 && app_state.current() == &GameState::MainGame
             {
                 app_state.push(GameState::PeepholeOpenedState).unwrap();
+                match vulnerability_resource.at_door {
+                    crate::vulnerability::AtDoorType::None => super::spawn_peephole(
+                        "textures/peepholes/peephole_none.png",
+                        &mut commands,
+                        &asset_server,
+                        &mut materials,
+                    ),
+                    crate::vulnerability::AtDoorType::DeliveryPerson => super::spawn_peephole(
+                        "textures/peepholes/peephole_pizza.png",
+                        &mut commands,
+                        &asset_server,
+                        &mut materials,
+                    ),
+                    crate::vulnerability::AtDoorType::NPC => super::spawn_peephole(
+                        "textures/peepholes/peephole_npc_1.png",
+                        &mut commands,
+                        &asset_server,
+                        &mut materials,
+                    ),
+                }
+
+                despawn_interactable_icons(&mut commands, &interactable_icon_query);
                 info!("Checking peephole")
             }
         } else if let Some(InteractableType::OpenDoor) = player_component.interactable_in_range {
@@ -74,13 +101,16 @@ pub fn interact_door_system(
 }
 
 pub fn exit_peephole_system(
+    mut commands: Commands,
+    peephole_query: Query<Entity, With<super::PeepholeComponent>>,
     keyboard_input: Res<Input<KeyCode>>,
     mut app_state: ResMut<State<GameState>>,
 ) {
-    if keyboard_input.just_pressed(KeyCode::Escape)
+    if keyboard_input.just_released(KeyCode::C)
         && app_state.current() == &GameState::PeepholeOpenedState
     {
         app_state.pop().unwrap();
+        super::despawn_peepholes(&mut commands, &peephole_query);
         info!("Leaving peephole")
     }
 }

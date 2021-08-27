@@ -1,6 +1,9 @@
-use crate::apartment::{
-    player::{Hunger, PlayerComponent},
-    InteractableComponent, InteractableType, InteractablesResource,
+use crate::{
+    apartment::{
+        player::{Hunger, PlayerComponent},
+        InteractableComponent, InteractableType, InteractablesResource,
+    },
+    vulnerability::{AtDoorType, VulnerabilityResource},
 };
 
 use crate::states::GameState;
@@ -167,6 +170,7 @@ pub fn pizza_delivery_system(
     mut materials: ResMut<Assets<ColorMaterial>>,
     interactables_resource: Res<InteractablesResource>,
     interactable_query: Query<&InteractableComponent>,
+    mut vulnerability_resource: ResMut<VulnerabilityResource>,
     time: Res<Time>,
     asset_server: Res<AssetServer>,
     audio: Res<Audio>,
@@ -177,6 +181,7 @@ pub fn pizza_delivery_system(
 
             if pizza_delivery_resource.delivery_timer.just_finished() {
                 pizza_delivery_resource.status = PizzaDeliveryStatus::AtDoor;
+                vulnerability_resource.at_door = AtDoorType::DeliveryPerson;
                 audio.play(asset_server.load("audio/knocking.mp3"));
                 info!("Pizza is here!");
             }
@@ -187,6 +192,7 @@ pub fn pizza_delivery_system(
                     pizza_delivery_resource.status = PizzaDeliveryStatus::Delivered;
                     super::spawn_pizza(&mut commands, &asset_server, &mut materials);
                     spawn_pizza_interactable(&mut commands, &interactables_resource);
+                    vulnerability_resource.at_door = AtDoorType::None;
                     info!("I have the pizza.")
                 }
             }
