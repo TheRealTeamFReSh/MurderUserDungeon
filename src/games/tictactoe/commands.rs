@@ -1,6 +1,12 @@
 use bevy::prelude::*;
 
-use crate::{console::{ConsoleData, event::{EnteredConsoleCommandEvent, PrintConsoleEvent}}, games::{ConsoleGamesData, GameList}};
+use crate::{
+    console::{
+        event::{EnteredConsoleCommandEvent, PrintConsoleEvent},
+        ConsoleData,
+    },
+    games::{ConsoleGamesData, GameList},
+};
 
 use super::game::{self, TicTacToeData};
 
@@ -13,7 +19,9 @@ pub fn commands_handler(
 ) {
     for EnteredConsoleCommandEvent(cmd) in cmd_reader.iter() {
         // Don't do anything if the string is empty
-        if cmd.is_empty() { return ; }
+        if cmd.is_empty() {
+            return;
+        }
 
         let args: Vec<&str> = cmd.trim().split(' ').collect();
 
@@ -32,20 +40,25 @@ pub fn commands_handler(
                 console_writer.send(PrintConsoleEvent("Quitting TicTacToe...".to_string()));
                 cg_data.loaded_game = GameList::None;
                 cg_data.ragequit_count += 1;
-            },
+            }
             "tutorial" => console_writer.send(PrintConsoleEvent(game::display_tutorial())),
 
             "place" => {
-                if args.len() == 1 { 
-                    console_writer.send(PrintConsoleEvent("No position provided\nUsage: place <pos>".to_string()));
+                if args.len() == 1 {
+                    console_writer.send(PrintConsoleEvent(
+                        "No position provided\nUsage: place <pos>".to_string(),
+                    ));
                     return;
                 }
 
                 game::play_position(args[1], &mut ttt_data, &mut console_writer);
-            },
+            }
 
             _ => {
-                console_writer.send(PrintConsoleEvent(format!("I didn't understand the command: \"{}\"", args[0])));
+                console_writer.send(PrintConsoleEvent(format!(
+                    "I didn't understand the command: \"{}\"",
+                    args[0]
+                )));
             }
         }
     }
@@ -54,7 +67,7 @@ pub fn commands_handler(
 fn display_help() -> String {
     let mut res = String::from("\nSHOWING 'TicTacToe' COMMANDS\n");
 
-    let underline  = "==========================\n\n";
+    let underline = "==========================\n\n";
     res.push_str(underline);
 
     res.push_str("- help : Displays this message\n");

@@ -13,7 +13,7 @@ now (I really hope it's actual water and not
 pee)."
     ],
 
-    tutorial: "
+    tutorial: ["
 This could be the start of a great story,
 however you are here.. in the sewers hiding for
 your responsibilities...
@@ -26,12 +26,45 @@ other people here are the ones shooting her***
 *hum hum* people looking for troubles *hum 
 hum* looking for adventure!
 
-You may encounter creatures, other people and
-find treasures inside -=[The Labyrinth]=-
+There will be no mercy. It's you against the
+unknown (and underage angry gamers).",
+
+"While exploring -=[The Labyrinth]=- you may 
+encounter creatures, other people and find treasures 
+inside it. You can claim all of this junk *hum*
+beauties for yourself.
+
+Don't forget: 10 exp = 1 level and one levels
+gives you life and damages!
+
+Be friendly to the NPCs there and they might
+be nice with you.
 
 Be brave and face and the fun and the dangers
 -=[The Labyrinth]=- (TM) has to offer you.
 (No refunds)",
+
+"We're no strangers to love,
+You know the rules and so do I,
+A full commitment's what I'm thinking of,
+You wouldn't get this from any other guy.
+
+I just wanna tell you how I'm feeling,
+Gotta make you understand!
+
+Never gonna give you up,
+Never gonna let you down,
+Never gonna run around and desert you.
+Never gonna make you cry,
+Never gonna say goodbye,
+Never gonna tell a lie and hurt you.
+
+
+
+Well crap you are still there? Get out!
+
+"
+    ],
 
     enemies: [
         Enemy(

@@ -38,6 +38,7 @@ pub enum GameOverReason {
     TooManyRageQuit,
     TicTacToeLosing,
     LabyrinthLosing,
+    LabyrinthWinning,
 }
 
 impl GameOverReason {
@@ -47,6 +48,7 @@ impl GameOverReason {
             GameOverReason::TooManyRageQuit => "You ragequitted too many times, \nyou went in fury mode and made an heart attack.",
             GameOverReason::TicTacToeLosing => "How dare you... lose a game of TicTacToe...\n(There is no AI, it's like losing to a baby...)",
             GameOverReason::LabyrinthLosing => "It's hard to stay alive there...\nMaybe in another life you will thrive and be a real MLG!",
+            GameOverReason::LabyrinthWinning => "Congrats! You banged kevin's mom!\nWhat?! You really thought you could win?\n'Time to learn a lesson kiddo...",
         }
     }
 }

@@ -1,8 +1,8 @@
-mod commands;
-mod game;
-mod data;
 mod art;
+mod commands;
+mod data;
 mod enemies;
+mod game;
 mod items;
 mod utils;
 
@@ -29,30 +29,27 @@ impl Plugin for LabyrinthGamePlugin {
             SystemSet::on_update(GameState::ConsoleOpenedState)
                 .with_run_criteria(should_run.system())
                 .with_system(
-                    game::game_loop.system()
+                    game::game_loop
+                        .system()
                         .label("laby_game_loop")
-                        .before("laby_cmd_handler")
+                        .before("laby_cmd_handler"),
                 )
                 .with_system(
-                    commands::commands_handler.system()
+                    commands::commands_handler
+                        .system()
                         .label("laby_cmd_handler")
-                        .before("send_console_input")
+                        .before("send_console_input"),
                 ),
         );
     }
 }
 
-pub fn start_game(
-    cg_data: &mut ResMut<ConsoleGamesData>,
-) {
+pub fn start_game(cg_data: &mut ResMut<ConsoleGamesData>) {
     cg_data.loaded_game = GameList::Labyrinth;
     info!("Starting labyrinth game");
 }
 
-pub fn should_run(
-    cg_data: Res<ConsoleGamesData>,
-) -> ShouldRun
-{
+pub fn should_run(cg_data: Res<ConsoleGamesData>) -> ShouldRun {
     if cg_data.loaded_game == GameList::Labyrinth {
         ShouldRun::Yes
     } else {
