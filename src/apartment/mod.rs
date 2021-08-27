@@ -39,10 +39,10 @@ impl Plugin for ApartmentPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
             .add_plugin(DebugLinesPlugin)
-            .insert_resource(player::Health(100))
-            .insert_resource(player::Hunger(100))
-            .insert_resource(player::Sleepiness(100))
-            .insert_resource(player::PeePeePooPoo(100))
+            .insert_resource(player::Health(100.))
+            .insert_resource(player::Hunger(100.))
+            .insert_resource(player::Sleepiness(100.))
+            .insert_resource(player::PeePeePooPoo(100.))
             .insert_resource(player::StatsTimer(Timer::from_seconds(1.0, true)))
             .insert_resource(bed::SleepingResource {
                 sleep_timer: Timer::from_seconds(bed::SLEEP_TIME, false),
@@ -127,7 +127,8 @@ impl Plugin for ApartmentPlugin {
                         phone::interact_phone_system
                             .system()
                             .after("check_interactables"),
-                    ),
+                    )
+                    .with_system(decrease_stats.system()),
             );
         app.add_system(animation::basic_sprite_animation_system.system());
         app.add_system(bed::sleeping_system.system())
@@ -142,7 +143,6 @@ impl Plugin for ApartmentPlugin {
                 .system()
                 .after("set_player_animation"),
         );
-        app.add_system(decrease_stats.system());
 
         if cfg!(debug_assertions) {
             app.add_system_set(

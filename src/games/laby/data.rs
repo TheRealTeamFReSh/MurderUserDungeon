@@ -11,6 +11,13 @@ pub enum GameState {
     Exploring,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum PlayerActions {
+    Attack,
+    Prepare,
+    Protect,
+}
+
 #[derive(Debug)]
 pub struct PlayerStats {
     pub health: f32,
@@ -18,6 +25,8 @@ pub struct PlayerStats {
     pub level: usize,
     pub exp: usize,
     pub damages: f32,
+    pub action: PlayerActions,
+    pub last_action: PlayerActions,
 }
 
 impl Default for PlayerStats {
@@ -28,11 +37,24 @@ impl Default for PlayerStats {
             level: 1,
             exp: 0,
             damages: 1.0,
+            action: PlayerActions::Attack,
+            last_action: PlayerActions::Attack,
         }
     }
 }
 
-#[derive(PartialEq)]
+impl PlayerStats {
+    pub fn reset(&mut self) {
+        self.exp = 0;
+        self.level = 1;
+        self.damages = 1.0;
+        self.max_health = 10.0;
+        self.health = self.max_health;
+        self.action = PlayerActions::Attack;
+    }
+}
+
+#[derive(PartialEq, Clone, Copy)]
 pub enum RoomType {
     Corridor,
     Enemy,
@@ -52,6 +74,7 @@ pub struct LabyrinthData {
     pub game_state: GameState,
     pub description: String,
     pub status_message: String,
+    pub tutorial_page: usize,
 }
 
 impl Default for LabyrinthData {
@@ -67,7 +90,11 @@ impl Default for LabyrinthData {
             enemy: Enemy::default(),
             item_type: ItemType::Chest,
             status_message: String::from(""),
-            npc: NPCData { sprite_id:0, username: "".to_string() }
+            npc: NPCData {
+                sprite_id: 0,
+                username: "".to_string(),
+            },
+            tutorial_page: 0,
         }
     }
 }
@@ -79,6 +106,7 @@ impl LabyrinthData {
         self.has_shown_turn_infos = false;
         self.wait_for_continue = false;
         self.game_state = GameState::Tutorial;
+        self.tutorial_page = 0;
     }
 }
 
@@ -86,8 +114,8 @@ impl LabyrinthData {
 #[derive(Debug, Deserialize)]
 pub struct LabyrinthResourceFile {
     pub descriptions: Vec<String>,
-    pub tutorial: String,
-    pub enemies: Vec<Enemy>, 
+    pub tutorial: Vec<String>,
+    pub enemies: Vec<Enemy>,
 }
 
 #[derive(PartialEq)]
@@ -153,11 +181,16 @@ impl Directions {
     }
 
     pub fn can_go_direction(&self, mov: Movement) -> bool {
-        if self == &Directions::All { return true; }
+        if self == &Directions::All {
+            return true;
+        }
 
         match mov {
             Movement::Forward => {
-                if self == &Directions::LeftFront || self == &Directions::RightFront || self == &Directions::Front {
+                if self == &Directions::LeftFront
+                    || self == &Directions::RightFront
+                    || self == &Directions::Front
+                {
                     return true;
                 }
             }

@@ -11,6 +11,7 @@ mod console;
 mod debug;
 mod games;
 mod hud;
+mod main_menu;
 mod misc;
 mod npcs;
 mod states;
@@ -42,7 +43,8 @@ fn main() {
         .add_plugin(hud::Plugin)
         .add_plugin(npcs::NPCsPlugin)
         .add_plugin(misc::day_cycle::DayCyclePlugin)
-        .add_state(states::GameState::MainGame)
+        .add_plugin(main_menu::Plugin)
+        .add_state(states::GameState::MainMenu)
         .add_system(exit_on_esc_system.system())
         .run();
 }

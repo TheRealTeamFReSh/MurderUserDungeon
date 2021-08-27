@@ -24,7 +24,32 @@ impl Plugin for DayCyclePlugin {
         .add_system_set(
             SystemSet::on_enter(GameState::MainGame).with_system(setup_lighting_system.system()),
         )
-        .add_system(day_cycle_system.system());
+        .add_system_set(
+            SystemSet::on_update(GameState::MainGame).with_system(day_cycle_system.system()),
+        )
+        .add_system_set(
+            SystemSet::on_update(GameState::ConsoleOpenedState)
+                .with_system(day_cycle_system.system()),
+        )
+        .add_system_set(
+            SystemSet::on_update(GameState::GameOverState).with_system(day_cycle_system.system()),
+        )
+        .add_system_set(
+            SystemSet::on_update(GameState::PlayerEatingState)
+                .with_system(day_cycle_system.system()),
+        )
+        .add_system_set(
+            SystemSet::on_update(GameState::PlayerOrderingPizzaState)
+                .with_system(day_cycle_system.system()),
+        )
+        .add_system_set(
+            SystemSet::on_update(GameState::PlayerPeeingState)
+                .with_system(day_cycle_system.system()),
+        )
+        .add_system_set(
+            SystemSet::on_update(GameState::PlayerSleepingState)
+                .with_system(day_cycle_system.system()),
+        );
     }
 }
 
@@ -37,6 +62,7 @@ pub struct DayCycleResource {
     pub days_passed: u8,
 }
 
+#[allow(unused)]
 impl DayCycleResource {
     pub fn get_alpha(&self) -> f32 {
         ((1.0 - ((2.0 * PI * self.day_timer.elapsed_secs()) / (self.day_length * 2.0)).sin())

@@ -4,12 +4,16 @@ use rand::Rng;
 use super::event::EnteredConsoleCommandEvent;
 use super::{ui, ConsoleData};
 use crate::apartment::{InteractableType, PlayerComponent};
+use crate::games::ConsoleGamesData;
 use crate::states::GameState;
+use crate::vulnerability::{BoolVulnerabilityType, VulnerabilityResource};
 
 pub fn trigger_open_console(
     player_query: Query<&PlayerComponent>,
     keyboard_input: Res<Input<KeyCode>>,
     mut app_state: ResMut<State<GameState>>,
+    cg_data: Res<ConsoleGamesData>,
+    mut vuln_res: ResMut<VulnerabilityResource>,
 ) {
     for player_component in player_query.iter() {
         if let Some(InteractableType::Desk) = player_component.interactable_in_range {
@@ -27,6 +31,13 @@ pub fn trigger_open_console(
     {
         app_state.pop().unwrap();
         info!("Console closed");
+        if cg_data.has_won_laby {
+            info!("Has won death");
+            *vuln_res
+                .bool_vulnerabilities
+                .get_mut(&BoolVulnerabilityType::LabyrinthWinning)
+                .unwrap() = true;
+        }
     }
 }
 

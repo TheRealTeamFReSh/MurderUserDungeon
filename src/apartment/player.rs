@@ -1,9 +1,13 @@
-use crate::{apartment::{
+use crate::{
+    apartment::{
         animation::{
             CharacterAnimationComponent, CharacterAnimationResource, CharacterAnimationType,
         },
         PLAYER_Z,
-    }, misc::game_over::GameOverData, states::GameState};
+    },
+    misc::game_over::GameOverData,
+    states::GameState,
+};
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
@@ -162,11 +166,11 @@ pub fn set_player_animation_system(
 pub fn hide_player_system(
     app_state: Res<State<GameState>>,
     mut player_sprite_query: Query<&mut TextureAtlasSprite, With<PlayerComponent>>,
-    go_data: Res<GameOverData>
+    go_data: Res<GameOverData>,
 ) {
     for mut sprite in player_sprite_query.iter_mut() {
-        sprite.color = if app_state.current() == &GameState::PlayerSleepingState || 
-            (app_state.current() == &GameState::GameOverState && go_data.hide_player_sprite)
+        sprite.color = if app_state.current() == &GameState::PlayerSleepingState
+            || (app_state.current() == &GameState::GameOverState && go_data.hide_player_sprite)
         {
             Color::NONE
         } else {
@@ -216,10 +220,10 @@ pub fn player_movement_system(
     }
 }
 
-pub struct Hunger(pub u32);
-pub struct Sleepiness(pub u32);
-pub struct PeePeePooPoo(pub u32);
-pub struct Health(pub u32);
+pub struct Hunger(pub f32);
+pub struct Sleepiness(pub f32);
+pub struct PeePeePooPoo(pub f32);
+pub struct Health(pub f32);
 pub struct StatsTimer(pub Timer);
 
 pub fn decrease_stats(
@@ -231,23 +235,23 @@ pub fn decrease_stats(
 ) {
     timer.0.tick(time.delta());
     if timer.0.finished() {
-        let hunger_reduction = 5;
+        let hunger_reduction = 0.66;
         if hunger.0 >= hunger_reduction {
             hunger.0 -= hunger_reduction
         } else {
-            hunger.0 = 0
+            hunger.0 = 0.
         };
-        let sleepiness_reduction = 5;
+        let sleepiness_reduction = 0.55;
         if sleepiness.0 >= sleepiness_reduction {
             sleepiness.0 -= sleepiness_reduction;
         } else {
-            sleepiness.0 = 0
+            sleepiness.0 = 0.
         }
-        let peepeepoopoo_reduction = 5;
+        let peepeepoopoo_reduction = 0.83;
         if peepeepoopoo.0 >= peepeepoopoo_reduction {
             peepeepoopoo.0 -= peepeepoopoo_reduction;
         } else {
-            peepeepoopoo.0 = 0
+            peepeepoopoo.0 = 0.
         }
         info!(
             "Hunger: {}, sleepiness: {}, peepeepoopoo: {}",

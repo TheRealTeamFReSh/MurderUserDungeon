@@ -43,7 +43,7 @@ pub fn interact_pizza_system(
                 && app_state.current() == &GameState::MainGame
             {
                 if let PizzaDeliveryStatus::Delivered = pizza_delivery_resource.status {
-                    if hunger.0 <= 50 {
+                    if hunger.0 <= 50. {
                         info!("Eating pizza");
                         // despawn pizza interactable
                         for (interactable_entity, interactable_component) in
@@ -93,7 +93,7 @@ pub fn eating_system(
         if eating_resource.eating_timer.just_finished() {
             eating_resource.eating_timer.reset();
 
-            hunger.0 = 100;
+            hunger.0 = 100.;
             if app_state.current() == &GameState::PlayerEatingState {
                 app_state.pop().unwrap();
             }
