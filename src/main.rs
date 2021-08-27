@@ -29,7 +29,7 @@ fn main() {
             title: "RustyJam".to_string(),
             vsync: false,
             mode: WindowMode::Windowed,
-            resizable: true,
+            resizable: false,
             ..Default::default()
         })
         .add_plugins(DefaultPlugins)
@@ -47,7 +47,6 @@ fn main() {
         .add_state(states::GameState::MainMenu)
         .add_startup_system(spawn_ui_camera.system())
         .add_system(exit_on_esc_system.system())
-        .add_startup_system(configure_window.system())
         .run();
 }
 
@@ -65,11 +64,4 @@ pub fn exit_on_esc_system(
 
 fn spawn_ui_camera(mut commands: Commands) {
     commands.spawn_bundle(UiCameraBundle::default());
-}
-
-fn configure_window(mut windows: ResMut<Windows>) {
-    info!("Setting window descriptor");
-    windows
-        .iter_mut()
-        .for_each(|window| window.set_resizable(false));
 }
