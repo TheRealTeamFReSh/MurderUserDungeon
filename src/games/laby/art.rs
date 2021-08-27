@@ -148,7 +148,7 @@ pub const RAT: &str = "
         (((-'       __//  '--. /
                   (((-'    __//
                          (((-'
-"; 
+";
 
 pub const BAT: &str = "
 ....._      

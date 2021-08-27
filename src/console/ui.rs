@@ -1,5 +1,5 @@
+use super::{commands::print_motd, event::PrintConsoleEvent, ConsoleAnimation, ConsoleData};
 use bevy::prelude::*;
-use super::{ConsoleAnimation, ConsoleData, commands::print_motd, event::PrintConsoleEvent};
 
 pub struct LogsArea;
 pub struct CommandLineText;
@@ -8,7 +8,7 @@ pub struct ConsoleUI;
 use sysinfo::System;
 
 pub fn build_ui(
-    mut commands: Commands, 
+    mut commands: Commands,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut anim_data: ResMut<ConsoleAnimation>,
     window: Res<Windows>,
@@ -25,8 +25,9 @@ pub fn build_ui(
     let background_component = NodeBundle {
         style: Style {
             size: Size::new(
-                Val::Px(current_window.width()), 
-                Val::Px(current_window.height())),
+                Val::Px(current_window.width()),
+                Val::Px(current_window.height()),
+            ),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::FlexStart,
             padding: Rect {
@@ -44,40 +45,40 @@ pub fn build_ui(
 
     // don't forget the UI camera
     commands.spawn_bundle(UiCameraBundle::default());
-    commands.spawn_bundle(background_component)
+    commands
+        .spawn_bundle(background_component)
         .insert(ConsoleUI {})
         .with_children(|parent| {
             //container
-            parent.spawn_bundle(NodeBundle {
-                style: Style {
-                    size: Size::new(
-                        Val::Px(0.75 * current_window.width()),
-                        Val::Percent(95.0)
-                    ),
-                    justify_content: JustifyContent::Center,
-                    flex_direction: FlexDirection::ColumnReverse,
-                    flex_wrap: FlexWrap::Wrap,
-                    ..Default::default()
-                },
-                material: materials.add(transparent_col.into()),
-                ..Default::default()
-            })
-            .with_children(|parent| {
-                 // logs area
-                parent
-                    .spawn_bundle(NodeBundle {
-                        style: Style {
-                            size: Size::new(
-                                Val::Px(0.75 * current_window.width()),
-                                Val::Percent(90.0)),
-                            justify_content: JustifyContent::FlexEnd,
-                            flex_direction: FlexDirection::ColumnReverse,
-                            flex_wrap: FlexWrap::Wrap,
-                            ..Default::default()
-                        },
-                        material: materials.add(transparent_col.into()),
+            parent
+                .spawn_bundle(NodeBundle {
+                    style: Style {
+                        size: Size::new(Val::Px(0.75 * current_window.width()), Val::Percent(95.0)),
+                        justify_content: JustifyContent::Center,
+                        flex_direction: FlexDirection::ColumnReverse,
+                        flex_wrap: FlexWrap::Wrap,
                         ..Default::default()
-                    })
+                    },
+                    material: materials.add(transparent_col.into()),
+                    ..Default::default()
+                })
+                .with_children(|parent| {
+                    // logs area
+                    parent
+                        .spawn_bundle(NodeBundle {
+                            style: Style {
+                                size: Size::new(
+                                    Val::Px(0.75 * current_window.width()),
+                                    Val::Percent(90.0),
+                                ),
+                                justify_content: JustifyContent::FlexEnd,
+                                flex_direction: FlexDirection::ColumnReverse,
+                                flex_wrap: FlexWrap::Wrap,
+                                ..Default::default()
+                            },
+                            material: materials.add(transparent_col.into()),
+                            ..Default::default()
+                        })
                         .with_children(|parent| {
                             parent
                                 .spawn_bundle(TextBundle {
@@ -86,33 +87,36 @@ pub fn build_ui(
                                 .insert(LogsArea);
                         });
 
-                // command textbox area
-                parent
-                    .spawn_bundle(NodeBundle {
-                        style: Style {
-                            size: Size::new(
-                                Val::Px(0.75 * current_window.width()),
-                                Val::Percent(10.0)),
-                            flex_wrap: FlexWrap::Wrap,
-                            ..Default::default()
-                        },
-                        material: materials.add(transparent_col.into()),
-                        ..Default::default()
-                    })
-                        .with_children(|parent| {
-                            parent.spawn_bundle(TextBundle {
-                                style: Style {
-                                    size: Size::new(
-                                        Val::Px(0.75 * current_window.width()),
-                                        Val::Percent(10.0)),
-                                    flex_wrap: FlexWrap::Wrap,
-                                    ..Default::default()
-                                },
+                    // command textbox area
+                    parent
+                        .spawn_bundle(NodeBundle {
+                            style: Style {
+                                size: Size::new(
+                                    Val::Px(0.75 * current_window.width()),
+                                    Val::Percent(10.0),
+                                ),
+                                flex_wrap: FlexWrap::Wrap,
                                 ..Default::default()
-                            })
-                            .insert(CommandLineText);
+                            },
+                            material: materials.add(transparent_col.into()),
+                            ..Default::default()
+                        })
+                        .with_children(|parent| {
+                            parent
+                                .spawn_bundle(TextBundle {
+                                    style: Style {
+                                        size: Size::new(
+                                            Val::Px(0.75 * current_window.width()),
+                                            Val::Percent(10.0),
+                                        ),
+                                        flex_wrap: FlexWrap::Wrap,
+                                        ..Default::default()
+                                    },
+                                    ..Default::default()
+                                })
+                                .insert(CommandLineText);
                         });
-            });
+                });
         });
 
     console_writer.send(PrintConsoleEvent(print_motd(&mut sys, false)));
@@ -157,7 +161,9 @@ pub fn apply_animation(
 ) {
     let delta_t = time.seconds_since_startup() - anim_data.start_time;
     let value = 1.0 - (-(delta_t * anim_data.moving_speed)).exp();
-    let new_position = anim_data.start_position.lerp(anim_data.end_position, value as f32);
+    let new_position = anim_data
+        .start_position
+        .lerp(anim_data.end_position, value as f32);
 
     if data.is_opening && new_position.abs_diff_eq(anim_data.start_position, 1.0) {
         data.fully_opened = true;
@@ -165,7 +171,7 @@ pub fn apply_animation(
 
     if let Ok((_, mut style)) = console_query.single_mut() {
         style.position.top = Val::Px(new_position.y);
-        style.position.left = Val::Px(new_position.x); 
+        style.position.left = Val::Px(new_position.x);
     }
 }
 
@@ -174,21 +180,21 @@ pub fn update_logs_area(
     asset_server: Res<AssetServer>,
     mut logs_area_query: Query<&mut Text, With<LogsArea>>,
 ) {
-    let sections = data.messages.iter()
+    let sections = data
+        .messages
+        .iter()
         .flat_map(|msg| {
             let mut msg = msg.clone();
             msg.push('\n');
 
-            std::array::IntoIter::new([
-                TextSection {
-                    value: msg.clone(),
-                    style: TextStyle {
-                        font: asset_server.load("fonts/VT323-Regular.ttf"),
-                        font_size: 16.,
-                        color: Color::rgba_u8(76, 207, 76, 255),
-                    },
+            std::array::IntoIter::new([TextSection {
+                value: msg.clone(),
+                style: TextStyle {
+                    font: asset_server.load("fonts/VT323-Regular.ttf"),
+                    font_size: 16.,
+                    color: Color::rgba_u8(76, 207, 76, 255),
                 },
-            ])
+            }])
         })
         .collect::<Vec<_>>();
 

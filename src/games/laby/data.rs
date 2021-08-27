@@ -32,7 +32,7 @@ impl Default for PlayerStats {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone, Copy)]
 pub enum RoomType {
     Corridor,
     Enemy,
@@ -67,7 +67,10 @@ impl Default for LabyrinthData {
             enemy: Enemy::default(),
             item_type: ItemType::Chest,
             status_message: String::from(""),
-            npc: NPCData { sprite_id:0, username: "".to_string() }
+            npc: NPCData {
+                sprite_id: 0,
+                username: "".to_string(),
+            },
         }
     }
 }
@@ -87,7 +90,7 @@ impl LabyrinthData {
 pub struct LabyrinthResourceFile {
     pub descriptions: Vec<String>,
     pub tutorial: String,
-    pub enemies: Vec<Enemy>, 
+    pub enemies: Vec<Enemy>,
 }
 
 #[derive(PartialEq)]
@@ -153,11 +156,16 @@ impl Directions {
     }
 
     pub fn can_go_direction(&self, mov: Movement) -> bool {
-        if self == &Directions::All { return true; }
+        if self == &Directions::All {
+            return true;
+        }
 
         match mov {
             Movement::Forward => {
-                if self == &Directions::LeftFront || self == &Directions::RightFront || self == &Directions::Front {
+                if self == &Directions::LeftFront
+                    || self == &Directions::RightFront
+                    || self == &Directions::Front
+                {
                     return true;
                 }
             }

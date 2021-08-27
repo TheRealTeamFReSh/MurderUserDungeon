@@ -1,7 +1,11 @@
 use bevy::prelude::*;
 use rand::Rng;
 
-use crate::{console::event::PrintConsoleEvent, games::{ConsoleGamesData, GameList}, vulnerability::{BoolVulnerabilityType, VulnerabilityResource}};
+use crate::{
+    console::event::PrintConsoleEvent,
+    games::{ConsoleGamesData, GameList},
+    vulnerability::{BoolVulnerabilityType, VulnerabilityResource},
+};
 
 #[derive(Default)]
 pub struct TicTacToeData {
@@ -50,7 +54,7 @@ impl TicTacToeData {
             for j in 0..3 {
                 if self.grid[i as usize][j as usize] == 0 {
                     return true;
-                }   
+                }
             }
         }
         false
@@ -58,11 +62,25 @@ impl TicTacToeData {
 
     fn has_winner(&self) -> usize {
         for k in 0..3 {
-            if self.grid[k][0] == self.grid[k][1] && self.grid[k][1] == self.grid[k][2] && self.grid[k][0] != 0 { return self.grid[k][0]; }
-            if self.grid[0][k] == self.grid[1][k] && self.grid[1][k] == self.grid[2][k] && self.grid[0][k] != 0 { return self.grid[0][k]; }
+            if self.grid[k][0] == self.grid[k][1]
+                && self.grid[k][1] == self.grid[k][2]
+                && self.grid[k][0] != 0
+            {
+                return self.grid[k][0];
+            }
+            if self.grid[0][k] == self.grid[1][k]
+                && self.grid[1][k] == self.grid[2][k]
+                && self.grid[0][k] != 0
+            {
+                return self.grid[0][k];
+            }
         }
-        if ((self.grid[0][0] == self.grid[1][1] && self.grid[1][1] == self.grid[2][2]) ||
-            (self.grid[2][0] == self.grid[1][1] && self.grid[1][1] == self.grid[0][2])) && self.grid[1][1] != 0 { return self.grid[1][1]; }
+        if ((self.grid[0][0] == self.grid[1][1] && self.grid[1][1] == self.grid[2][2])
+            || (self.grid[2][0] == self.grid[1][1] && self.grid[1][1] == self.grid[0][2]))
+            && self.grid[1][1] != 0
+        {
+            return self.grid[1][1];
+        }
 
         0
     }
@@ -70,7 +88,7 @@ impl TicTacToeData {
 
 pub enum TurnType {
     PlayerTurn,
-    AITurn,    
+    AITurn,
 }
 impl Default for TurnType {
     fn default() -> Self {
@@ -82,7 +100,8 @@ pub fn display_tutorial() -> String {
     let mut res = String::from("\n\n\nTicTactToe Tutorial\n");
     res.push_str("-------------------\n");
 
-    res.push_str("
+    res.push_str(
+        "
 The goal is to align 3 'X' the computer will try
 to align 3 'O'. You have to beat the computer!
     
@@ -96,7 +115,8 @@ The grid is made of 9 cells from 'A' to 'I'.
     
 To play, type: 'place A' for example...
     
-Good luck!\n");
+Good luck!\n",
+    );
 
     res
 }
@@ -114,8 +134,10 @@ pub fn game_loop(
     }
 
     if !ttt_data.waiting_for_input {
-
-        console_writer.send(PrintConsoleEvent(format!("---------------------------\nTurn number: {}", ttt_data.turn_number)));
+        console_writer.send(PrintConsoleEvent(format!(
+            "---------------------------\nTurn number: {}",
+            ttt_data.turn_number
+        )));
         console_writer.send(PrintConsoleEvent(display_grid(&ttt_data)));
 
         // check if there is a winner
@@ -136,12 +158,14 @@ pub fn game_loop(
                     .unwrap() = true;
                 return;
             }
-            _ => ()
+            _ => (),
         }
 
         // check if pawns can be placed
         if !ttt_data.has_space_available() {
-            console_writer.send(PrintConsoleEvent("It's a tie... What are you doing ??!".to_string()));
+            console_writer.send(PrintConsoleEvent(
+                "It's a tie... What are you doing ??!".to_string(),
+            ));
             cg_data.loaded_game = GameList::None;
             ttt_data.reset();
             return;
@@ -150,7 +174,9 @@ pub fn game_loop(
         match ttt_data.current_turn {
             TurnType::PlayerTurn => {
                 ttt_data.turn_number += 1;
-                console_writer.send(PrintConsoleEvent("It's your turn to play [A-I]:".to_string()));
+                console_writer.send(PrintConsoleEvent(
+                    "It's your turn to play [A-I]:".to_string(),
+                ));
             }
 
             TurnType::AITurn => {
@@ -166,7 +192,6 @@ pub fn game_loop(
                     }
                 }
 
-
                 ttt_data.current_turn = TurnType::PlayerTurn;
                 ttt_data.waiting_for_input = false;
                 return;
@@ -179,30 +204,38 @@ pub fn game_loop(
 pub fn play_position(
     place: &str,
     ttt_data: &mut ResMut<TicTacToeData>,
-    console_writer: &mut EventWriter<PrintConsoleEvent>
+    console_writer: &mut EventWriter<PrintConsoleEvent>,
 ) {
     if ttt_data.waiting_for_input {
         if let Some(position) = TicTacToeData::get_position(place) {
             let (i, j) = position;
             match ttt_data.grid[i][j] {
-                1 => console_writer.send(PrintConsoleEvent("You already placed a pawn here".to_string())),
-                2 => console_writer.send(PrintConsoleEvent("You can't place a pawn on top of your opponent's".to_string())),
+                1 => console_writer.send(PrintConsoleEvent(
+                    "You already placed a pawn here".to_string(),
+                )),
+                2 => console_writer.send(PrintConsoleEvent(
+                    "You can't place a pawn on top of your opponent's".to_string(),
+                )),
                 _ => {
-                    console_writer.send(PrintConsoleEvent(format!("You place a pawn at position ({}, {})", i, j)));
+                    console_writer.send(PrintConsoleEvent(format!(
+                        "You place a pawn at position ({}, {})",
+                        i, j
+                    )));
                     ttt_data.grid[i][j] = 1;
                     ttt_data.current_turn = TurnType::AITurn;
                     ttt_data.waiting_for_input = false;
                 }
             }
         } else {
-            console_writer.send(PrintConsoleEvent(format!("'{}' is not a valid position (valid: [A-I])", place)));
+            console_writer.send(PrintConsoleEvent(format!(
+                "'{}' is not a valid position (valid: [A-I])",
+                place
+            )));
         }
     }
 }
 
-pub fn display_grid(
-    ttt_data: &ResMut<TicTacToeData>,
-) -> String {
+pub fn display_grid(ttt_data: &ResMut<TicTacToeData>) -> String {
     let mut res = String::from("Current grid | Positions : \n");
 
     res.push_str(&format!(

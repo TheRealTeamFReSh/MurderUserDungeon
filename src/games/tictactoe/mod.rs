@@ -16,22 +16,18 @@ impl Plugin for TicTacToePlugin {
             SystemSet::on_update(GameState::ConsoleOpenedState)
                 .with_run_criteria(should_run.system())
                 .with_system(game::game_loop.system())
-                .with_system(commands::commands_handler.system()).before("send_console_input"),
+                .with_system(commands::commands_handler.system())
+                .before("send_console_input"),
         );
     }
 }
 
-pub fn start_game(
-    cg_data: &mut ResMut<ConsoleGamesData>,
-) {
+pub fn start_game(cg_data: &mut ResMut<ConsoleGamesData>) {
     cg_data.loaded_game = GameList::TicTacToe;
     info!("Starting tictactoe game");
 }
 
-pub fn should_run(
-    cg_data: Res<ConsoleGamesData>,
-) -> ShouldRun
-{
+pub fn should_run(cg_data: Res<ConsoleGamesData>) -> ShouldRun {
     if cg_data.loaded_game == GameList::TicTacToe {
         ShouldRun::Yes
     } else {
