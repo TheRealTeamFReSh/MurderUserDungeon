@@ -4,14 +4,14 @@ use bevy::prelude::*;
 use std::f32::consts::PI;
 use std::time::Duration;
 
-pub const DAY_LENGTH: f32 = 60.0;
+pub const DAY_LENGTH: f32 = 240.0;
 pub const STARTING_HOUR: f32 = 6.0;
 pub const MAX_ALPHA: f32 = 0.92;
 pub const MIN_ALPHA: f32 = 0.5;
-pub const SLEEP_HOURS: f32 = 4.0;
-pub struct LightingPlugin;
+pub const SLEEP_HOURS: f32 = 8.0;
+pub struct DayCyclePlugin;
 
-impl Plugin for LightingPlugin {
+impl Plugin for DayCyclePlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.insert_resource(DayCycleResource {
             day_timer: Timer::from_seconds(DAY_LENGTH, true),
