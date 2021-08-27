@@ -3,6 +3,8 @@ pub mod event;
 mod input;
 mod ui;
 
+use crate::apartment::player::decrease_stats;
+
 use self::commands::should_run_cmd_handler;
 
 use super::states::GameState;
@@ -39,7 +41,11 @@ impl Plugin for ConsolePlugin {
                 SystemSet::on_update(GameState::ConsoleOpenedState)
                     .with_run_criteria(should_run_cmd_handler.system())
                     .with_system(commands::commands_handler.system())
-                    .before("send_console_input"),
+                        .before("send_console_input"),
+            )
+            .add_system_set(
+                SystemSet::on_update(GameState::ConsoleOpenedState)
+                    .with_system(decrease_stats.system()),
             )
             .add_system_to_stage(CoreStage::PostUpdate, ui::apply_animation.system())
             .add_system_set(
