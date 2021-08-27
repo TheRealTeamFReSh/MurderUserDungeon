@@ -173,7 +173,6 @@ fn build_ui(
         ..Default::default()
     };
 
-    commands.spawn_bundle(UiCameraBundle::default());
     commands
         .spawn_bundle(background)
         .insert(GameOverBackground)

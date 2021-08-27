@@ -43,8 +43,6 @@ pub fn build_ui(
 
     let transparent_col = Color::rgba_u8(0, 0, 0, 0);
 
-    // don't forget the UI camera
-    commands.spawn_bundle(UiCameraBundle::default());
     commands
         .spawn_bundle(background_component)
         .insert(ConsoleUI {})
