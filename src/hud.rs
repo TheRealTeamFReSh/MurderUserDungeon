@@ -13,8 +13,8 @@ impl prelude::Plugin for Plugin {
     fn build(&self, app: &mut prelude::AppBuilder) {
         app.add_system_set(
             SystemSet::on_enter(GameState::MainGame)
-                .with_system(build_stat_hud.system())
-                .with_system(build_time_display.system()),
+                .with_system(build_stat_hud.system().before("build_terminal"))
+                .with_system(build_time_display.system().before("build_terminal")),
         )
         .add_system_set(
             SystemSet::on_update(GameState::MainGame)
