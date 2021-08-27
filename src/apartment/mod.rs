@@ -29,6 +29,7 @@ pub const NPC_Z: f32 = 4.0;
 pub const PLAYER_Z: f32 = 5.0;
 pub const FOREGROUND_Z: f32 = 10.0;
 pub const INTERACTABLE_ICON_Z: f32 = 11.0;
+pub const LIGHTING_Z: f32 = 10.5;
 
 impl Plugin for ApartmentPlugin {
     fn build(&self, app: &mut AppBuilder) {
@@ -89,7 +90,6 @@ impl Plugin for ApartmentPlugin {
                         door::interact_door_system
                             .system()
                             .after("check_interactables"),
-
                     )
                     .with_system(
                         bed::interact_bed_system
