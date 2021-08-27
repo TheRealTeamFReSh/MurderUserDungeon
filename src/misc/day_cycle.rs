@@ -37,6 +37,7 @@ pub struct DayCycleResource {
     pub days_passed: u8,
 }
 
+#[allow(unused)]
 impl DayCycleResource {
     pub fn get_alpha(&self) -> f32 {
         ((1.0 - ((2.0 * PI * self.day_timer.elapsed_secs()) / (self.day_length * 2.0)).sin())

@@ -22,6 +22,7 @@ impl Plugin for ConsoleGamesPlugin {
         app.insert_resource(ConsoleGamesData {
             loaded_game: GameList::None,
             ragequit_count: 0,
+            has_won_laby: false,
         });
         app.add_startup_system(setup.system());
         app.add_plugin(laby::LabyrinthGamePlugin);
@@ -32,6 +33,7 @@ impl Plugin for ConsoleGamesPlugin {
 pub struct ConsoleGamesData {
     pub loaded_game: GameList,
     pub ragequit_count: usize,
+    pub has_won_laby: bool,
 }
 
 impl ConsoleGamesData {

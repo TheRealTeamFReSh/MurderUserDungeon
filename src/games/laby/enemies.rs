@@ -13,10 +13,11 @@ pub struct Enemy {
     pub damages: f32,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone, PartialEq)]
 pub enum EnemyType {
     Rat,
     Bat,
+    Boss,
 }
 
 impl EnemyType {
@@ -24,6 +25,7 @@ impl EnemyType {
         match self {
             EnemyType::Rat => "rat",
             EnemyType::Bat => "bat",
+            EnemyType::Boss => "boss",
         }
     }
 }
@@ -33,6 +35,7 @@ impl Enemy {
         match self.kind {
             EnemyType::Rat => art::RAT,
             EnemyType::Bat => art::BAT,
+            EnemyType::Boss => art::BOSS,
         }
     }
 

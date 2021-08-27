@@ -11,6 +11,13 @@ pub enum GameState {
     Exploring,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum PlayerActions {
+    Attack,
+    Prepare,
+    Protect,
+}
+
 #[derive(Debug)]
 pub struct PlayerStats {
     pub health: f32,
@@ -18,6 +25,8 @@ pub struct PlayerStats {
     pub level: usize,
     pub exp: usize,
     pub damages: f32,
+    pub action: PlayerActions,
+    pub last_action: PlayerActions,
 }
 
 impl Default for PlayerStats {
@@ -28,7 +37,20 @@ impl Default for PlayerStats {
             level: 1,
             exp: 0,
             damages: 1.0,
+            action: PlayerActions::Attack,
+            last_action: PlayerActions::Attack,
         }
+    }
+}
+
+impl PlayerStats {
+    pub fn reset(&mut self) {
+        self.exp = 0;
+        self.level = 1;
+        self.damages = 1.0;
+        self.max_health = 10.0;
+        self.health = self.max_health;
+        self.action = PlayerActions::Attack;
     }
 }
 
@@ -52,6 +74,7 @@ pub struct LabyrinthData {
     pub game_state: GameState,
     pub description: String,
     pub status_message: String,
+    pub tutorial_page: usize,
 }
 
 impl Default for LabyrinthData {
@@ -71,6 +94,7 @@ impl Default for LabyrinthData {
                 sprite_id: 0,
                 username: "".to_string(),
             },
+            tutorial_page: 0,
         }
     }
 }
@@ -82,6 +106,7 @@ impl LabyrinthData {
         self.has_shown_turn_infos = false;
         self.wait_for_continue = false;
         self.game_state = GameState::Tutorial;
+        self.tutorial_page = 0;
     }
 }
 
@@ -89,7 +114,7 @@ impl LabyrinthData {
 #[derive(Debug, Deserialize)]
 pub struct LabyrinthResourceFile {
     pub descriptions: Vec<String>,
-    pub tutorial: String,
+    pub tutorial: Vec<String>,
     pub enemies: Vec<Enemy>,
 }
 

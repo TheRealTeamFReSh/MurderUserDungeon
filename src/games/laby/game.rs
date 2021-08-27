@@ -3,10 +3,13 @@ use rand::{prelude::SliceRandom, Rng};
 
 use crate::{
     console::{event::PrintConsoleEvent, ConsoleData},
-    games::laby::{
-        art,
-        data::Directions,
-        utils::{self, display_bar},
+    games::{
+        laby::{
+            art,
+            data::{Directions, PlayerActions},
+            utils::{self, display_bar},
+        },
+        ConsoleGamesData, GameList,
     },
     npcs::NPCsResource,
     vulnerability::{BoolVulnerabilityType, VulnerabilityResource},
@@ -14,9 +17,11 @@ use crate::{
 
 use super::{
     data::{GameState, LabyrinthData, LabyrinthResourceFile, PlayerStats, RoomType},
-    enemies::Enemy,
+    enemies::{Enemy, EnemyType},
     items::ItemType,
 };
+
+const NUMBER_OF_TURN_TO_WIN: usize = 20;
 
 pub fn game_loop(
     mut laby_data: ResMut<LabyrinthData>,
@@ -26,6 +31,7 @@ pub fn game_loop(
     mut player: ResMut<PlayerStats>,
     mut vuln_res: ResMut<VulnerabilityResource>,
     npc_res: Res<NPCsResource>,
+    mut cg_data: ResMut<ConsoleGamesData>,
 ) {
     if laby_data.has_shown_turn_infos || laby_data.wait_for_continue {
         return;
@@ -39,13 +45,25 @@ pub fn game_loop(
         return;
     }
 
+    if player.exp >= 10 {
+        player.exp -= 10;
+        player.level += 1;
+        player.max_health += 2.0;
+        player.damages += 1.5;
+        player.health += 2.0;
+        player.health = player.health.min(player.max_health);
+    }
+
     // first we clear the screen
     console_data.messages.clear();
 
     match laby_data.game_state {
         // if we're going through the tutorial
         GameState::Tutorial => {
-            console_writer.send(PrintConsoleEvent(display_tutorial(&laby_res)));
+            console_writer.send(PrintConsoleEvent(display_tutorial(
+                &laby_res,
+                laby_data.tutorial_page,
+            )));
             laby_data.wait_for_continue = true;
         }
 
@@ -59,14 +77,28 @@ pub fn game_loop(
                 RoomType::Enemy => {
                     if laby_data.enemy.health <= 0.0 {
                         laby_data.enemy.health = laby_data.enemy.health.max(0.0);
-                        new_turn(&mut laby_data, &laby_res, &mut player, &npc_res);
                         laby_data.wait_for_continue = false;
                         laby_data.has_shown_turn_infos = false;
+
+                        if laby_data.enemy.kind == EnemyType::Boss {
+                            console_writer.send(PrintConsoleEvent(
+                                "Congrats! You beat the game and banged kevin's mom!\n".to_string(),
+                            ));
+                            cg_data.loaded_game = GameList::None;
+                            cg_data.has_won_laby = true;
+                            laby_data.reset();
+                            player.reset();
+                            return;
+                        }
+
                         laby_data.status_message = format!(
                             "Enemy killed! Congrats!\nYou gained {} Exp",
                             laby_data.enemy.exp
                         );
                         player.exp += laby_data.enemy.exp;
+                        player.action = PlayerActions::Attack;
+
+                        new_turn(&mut laby_data, &laby_res, &mut player, &npc_res);
                         return;
                     }
 
@@ -82,6 +114,8 @@ pub fn game_loop(
             console_writer.send(PrintConsoleEvent(player_infos(&player)));
 
             console_writer.send(PrintConsoleEvent(display_status(&laby_data)));
+
+            player.last_action = player.action;
         }
     };
 
@@ -98,10 +132,10 @@ fn display_status(laby_data: &ResMut<LabyrinthData>) -> String {
     res
 }
 
-fn display_tutorial(laby_res: &Res<LabyrinthResourceFile>) -> String {
+fn display_tutorial(laby_res: &Res<LabyrinthResourceFile>, page: usize) -> String {
     let mut res = String::from("------------------==[Labyrinth]==-----------------\n\n");
 
-    res.push_str(&laby_res.tutorial);
+    res.push_str(laby_res.tutorial.get(page).unwrap());
     res.push_str("\n\n\n");
 
     res.push_str("Don't forget to type 'help' for the list of commands.\n");
@@ -180,9 +214,14 @@ fn npc_display(laby_data: &ResMut<LabyrinthData>) -> String {
 
     // Description
     res.push_str("---------------------[Talking]--------------------\n");
-    res.push_str("<Put the npc pickup line here>\n\n\n");
+    res.push_str(
+        "
+For now all npcs are mute (how so?)
+But he is still nice and if you talk with him/her
+you may get a small boon from it *wink wink*\n\n",
+    );
 
-    res.push_str("Type 'talk' to speak with him or 'skip' to go to the next room\n");
+    res.push_str("Type 'talk' to speak with him/her or 'skip' to go to the next room\n");
 
     res
 }
@@ -212,6 +251,23 @@ pub fn new_turn(
 
     player.health += 1.0;
     player.health = player.health.min(player.max_health);
+
+    if laby_data.steps_number == NUMBER_OF_TURN_TO_WIN {
+        laby_data.room_type = RoomType::Enemy;
+        laby_data.enemy = Enemy {
+            damages: 2.0,
+            description: "
+This is the end. He is the devil, the incarnation
+of your worst fears. He is also ..xxXDarkKevin69Xxx..
+and won't hesitate to bang your MOM."
+                .to_string(),
+            exp: 100,
+            health: 25.0,
+            max_health: 25.0,
+            kind: EnemyType::Boss,
+        };
+        return;
+    }
 
     // 10 rooms =
     // 4 corridor, 1 item, 3 enemy, 2 npc
