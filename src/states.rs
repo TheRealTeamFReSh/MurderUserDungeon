@@ -9,4 +9,5 @@ pub enum GameState {
     PlayerOrderingPizzaState,
     PlayerEatingState,
     MainMenu,
+    ControlMenu,
 }
