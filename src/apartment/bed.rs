@@ -2,11 +2,13 @@ use crate::misc::day_cycle::DayCycleResource;
 use crate::vulnerability::{spawn_npc, BoolVulnerabilityType, VulnerabilityResource};
 use crate::{
     apartment::{
+        phone::{PizzaDeliveryResource, PizzaDeliveryStatus},
         player::{PlayerComponent, Sleepiness},
         InteractableComponent, InteractableType, PlayerInBedComponent,
     },
     misc::game_over::{GameOverData, GameOverReason},
 };
+use std::time::Duration;
 
 use crate::states::GameState;
 use bevy::prelude::*;
@@ -75,6 +77,7 @@ pub fn sleeping_system(
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     mut go_data: ResMut<GameOverData>,
     mut day_resource: ResMut<DayCycleResource>,
+    mut pizza_delivery_resource: ResMut<PizzaDeliveryResource>,
 ) {
     if app_state.current() == &GameState::PlayerSleepingState {
         sleep_resource.sleep_timer.tick(time.delta());
@@ -107,6 +110,19 @@ pub fn sleeping_system(
                     app_state.pop().unwrap();
                 }
                 day_resource.sleep();
+
+                // deliver pizza if ordered
+                let pizza_time = pizza_delivery_resource
+                    .delivery_timer
+                    .duration()
+                    .as_secs_f32()
+                    - 0.1;
+
+                if let PizzaDeliveryStatus::Ordered = pizza_delivery_resource.status {
+                    pizza_delivery_resource
+                        .delivery_timer
+                        .set_elapsed(Duration::from_secs_f32(pizza_time));
+                }
                 info!("Player woke up");
             }
         }
