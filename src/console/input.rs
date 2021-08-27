@@ -21,6 +21,7 @@ pub fn trigger_open_console(
                 && app_state.current() == &GameState::MainGame
             {
                 app_state.push(GameState::ConsoleOpenedState).unwrap();
+                #[cfg(debug_assertions)]
                 info!("Console opened");
             }
         }
@@ -30,8 +31,10 @@ pub fn trigger_open_console(
         && keyboard_input.just_pressed(KeyCode::Escape)
     {
         app_state.pop().unwrap();
+        #[cfg(debug_assertions)]
         info!("Console closed");
         if cg_data.has_won_laby {
+            #[cfg(debug_assertions)]
             info!("Has won death");
             *vuln_res
                 .bool_vulnerabilities

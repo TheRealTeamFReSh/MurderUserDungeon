@@ -32,6 +32,7 @@ pub fn interact_bed_system(
                 && app_state.current() == &GameState::MainGame
             {
                 if sleepiness.0 <= 50. {
+                    #[cfg(debug_assertions)]
                     info!("Sleeping in bed");
                     audio.play(asset_server.load("audio/get_in_bed.mp3"));
                     if app_state.current() == &GameState::MainGame {
@@ -48,6 +49,7 @@ pub fn interact_bed_system(
                         }
                     }
                 } else {
+                    #[cfg(debug_assertions)]
                     info!("Not tired");
                     // TODO: notify the player that he is not tired
                 }
@@ -107,6 +109,7 @@ pub fn sleeping_system(
                     app_state.pop().unwrap();
                 }
                 day_resource.sleep();
+                #[cfg(debug_assertions)]
                 info!("Player woke up");
             }
         }

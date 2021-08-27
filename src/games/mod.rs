@@ -51,6 +51,7 @@ impl ConsoleGamesData {
 }
 
 fn setup() {
+    #[cfg(debug_assertions)]
     info!("Loading ConsoleGamesPlugin");
 }
 
