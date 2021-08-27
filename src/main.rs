@@ -45,6 +45,7 @@ fn main() {
         .add_plugin(misc::day_cycle::DayCyclePlugin)
         .add_plugin(main_menu::Plugin)
         .add_state(states::GameState::MainMenu)
+        .add_startup_system(spawn_ui_camera.system())
         .add_system(exit_on_esc_system.system())
         .run();
 }
@@ -59,4 +60,8 @@ pub fn exit_on_esc_system(
     {
         app_exit_events.send(AppExit);
     }
+}
+
+fn spawn_ui_camera(mut commands: Commands) {
+    commands.spawn_bundle(UiCameraBundle::default());
 }
