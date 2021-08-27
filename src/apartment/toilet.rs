@@ -22,7 +22,7 @@ pub fn interact_toilet_system(
             if keyboard_input.just_pressed(KeyCode::E)
                 && app_state.current() == &GameState::MainGame
             {
-                if peepeepoopoo.0 <= 50 {
+                if peepeepoopoo.0 <= 50. {
                     info!("Using toilet");
                     audio.play(asset_server.load("audio/peeing.mp3"));
                     if app_state.current() == &GameState::MainGame {
@@ -56,7 +56,7 @@ pub fn peeing_system(
         if peeing_resource.pee_timer.just_finished() {
             peeing_resource.pee_timer.reset();
 
-            peepeepoopoo.0 = 100;
+            peepeepoopoo.0 = 100.;
             if app_state.current() == &GameState::PlayerPeeingState {
                 app_state.pop().unwrap();
             }

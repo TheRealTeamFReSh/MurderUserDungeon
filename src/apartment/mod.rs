@@ -38,10 +38,10 @@ impl Plugin for ApartmentPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
             .add_plugin(DebugLinesPlugin)
-            .insert_resource(player::Health(100))
-            .insert_resource(player::Hunger(100))
-            .insert_resource(player::Sleepiness(100))
-            .insert_resource(player::PeePeePooPoo(100))
+            .insert_resource(player::Health(100.))
+            .insert_resource(player::Hunger(100.))
+            .insert_resource(player::Sleepiness(100.))
+            .insert_resource(player::PeePeePooPoo(100.))
             .insert_resource(player::StatsTimer(Timer::from_seconds(1.0, true)))
             .insert_resource(bed::SleepingResource {
                 sleep_timer: Timer::from_seconds(bed::SLEEP_TIME, false),

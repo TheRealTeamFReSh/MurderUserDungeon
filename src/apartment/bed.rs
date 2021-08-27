@@ -31,7 +31,7 @@ pub fn interact_bed_system(
             if keyboard_input.just_pressed(KeyCode::E)
                 && app_state.current() == &GameState::MainGame
             {
-                if sleepiness.0 <= 50 {
+                if sleepiness.0 <= 50. {
                     info!("Sleeping in bed");
                     audio.play(asset_server.load("audio/get_in_bed.mp3"));
                     if app_state.current() == &GameState::MainGame {
@@ -102,7 +102,7 @@ pub fn sleeping_system(
             } else {
                 super::despawn_player_in_bed(&mut commands, &player_in_bed_query);
                 audio.play(asset_server.load("audio/get_out_bed.mp3"));
-                sleepiness.0 = 100;
+                sleepiness.0 = 100.;
                 if app_state.current() == &GameState::PlayerSleepingState {
                     app_state.pop().unwrap();
                 }
