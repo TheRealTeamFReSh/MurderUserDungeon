@@ -7,4 +7,6 @@ pub enum GameState {
     PlayerPeeingState,
     PlayerOrderingPizzaState,
     PlayerEatingState,
+    MainMenu,
+    ControlMenu,
 }

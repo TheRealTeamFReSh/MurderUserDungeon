@@ -11,6 +11,7 @@ mod console;
 mod debug;
 mod games;
 mod hud;
+mod main_menu;
 mod misc;
 mod npcs;
 mod states;
@@ -42,8 +43,11 @@ fn main() {
         .add_plugin(hud::Plugin)
         .add_plugin(npcs::NPCsPlugin)
         .add_plugin(misc::day_cycle::DayCyclePlugin)
-        .add_state(states::GameState::MainGame)
+        .add_plugin(main_menu::Plugin)
+        .add_state(states::GameState::MainMenu)
+        .add_startup_system(spawn_ui_camera.system())
         .add_system(exit_on_esc_system.system())
+        .add_startup_system(configure_window.system())
         .run();
 }
 
@@ -57,4 +61,15 @@ pub fn exit_on_esc_system(
     {
         app_exit_events.send(AppExit);
     }
+}
+
+fn spawn_ui_camera(mut commands: Commands) {
+    commands.spawn_bundle(UiCameraBundle::default());
+}
+
+fn configure_window(mut windows: ResMut<Windows>) {
+    info!("Setting window descriptor");
+    windows
+        .iter_mut()
+        .for_each(|window| window.set_resizable(false));
 }
