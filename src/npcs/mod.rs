@@ -21,10 +21,14 @@ impl Plugin for NPCsPlugin {
 
 pub fn generate_npcs_system(
     mut npcs_resource: ResMut<NPCsResource>,
-    usernames: Res<UsernamesResource>,
+    usernames_resource: Res<UsernamesResource>,
 ) {
+    let mut usernames = usernames_resource.usernames.clone();
+
     for i in 0..NPC_COUNT {
-        let username = usernames.usernames.choose(&mut rand::thread_rng()).unwrap();
+        let username = usernames.choose(&mut rand::thread_rng()).unwrap().clone();
+        usernames.retain(|x| x != &username);
+
         npcs_resource.npcs.insert(
             username.to_string(),
             NPCData {

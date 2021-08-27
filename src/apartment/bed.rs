@@ -1,8 +1,12 @@
-use crate::{apartment::{
-    player::{PlayerComponent, Sleepiness},
-    InteractableComponent, InteractableType, PlayerInBedComponent,
-}, misc::game_over::{GameOverData, GameOverReason}};
+use crate::misc::day_cycle::DayCycleResource;
 use crate::vulnerability::{spawn_npc, BoolVulnerabilityType, VulnerabilityResource};
+use crate::{
+    apartment::{
+        player::{PlayerComponent, Sleepiness},
+        InteractableComponent, InteractableType, PlayerInBedComponent,
+    },
+    misc::game_over::{GameOverData, GameOverReason},
+};
 
 use crate::states::GameState;
 use bevy::prelude::*;
@@ -70,6 +74,7 @@ pub fn sleeping_system(
     vulnerability_resource: Res<VulnerabilityResource>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     mut go_data: ResMut<GameOverData>,
+    mut day_resource: ResMut<DayCycleResource>,
 ) {
     if app_state.current() == &GameState::PlayerSleepingState {
         sleep_resource.sleep_timer.tick(time.delta());
@@ -101,6 +106,7 @@ pub fn sleeping_system(
                 if app_state.current() == &GameState::PlayerSleepingState {
                     app_state.pop().unwrap();
                 }
+                day_resource.sleep();
                 info!("Player woke up");
             }
         }
