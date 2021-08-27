@@ -2,6 +2,7 @@ use crate::apartment::player::Health;
 use crate::apartment::player::Hunger;
 use crate::apartment::player::PeePeePooPoo;
 use crate::apartment::player::Sleepiness;
+use crate::misc::day_cycle::DayCycleResource;
 use crate::states::GameState;
 use bevy::prelude;
 use bevy::prelude::*;
@@ -11,10 +12,14 @@ pub struct Plugin;
 impl prelude::Plugin for Plugin {
     fn build(&self, app: &mut prelude::AppBuilder) {
         app.add_system_set(
-            SystemSet::on_enter(GameState::MainGame).with_system(build_stat_hud.system()),
+            SystemSet::on_enter(GameState::MainGame)
+                .with_system(build_stat_hud.system())
+                .with_system(build_time_display.system()),
         )
         .add_system_set(
-            SystemSet::on_update(GameState::MainGame).with_system(refresh_stat_hud.system()),
+            SystemSet::on_update(GameState::MainGame)
+                .with_system(refresh_stat_hud.system())
+                .with_system(update_time_display.system()),
         );
     }
 }
@@ -156,4 +161,70 @@ fn refresh_stat_hud(
             }
         }
     });
+}
+
+struct TimeDisplay;
+
+fn build_time_display(
+    mut commands: Commands,
+    time: Res<DayCycleResource>,
+    ass: ResMut<AssetServer>,
+) {
+    commands.spawn_bundle(TextBundle {
+        style: Style {
+            size: Size::default(),
+            position: Rect {
+                left: Val::Percent(79.0),
+                bottom: Val::Percent(30.0),
+                ..Rect::default()
+            },
+            position_type: PositionType::Absolute,
+            ..Style::default()
+        },
+        text: Text::with_section(
+            "TIME",
+            TextStyle {
+                font: ass.load("fonts/VT323-Regular.ttf"),
+                font_size: 18.,
+                color: Color::WHITE,
+            },
+            TextAlignment::default(),
+        ),
+        ..TextBundle::default()
+    });
+
+    commands
+        .spawn_bundle(TextBundle {
+            style: Style {
+                size: Size::default(),
+                position: Rect {
+                    left: Val::Percent(85.0),
+                    bottom: Val::Percent(30.0),
+                    ..Rect::default()
+                },
+                position_type: PositionType::Absolute,
+                ..Style::default()
+            },
+            text: Text::with_section(
+                format!("{:02}:{:02}", time.get_hour(), time.get_minute()),
+                TextStyle {
+                    font: ass.load("fonts/VT323-Regular.ttf"),
+                    font_size: 24.,
+                    color: Color::WHITE,
+                },
+                TextAlignment::default(),
+            ),
+            ..TextBundle::default()
+        })
+        .insert(TimeDisplay);
+}
+
+fn update_time_display(time: Res<DayCycleResource>, query: Query<&mut Text, With<TimeDisplay>>) {
+    if time.is_changed() {
+        query.for_each_mut(|mut text| {
+            if let Some(mut section) = text.sections.first_mut() {
+                section.value = format!("{:02}:{:02}", time.get_hour(), time.get_minute());
+            }
+        });
+    }
 }
