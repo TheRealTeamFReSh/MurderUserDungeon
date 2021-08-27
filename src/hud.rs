@@ -141,22 +141,22 @@ fn refresh_stat_hud(
     query.for_each_mut(|(mut style, stat)| match stat {
         StatDisplay::Health => {
             if health.is_changed() {
-                style.size.width = Val::Px(health.0 as f32);
+                style.size.width = Val::Px(health.0);
             }
         }
         StatDisplay::Hunger => {
             if hunger.is_changed() {
-                style.size.width = Val::Px(hunger.0 as f32);
+                style.size.width = Val::Px(hunger.0);
             }
         }
         StatDisplay::Sleep => {
             if sleepiness.is_changed() {
-                style.size.width = Val::Px(sleepiness.0 as f32)
+                style.size.width = Val::Px(sleepiness.0)
             }
         }
         StatDisplay::PeePoo => {
             if peepeepoopoo.is_changed() {
-                style.size.width = Val::Px(peepeepoopoo.0 as f32)
+                style.size.width = Val::Px(peepeepoopoo.0)
             }
         }
     });
