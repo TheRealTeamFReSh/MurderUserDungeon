@@ -43,12 +43,6 @@ fn build_stat_hud(
 
     spawn_stat_bar(
         &mut commands,
-        Health,
-        materials.add(Color::RED.into()),
-        &font,
-    );
-    spawn_stat_bar(
-        &mut commands,
         Hunger,
         materials.add(Color::GREEN.into()),
         &font,
