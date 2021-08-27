@@ -4,9 +4,16 @@ use crate::states::GameState;
 
 pub struct GameOverPlugin;
 
+pub const DEATH_SOUND_DELAY: f32 = 3.6;
+
 impl Plugin for GameOverPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.insert_resource(GameOverAnimation::default());
+        let mut game_over_sound_timer = Timer::from_seconds(DEATH_SOUND_DELAY, false);
+        game_over_sound_timer.pause();
+        app.insert_resource(GameOverAnimation {
+            game_over_sound_timer,
+            ..Default::default()
+        });
         app.insert_resource(GameOverData {
             reason: None,
             hide_player_sprite: false,
@@ -21,7 +28,7 @@ impl Plugin for GameOverPlugin {
                 .with_system(show_game_over_screen.system())
                 .with_system(apply_animation.system()),
         );
-        app.add_system(set_game_over_message.system()); 
+        app.add_system(set_game_over_message.system());
     }
 }
 
@@ -199,7 +206,8 @@ fn on_enter_game_over(mut anim_data: ResMut<GameOverAnimation>, time: Res<Time>)
     anim_data.start_opacity = 0.0;
     anim_data.end_opacity = 1.0;
     anim_data.start_time = time.seconds_since_startup();
-    anim_data.speed = 0.4;
+    anim_data.speed = 1.4;
+    anim_data.game_over_sound_timer.unpause();
 }
 
 fn show_game_over_screen(mut query: Query<(&Transform, With<GameOverBackground>)>) {
@@ -207,7 +215,7 @@ fn show_game_over_screen(mut query: Query<(&Transform, With<GameOverBackground>)
 }
 
 fn set_game_over_message(
-    mut query: Query<(&mut Text, With<TextReason>)>, 
+    mut query: Query<(&mut Text, With<TextReason>)>,
     go_data: Res<GameOverData>,
 ) {
     for (mut text, _) in query.iter_mut() {
@@ -223,6 +231,7 @@ pub struct GameOverAnimation {
     pub end_opacity: f32,
     pub start_time: f64,
     pub speed: f64,
+    pub game_over_sound_timer: Timer,
 }
 
 pub fn apply_animation(
@@ -233,22 +242,39 @@ pub fn apply_animation(
     )>,
     mut font_query: Query<(&mut Text, With<GameOverAnimationComponent>)>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    anim_data: Res<GameOverAnimation>,
+    mut anim_data: ResMut<GameOverAnimation>,
     time: Res<Time>,
+    asset_server: Res<AssetServer>,
+    audio: Res<Audio>,
 ) {
     let delta_t = time.seconds_since_startup() - anim_data.start_time;
-    let value = 1.0 - (-(delta_t * anim_data.speed)).exp();
+    let background_value = 1.0 - (-(delta_t * anim_data.speed)).exp();
+
+    // text fades in after fade to black
+    let mut text_value = delta_t - 3.0;
+    if text_value < 0.0 {
+        text_value = 0.0;
+    }
+    if text_value > 1.0 {
+        text_value = 1.0;
+    }
 
     // changing material opacity
     for (_, color, _) in mat_query.iter_mut() {
         let color_mat = materials.get_mut(color.id).unwrap();
-        color_mat.color.set_a(value as f32);
+        color_mat.color.set_a(background_value as f32);
     }
 
     // changin font opacity
     for (mut text, _) in font_query.iter_mut() {
         for section in text.sections.iter_mut() {
-            section.style.color.set_a(value as f32);
+            section.style.color.set_a(text_value as f32);
         }
+    }
+
+    // update timer to play death sound effect
+    anim_data.game_over_sound_timer.tick(time.delta());
+    if anim_data.game_over_sound_timer.just_finished() {
+        audio.play(asset_server.load("audio/death.mp3"));
     }
 }
