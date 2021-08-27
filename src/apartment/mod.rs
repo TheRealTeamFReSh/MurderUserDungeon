@@ -62,6 +62,10 @@ impl Plugin for ApartmentPlugin {
                     day_cycle::DAY_LENGTH * ((phone::DELIVERY_TIME) / 24.0),
                     true,
                 ),
+                at_door_timer: Timer::from_seconds(
+                    day_cycle::DAY_LENGTH * ((phone::AT_DOOR_TIME) / 24.0),
+                    true,
+                ),
             })
             .insert_resource(
                 from_bytes::<animation::CharacterAnimationResource>(include_bytes!(
