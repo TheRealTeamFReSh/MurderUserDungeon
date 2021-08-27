@@ -15,13 +15,14 @@ pub fn interact_door_system(
     hallway_cover_query: Query<Entity, With<super::HallwayCoverComponent>>,
     interactables_resource: Res<InteractablesResource>,
     keyboard_input: Res<Input<KeyCode>>,
-    app_state: Res<State<GameState>>,
+    mut app_state: ResMut<State<GameState>>,
     asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     audio: Res<Audio>,
 ) {
     for player_component in player_query.iter() {
         if let Some(InteractableType::ClosedDoor) = player_component.interactable_in_range {
+            // open door
             if keyboard_input.just_pressed(KeyCode::E)
                 && app_state.current() == &GameState::MainGame
             {
@@ -41,6 +42,11 @@ pub fn interact_door_system(
 
                 // spawn an open door
                 spawn_open_door(&mut commands, &interactables_resource);
+            } else if keyboard_input.just_pressed(KeyCode::C)
+                && app_state.current() == &GameState::MainGame
+            {
+                app_state.push(GameState::PeepholeOpenedState).unwrap();
+                info!("Checking peephole")
             }
         } else if let Some(InteractableType::OpenDoor) = player_component.interactable_in_range {
             if keyboard_input.just_pressed(KeyCode::E)
@@ -64,6 +70,18 @@ pub fn interact_door_system(
                 spawn_closed_door(&mut commands, &interactables_resource);
             }
         }
+    }
+}
+
+pub fn exit_peephole_system(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut app_state: ResMut<State<GameState>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::Escape)
+        && app_state.current() == &GameState::PeepholeOpenedState
+    {
+        app_state.pop().unwrap();
+        info!("Leaving peephole")
     }
 }
 

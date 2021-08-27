@@ -2,6 +2,7 @@
 pub enum GameState {
     MainGame,
     ConsoleOpenedState,
+    PeepholeOpenedState,
     PlayerSleepingState,
     GameOverState,
     PlayerPeeingState,

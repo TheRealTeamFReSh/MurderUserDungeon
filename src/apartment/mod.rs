@@ -33,6 +33,7 @@ pub const PLAYER_Z: f32 = 5.0;
 pub const FOREGROUND_Z: f32 = 10.0;
 pub const INTERACTABLE_ICON_Z: f32 = 11.0;
 pub const LIGHTING_Z: f32 = 10.5;
+pub const PEEPHOLE_Z: f32 = 10.2;
 
 impl Plugin for ApartmentPlugin {
     fn build(&self, app: &mut AppBuilder) {
@@ -134,7 +135,8 @@ impl Plugin for ApartmentPlugin {
             .add_system(phone::ordering_pizza_system.system())
             .add_system(phone::eating_system.system())
             .add_system(phone::pizza_delivery_system.system())
-            .add_system(player::hide_player_system.system());
+            .add_system(player::hide_player_system.system())
+            .add_system(door::exit_peephole_system.system());
         app.add_system(
             animation::animate_character_system
                 .system()
@@ -492,5 +494,34 @@ pub fn spawn_pizza(
 pub fn despawn_pizza(commands: &mut Commands, pizza_query: &Query<Entity, With<PizzaComponent>>) {
     for pizza in pizza_query.iter() {
         commands.entity(pizza).despawn();
+    }
+}
+
+pub struct PeepholeComponent;
+
+pub fn spawn_peephole(
+    commands: &mut Commands,
+    asset_server: &AssetServer,
+    materials: &mut Assets<ColorMaterial>,
+) {
+    // create background
+    let texture_handle = asset_server.load("textures/peepholes/peephole_none.png");
+    commands
+        .spawn()
+        .insert(PeepholeComponent)
+        .insert_bundle(SpriteBundle {
+            material: materials.add(texture_handle.into()),
+            transform: Transform::from_translation(Vec3::new(0.0, 0.0, PEEPHOLE_Z)),
+            ..Default::default()
+        })
+        .insert(Name::new("Peephole"));
+}
+
+pub fn despawn_peepholes(
+    commands: &mut Commands,
+    peephole_query: &Query<Entity, With<PeepholeComponent>>,
+) {
+    for peephole in peephole_query.iter() {
+        commands.entity(peephole).despawn();
     }
 }
