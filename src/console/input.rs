@@ -176,3 +176,17 @@ pub fn update_enter_command(
         },
     });
 }
+
+pub fn opening_console_sound(
+    audio: Res<Audio>,
+    asset_server: Res<AssetServer>,
+) {
+    audio.play(asset_server.load("audio/crt_on.mp3"));
+}
+
+pub fn closing_console_sound(
+    audio: Res<Audio>,
+    asset_server: Res<AssetServer>,
+) {
+    audio.play(asset_server.load("audio/crt_off.mp3"));
+}

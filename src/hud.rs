@@ -1,4 +1,3 @@
-use crate::apartment::player::Health;
 use crate::apartment::player::Hunger;
 use crate::apartment::player::PeePeePooPoo;
 use crate::apartment::player::Sleepiness;
@@ -31,7 +30,6 @@ impl prelude::Plugin for Plugin {
 
 #[derive(Clone, Copy)]
 enum StatDisplay {
-    Health,
     Hunger,
     Sleep,
     PeePoo,
@@ -82,7 +80,6 @@ fn spawn_stat_bar(
                 position: Rect {
                     left: Val::Percent(85.0),
                     bottom: match stat {
-                        StatDisplay::Health => Val::Percent(10.0),
                         StatDisplay::Hunger => Val::Percent(15.0),
                         StatDisplay::Sleep => Val::Percent(20.0),
                         StatDisplay::PeePoo => Val::Percent(25.0),
@@ -103,7 +100,6 @@ fn spawn_stat_bar(
             position: Rect {
                 left: Val::Percent(79.0),
                 bottom: match stat {
-                    StatDisplay::Health => Val::Percent(9.5),
                     StatDisplay::Hunger => Val::Percent(14.5),
                     StatDisplay::Sleep => Val::Percent(19.5),
                     StatDisplay::PeePoo => Val::Percent(24.5),
@@ -115,7 +111,6 @@ fn spawn_stat_bar(
         },
         text: Text::with_section(
             match stat {
-                StatDisplay::Health => "HEALTH",
                 StatDisplay::Hunger => "HUNGER",
                 StatDisplay::Sleep => "SLEEP",
                 StatDisplay::PeePoo => "PISS",
@@ -135,15 +130,9 @@ fn refresh_stat_hud(
     hunger: Res<Hunger>,
     sleepiness: Res<Sleepiness>,
     peepeepoopoo: Res<PeePeePooPoo>,
-    health: Res<Health>,
     query: Query<(&mut Style, &StatDisplay)>,
 ) {
     query.for_each_mut(|(mut style, stat)| match stat {
-        StatDisplay::Health => {
-            if health.is_changed() {
-                style.size.width = Val::Px(health.0);
-            }
-        }
         StatDisplay::Hunger => {
             if hunger.is_changed() {
                 style.size.width = Val::Px(hunger.0);

@@ -74,6 +74,13 @@ impl Plugin for ApartmentPlugin {
                 ))
                 .unwrap(),
             )
+            .insert_resource(animation::WalkingSound {
+                first_time: true,
+                timer: Timer::from_seconds(
+                    0.4,
+                    true,
+                ),
+            })
             .add_system_set(
                 SystemSet::on_enter(GameState::MainGame)
                     .with_system(setup.system().label("apartment_setup"))
@@ -126,6 +133,10 @@ impl Plugin for ApartmentPlugin {
                         phone::interact_phone_system
                             .system()
                             .after("check_interactables"),
+                    )
+                    .with_system(
+                        animation::player_walking_sound_system.system()
+                            .after("player_movement")
                     )
                     .with_system(decrease_stats.system()),
             );
