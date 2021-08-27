@@ -200,7 +200,10 @@ fn item_display(
 
     // Description
     res.push_str("-------------------[Description]------------------\n");
-    res.push_str("<Put the item description here>\n\n\n");
+    res.push_str("
+This item has currently no description
+However you can type 'loot' to get its content
+or you can type 'skip' to go to the next room.\n\n");
 
     res
 }

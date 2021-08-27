@@ -199,9 +199,36 @@ pub fn commands_handler(
                         msg = "The NPC gives you the cold shoulder.. maybe next time?".to_string();
                     }
 
+                    laby_data.has_shown_turn_infos = false;
+                    laby_data.wait_for_continue = false;
+
                     console_writer.send(PrintConsoleEvent(msg.clone()));
                     laby_data.status_message = msg.clone();
                     new_turn(&mut laby_data, &laby_res, &mut player, &npc_res);
+                } else {
+                    console_writer.send(PrintConsoleEvent("You try to talk to yourself and gained nothing but loneliness..".to_string()));
+                }
+            }
+            "loot" => {
+                if laby_data.room_type == RoomType::Item {
+                    let will_give_boon = rand::thread_rng().gen_ratio(8, 10);
+
+                    let msg: String;
+                    if will_give_boon {
+                        msg = "You managed to find a good item and gained damages".to_string();
+                        player.damages += 1.0;
+                    } else {
+                        msg = "Ah crap its too rusty... maybe next time?".to_string();
+                    }
+
+                    laby_data.has_shown_turn_infos = false;
+                    laby_data.wait_for_continue = false;
+
+                    console_writer.send(PrintConsoleEvent(msg.clone()));
+                    laby_data.status_message = msg.clone();
+                    new_turn(&mut laby_data, &laby_res, &mut player, &npc_res);
+                } else {
+                    console_writer.send(PrintConsoleEvent("You try to loot this room..\n There is nothing but rocks (sry)...".to_string()));
                 }
             }
 
@@ -245,10 +272,11 @@ fn display_help(page_number: usize) -> String {
         res.push_str("- go <direction>: Move the player to the next direction\n");
         res.push_str("- ragequit: Leaves the game (you will lose your progress)\n");
         res.push_str("- infos: Display informations about the place you stand\n");
+        res.push_str("- skip: skip this room to go to the next (if you can)\n");
     } else {
         res.push_str("- talk: talks to an npc to receive its boon\n");
+        res.push_str("- loot: loots the item (when you find one)\n");
         res.push_str("- continue: to continue a story/speech\n");
-        res.push_str("- skip: skip this room to go to the next\n");
         res.push_str("- attack: attacks the monster / NPC\n");
         res.push_str("- prepare: prepares the attack for x2.5 damages\n");
         res.push_str("- protect: a protection position to take x0.5 damages\n");
