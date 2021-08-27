@@ -15,8 +15,11 @@ impl Plugin for ConsolePlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.add_event::<event::PrintConsoleEvent>()
             .add_event::<event::EnteredConsoleCommandEvent>()
-            .add_startup_system(ui::build_ui.system())
-            .add_startup_system(setup.system())
+            .add_system_set(
+                SystemSet::on_enter(GameState::MainGame)
+                    .with_system(ui::build_ui.system().label("build_terminal"))
+                    .with_system(setup.system()),
+            )
             .add_system_set(
                 SystemSet::on_enter(GameState::ConsoleOpenedState)
                     .with_system(ui::open_console.system()),
