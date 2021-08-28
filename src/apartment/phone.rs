@@ -5,9 +5,7 @@ use crate::{
         player::{Hunger, PlayerComponent},
         InteractableComponent, InteractableType, InteractablesResource,
     },
-    misc::{
-        day_cycle::DAY_LENGTH,
-    },
+    misc::day_cycle::DAY_LENGTH,
     vulnerability::{AtDoorType, VulnerabilityResource},
 };
 use bevy::prelude::*;
@@ -133,9 +131,15 @@ pub fn interact_phone_system(
                 && app_state.current() == &GameState::MainGame
             {
                 match pizza_delivery_resource.status {
-                    PizzaDeliveryStatus::Delivered => ui_bundle.show_text("Pizza is already here".to_string()),
-                    PizzaDeliveryStatus::Ordered => ui_bundle.show_text("I already ordered pizza!".to_string()),
-                    PizzaDeliveryStatus::AtDoor => ui_bundle.show_text("I already ordered pizza!".to_string()),
+                    PizzaDeliveryStatus::Delivered => {
+                        ui_bundle.show_text("Pizza is already here".to_string())
+                    }
+                    PizzaDeliveryStatus::Ordered => {
+                        ui_bundle.show_text("I already ordered pizza!".to_string())
+                    }
+                    PizzaDeliveryStatus::AtDoor => {
+                        ui_bundle.show_text("I already ordered pizza!".to_string())
+                    }
                     PizzaDeliveryStatus::Unordered => {
                         #[cfg(debug_assertions)]
                         info!("Using Phone");
@@ -198,7 +202,7 @@ pub fn pizza_delivery_system(
 
                 // random chance of spawning npc instead based on vulnerability level
                 if rand::thread_rng().gen::<f32>() * vulnerability_resource.vulnerability_factor
-                    > 0.1
+                    > 0.15
                 {
                     vulnerability_resource.at_door = AtDoorType::Npc;
                     audio.play(asset_server.load("audio/knocking.mp3"));
