@@ -1,5 +1,10 @@
-use crate::apartment::{
-    player::PlayerComponent, InteractableComponent, InteractableType, InteractablesResource,
+use crate::{
+    apartment::{
+        interactable::despawn_interactable_icons, player::PlayerComponent, InteractableComponent,
+        InteractableType, InteractablesResource,
+    },
+    misc::game_over::{GameOverData, GameOverReason},
+    vulnerability::{spawn_npc, AtDoorType, LockpickingStatus, VulnerabilityResource},
 };
 
 use crate::states::GameState;
@@ -15,13 +20,17 @@ pub fn interact_door_system(
     hallway_cover_query: Query<Entity, With<super::HallwayCoverComponent>>,
     interactables_resource: Res<InteractablesResource>,
     keyboard_input: Res<Input<KeyCode>>,
-    app_state: Res<State<GameState>>,
+    mut app_state: ResMut<State<GameState>>,
     asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    mut vulnerability_resource: ResMut<VulnerabilityResource>,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    mut go_data: ResMut<GameOverData>,
     audio: Res<Audio>,
 ) {
     for player_component in player_query.iter() {
         if let Some(InteractableType::ClosedDoor) = player_component.interactable_in_range {
+            // open door
             if keyboard_input.just_pressed(KeyCode::E)
                 && app_state.current() == &GameState::MainGame
             {
@@ -42,6 +51,52 @@ pub fn interact_door_system(
 
                 // spawn an open door
                 spawn_open_door(&mut commands, &interactables_resource);
+
+                // check if enemy at door and game over if so
+                if let AtDoorType::NPC = vulnerability_resource.at_door {
+                    vulnerability_resource.lockpicking_status = LockpickingStatus::None;
+                    spawn_npc(
+                        "textures/npcs/npc_1_forward_spritesheet.png",
+                        Vec2::new(-222.0, 164.0),
+                        &mut commands,
+                        &asset_server,
+                        &mut texture_atlases,
+                    );
+                    if app_state.current() == &GameState::MainGame {
+                        go_data.reason = Some(GameOverReason::LetThemIn);
+                        app_state.set(GameState::GameOverState).unwrap();
+                        #[cfg(debug_assertions)]
+                        info!("Console closed");
+                    }
+                    audio.play(asset_server.load("audio/dramatic_scare.mp3"));
+                }
+            } else if keyboard_input.just_pressed(KeyCode::C)
+                && app_state.current() == &GameState::MainGame
+            {
+                app_state.push(GameState::PeepholeOpenedState).unwrap();
+                match vulnerability_resource.at_door {
+                    crate::vulnerability::AtDoorType::None => super::spawn_peephole(
+                        "textures/peepholes/peephole_none.png",
+                        &mut commands,
+                        &asset_server,
+                        &mut materials,
+                    ),
+                    crate::vulnerability::AtDoorType::DeliveryPerson => super::spawn_peephole(
+                        "textures/peepholes/peephole_pizza.png",
+                        &mut commands,
+                        &asset_server,
+                        &mut materials,
+                    ),
+                    crate::vulnerability::AtDoorType::NPC => super::spawn_peephole(
+                        "textures/peepholes/peephole_npc_1.png",
+                        &mut commands,
+                        &asset_server,
+                        &mut materials,
+                    ),
+                }
+
+                despawn_interactable_icons(&mut commands, &interactable_icon_query);
+                info!("Checking peephole")
             }
         } else if let Some(InteractableType::OpenDoor) = player_component.interactable_in_range {
             if keyboard_input.just_pressed(KeyCode::E)
@@ -66,6 +121,21 @@ pub fn interact_door_system(
                 spawn_closed_door(&mut commands, &interactables_resource);
             }
         }
+    }
+}
+
+pub fn exit_peephole_system(
+    mut commands: Commands,
+    peephole_query: Query<Entity, With<super::PeepholeComponent>>,
+    keyboard_input: Res<Input<KeyCode>>,
+    mut app_state: ResMut<State<GameState>>,
+) {
+    if keyboard_input.just_released(KeyCode::C)
+        && app_state.current() == &GameState::PeepholeOpenedState
+    {
+        app_state.pop().unwrap();
+        super::despawn_peepholes(&mut commands, &peephole_query);
+        info!("Leaving peephole")
     }
 }
 
