@@ -222,8 +222,7 @@ pub fn pizza_delivery_system(
                 // deliveryperson leaves
                 pizza_delivery_resource.status = PizzaDeliveryStatus::Unordered;
                 vulnerability_resource.at_door = AtDoorType::None;
-                #[cfg(debug_assertions)]
-                info!("Delivery person left :(")
+                ui_bundle.show_text("Delivery person left :(!".to_string());
             } else {
                 for interactable_component in interactable_query.iter() {
                     if let InteractableType::OpenDoor = interactable_component.interactable_type {
