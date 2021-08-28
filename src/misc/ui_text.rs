@@ -35,6 +35,10 @@ impl Plugin for UITextPlugin {
             ),
         )
         .add_system_set(
+            SystemSet::on_exit(GameState::MainGame)
+                .with_system(despawn_ui.system()),
+        )
+        .add_system_set(
             SystemSet::on_update(GameState::MainGame)
                 .with_system(set_ui_text.system())
                 .with_system(apply_animation.system().label("ui_bottom_text_animation")),
@@ -205,5 +209,14 @@ pub fn apply_animation(
 pub fn set_ui_text(mut query: Query<&mut Text, With<TextUINode>>, bundle: Res<BottomTextUI>) {
     for mut text in query.iter_mut() {
         text.sections[0].value = bundle.ui_data.content.clone();
+    }
+}
+
+pub fn despawn_ui(
+    mut commands: Commands,
+    query: Query<Entity, Or<(With<TextUIContainer>, With<TextUINode>)>>,
+) {
+    for entity in query.iter() {
+        commands.entity(entity).despawn_recursive();
     }
 }
