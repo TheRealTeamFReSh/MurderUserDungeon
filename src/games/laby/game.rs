@@ -281,21 +281,34 @@ of your worst fears. He is also ...xxXDarkKevin420Xxx."
         return;
     }
 
-    // 10 rooms =
-    // 4 corridor, 1 item, 3 enemy, 2 npc
-    let rooms_possibilites = [
-        RoomType::Corridor,
-        RoomType::Corridor,
-        RoomType::Corridor,
-        RoomType::Corridor,
-        RoomType::Item,
-        RoomType::Enemy,
-        RoomType::Enemy,
-        RoomType::Enemy,
-        RoomType::Npc,
-        RoomType::Npc,
-    ];
-    laby_data.room_type = *rooms_possibilites.choose(&mut rand::thread_rng()).unwrap();
+    // if we were in tutorial we go in corridor
+    if laby_data.steps_number <= 1 {
+        laby_data.room_type = RoomType::Corridor; 
+    } else {
+        // 10 rooms =
+        // 4 corridor, 1 item, 3 enemy, 2 npc
+        let rooms_possibilites = [
+            RoomType::Corridor,
+            RoomType::Corridor,
+            RoomType::Corridor,
+            RoomType::Corridor,
+            RoomType::Item,
+            RoomType::Enemy,
+            RoomType::Enemy,
+            RoomType::Enemy,
+            RoomType::Npc,
+            RoomType::Npc,
+        ];
+
+        let mut new_room: RoomType;
+        loop {
+            new_room = *rooms_possibilites.choose(&mut rand::thread_rng()).unwrap();
+            
+            // if we don't have the same room
+            if new_room != laby_data.room_type { break; }
+        }
+        laby_data.room_type = new_room;
+    }
 
     match laby_data.room_type {
         RoomType::Enemy => {
