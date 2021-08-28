@@ -163,7 +163,7 @@ pub fn apply_animation(
         .start_position
         .lerp(anim_data.end_position, value as f32);
 
-    if data.is_opening && new_position.abs_diff_eq(anim_data.start_position, 1.0) {
+    if data.is_opening && new_position.abs_diff_eq(anim_data.end_position, 1.0) {
         data.fully_opened = true;
     }
 

@@ -41,7 +41,7 @@ impl Plugin for ConsolePlugin {
                 SystemSet::on_update(GameState::ConsoleOpenedState)
                     .with_run_criteria(should_run_cmd_handler.system())
                     .with_system(commands::commands_handler.system())
-                        .before("send_console_input"),
+                    .before("send_console_input"),
             )
             .add_system_set(
                 SystemSet::on_update(GameState::ConsoleOpenedState)

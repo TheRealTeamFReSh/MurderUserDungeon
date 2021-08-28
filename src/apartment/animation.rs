@@ -69,8 +69,13 @@ pub enum CharacterAnimationType {
 
 impl CharacterAnimationType {
     fn is_idle(&self) -> bool {
-        matches!(self, CharacterAnimationType::ForwardIdle | CharacterAnimationType::BackwardIdle |
-            CharacterAnimationType::LeftIdle | CharacterAnimationType::RightIdle)
+        matches!(
+            self,
+            CharacterAnimationType::ForwardIdle
+                | CharacterAnimationType::BackwardIdle
+                | CharacterAnimationType::LeftIdle
+                | CharacterAnimationType::RightIdle
+        )
     }
 }
 
@@ -87,10 +92,7 @@ pub struct WalkingSound {
 
 pub fn player_walking_sound_system(
     mut ws_res: ResMut<WalkingSound>,
-    mut player_query: Query<
-        &mut CharacterAnimationComponent,
-        With<PlayerComponent>,
-    >,
+    mut player_query: Query<&mut CharacterAnimationComponent, With<PlayerComponent>>,
     audio: Res<Audio>,
     asset_server: Res<AssetServer>,
     time: Res<Time>,
@@ -105,7 +107,9 @@ pub fn player_walking_sound_system(
                 }
 
                 let index = rand::thread_rng().gen_range(1..8);
-                audio.play(asset_server.load(format!("audio/footstep/footstep-{}.mp3", index).as_str()));
+                audio.play(
+                    asset_server.load(format!("audio/footstep/footstep-{}.mp3", index).as_str()),
+                );
             }
         } else {
             ws_res.timer.reset();
@@ -113,4 +117,3 @@ pub fn player_walking_sound_system(
         }
     }
 }
-

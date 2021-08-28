@@ -1,6 +1,9 @@
-use crate::apartment::{
-    player::{PeePeePooPoo, PlayerComponent},
-    InteractableType,
+use crate::{
+    apartment::{
+        player::{PeePeePooPoo, PlayerComponent},
+        InteractableType,
+    },
+    misc::ui_text::{TextUIAnimation, TextUIData},
 };
 
 use crate::states::GameState;
@@ -16,6 +19,10 @@ pub fn interact_toilet_system(
     mut app_state: ResMut<State<GameState>>,
     asset_server: Res<AssetServer>,
     audio: Res<Audio>,
+    mut ui_bottom_text: ResMut<TextUIData>,
+    windows: Res<Windows>,
+    time: Res<Time>,
+    mut anim_data: ResMut<TextUIAnimation>,
 ) {
     for player_component in player_query.iter() {
         if let Some(InteractableType::Toilet) = player_component.interactable_in_range {
@@ -30,9 +37,12 @@ pub fn interact_toilet_system(
                         app_state.push(GameState::PlayerPeeingState).unwrap();
                     }
                 } else {
-                    #[cfg(debug_assertions)]
-                    info!("Don't need to pee");
-                    // TODO: notify the player that he doesn't need to pee
+                    ui_bottom_text.show_text(
+                        &mut anim_data,
+                        &windows,
+                        &time,
+                        "I don't need to pee yet".to_string(),
+                    );
                 }
             }
         }
