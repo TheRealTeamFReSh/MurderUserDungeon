@@ -63,6 +63,7 @@ pub fn commands_handler(
                 cg_data.ragequit(&mut vuln_res);
             }
             "tutorial" => {
+                laby_data.tutorial_page = 0;
                 laby_data.game_state = GameState::Tutorial;
                 laby_data.has_shown_turn_infos = false;
             }
@@ -102,6 +103,10 @@ pub fn commands_handler(
                     console_writer.send(PrintConsoleEvent(msg.clone()));
                     laby_data.status_message = msg;
                     vuln_res.enemies.push(laby_data.npc.username.clone());
+                    
+                    laby_data.has_shown_turn_infos = false;
+                    laby_data.wait_for_continue = false;
+                    new_turn(&mut laby_data, &laby_res, &mut player, &npc_res);
                 } else if laby_data.game_state == GameState::Tutorial  {
                     laby_data.game_state = GameState::Exploring;
                     laby_data.has_shown_turn_infos = false;
