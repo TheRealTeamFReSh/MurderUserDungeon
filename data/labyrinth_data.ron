@@ -9,8 +9,7 @@ is friendly? *pets the rat*
 Outch that hurt, you son of a ...",
 
 "Damn, I should have kept my coat, it's raining
-now (I really hope it's actual water and not
-pee)."
+now...I HOPE that's water..."
     ],
 
     tutorial: ["
@@ -18,27 +17,28 @@ This could be the start of a great story,
 however you are here.. in the sewers hiding for
 your responsibilities...
 
-Anyway..
+Anyway...
 
 Welcome to -=[The Labyrinth]=- (TM) a magical
 place where friends are long gone and the only
-other people here are the ones shooting her***
-*hum hum* people looking for troubles *hum 
-hum* looking for adventure!
+other people here are in it for themselves,
+competing for the opportunity to win the 
+$1,000,000 reward!
 
 There will be no mercy. It's you against the
-unknown (and underage angry gamers).",
+unknown (and angry gamers).",
 
 "While exploring -=[The Labyrinth]=- you may 
 encounter creatures, other people and find treasures 
-inside it. You can claim all of this junk *hum*
-beauties for yourself.
+inside it. You can claim all of this loot for
+yourself.
 
 Don't forget: 10 exp = 1 level and one levels
 gives you life and damages!
 
-Be friendly to the NPCs there and they might
-be nice with you.
+Being aggressive toward other players will give
+you rewards, but being friendly to the other players
+may pay off in the long run.
 
 Be brave and face and the fun and the dangers
 -=[The Labyrinth]=- (TM) has to offer you.
@@ -71,8 +71,7 @@ Well crap you are still there? Get out!
             kind: Rat,
             description: "
 With its big black eyes, you may believe this
-rat is harmless. But look at the tail, this
-disgusting tail. Now look at yours?",
+rat is harmless. However, it is rearing to attack.",
             max_health: 3.0,
             health: 3.0,
             exp: 5,
@@ -83,7 +82,7 @@ disgusting tail. Now look at yours?",
             description: "
 This king of the night is so big relative to
 the corridor. You won't be able to go through
-without killing this monstruosity.",
+without killing this monstrosity.",
             max_health: 2.0,
             health: 2.0,
             exp: 2,

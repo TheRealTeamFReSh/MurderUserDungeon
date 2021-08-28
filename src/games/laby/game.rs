@@ -4,14 +4,19 @@ use std::thread;
 use bevy::prelude::*;
 use rand::{prelude::SliceRandom, Rng};
 
-use crate::{console::{event::PrintConsoleEvent, ConsoleData}, games::{
+use crate::{
+    console::{event::PrintConsoleEvent, ConsoleData},
+    games::{
         laby::{
             art,
             data::{Directions, PlayerActions},
             utils::{self, display_bar},
         },
         ConsoleGamesData, GameList,
-    }, npcs::{NPCData, NPCsResource}, vulnerability::{BoolVulnerabilityType, VulnerabilityResource}};
+    },
+    npcs::{NPCData, NPCsResource},
+    vulnerability::{BoolVulnerabilityType, VulnerabilityResource},
+};
 
 use super::{
     data::{GameState, LabyrinthData, LabyrinthResourceFile, PlayerStats, RoomType},
@@ -110,9 +115,7 @@ pub fn game_loop(
                     console_writer.send(PrintConsoleEvent(enemy_display(&laby_data)));
                 }
 
-                RoomType::Item => {
-                    console_writer.send(PrintConsoleEvent(item_display(&laby_data)))
-                }
+                RoomType::Item => console_writer.send(PrintConsoleEvent(item_display(&laby_data))),
 
                 RoomType::Npc => console_writer.send(PrintConsoleEvent(npc_display(&laby_data))),
             };
@@ -145,7 +148,7 @@ fn display_tutorial(laby_res: &ResMut<LabyrinthResourceFile>, page: usize) -> St
 
     res.push_str("Don't forget to type 'help' for the list of commands.\n");
     res.push_str("To show this tutorial type 'tutorial', to show the\n");
-    res.push_str("informations about the current room type 'infos'\n");
+    res.push_str("Information about the current room type 'infos'\n");
     res.push_str("To navigate in the labyrinth type 'go <dir>'\n\n");
     res.push_str("Type 'continue' in order to start the adventure...\n");
 
@@ -159,8 +162,7 @@ fn turn_display(laby_data: &ResMut<LabyrinthData>) -> String {
     res.push('\n');
     res.push_str(&format!(
         "Room number: {}/{}\n",
-        laby_data.steps_number,
-        NUMBER_OF_TURN_TO_WIN
+        laby_data.steps_number, NUMBER_OF_TURN_TO_WIN
     ));
     res.push_str(&format!(
         "Available movements: [{}]\n\n",
@@ -197,9 +199,7 @@ fn enemy_display(laby_data: &ResMut<LabyrinthData>) -> String {
     res
 }
 
-fn item_display(
-    laby_data: &ResMut<LabyrinthData>,
-) -> String {
+fn item_display(laby_data: &ResMut<LabyrinthData>) -> String {
     let mut res = String::from("----------------------[View]----------------------\n");
     res.push_str(laby_data.item_type.get_ascii_art());
     res.push('\n');
@@ -208,8 +208,8 @@ fn item_display(
     res.push_str("-------------------[Description]------------------\n");
     res.push_str(
         "
-This item has currently no description
-However you can type 'loot' to get its content
+Loot!
+Enter 'loot' to get its content
 or you can type 'skip' to go to the next room.\n\n",
     );
 
@@ -227,9 +227,10 @@ fn npc_display(laby_data: &ResMut<LabyrinthData>) -> String {
     res.push_str("---------------------[Talking]--------------------\n");
     res.push_str(
         "
-For now all npcs are mute (how so?)
-But he is still nice and if you talk with him/her
-you may get a small boon from it *wink wink*\n\n",
+        You encounter another player.\n
+        Time to choose: Stay safe through friendship?\n
+        or gain power through aggression?
+        \n\n",
     );
 
     res.push_str("Type 'talk' to speak with him/her 'insult' to .. insult the npc\nor 'skip' to go to the next room\n");
@@ -259,7 +260,9 @@ pub fn new_turn(
     npc_res: &Res<NPCsResource>,
 ) {
     // first wait a bit
-    thread::sleep(time::Duration::from_secs_f32(rand::thread_rng().gen_range(0.2..=0.7)));
+    thread::sleep(time::Duration::from_secs_f32(
+        rand::thread_rng().gen_range(0.2..=0.7),
+    ));
 
     laby_data.steps_number += 1;
 
@@ -271,8 +274,8 @@ pub fn new_turn(
         laby_data.enemy = Enemy {
             damages: 2.0,
             description: "
-This is the end. He is the devil, the incarnation
-of your worst fears. He is also ...xxXDarkKevin420Xxx."
+This is the end.
+You encounter the legendary gamer xxXDarkKevin420Xxx. No friendship here, only battle!"
                 .to_string(),
             exp: 100,
             health: 25.0,
@@ -284,7 +287,7 @@ of your worst fears. He is also ...xxXDarkKevin420Xxx."
 
     // if we were in tutorial we go in corridor
     if laby_data.steps_number <= 1 {
-        laby_data.room_type = RoomType::Corridor; 
+        laby_data.room_type = RoomType::Corridor;
     } else {
         // 10 rooms =
         // 4 corridor, 1 item, 3 enemy, 2 npc
@@ -304,9 +307,11 @@ of your worst fears. He is also ...xxXDarkKevin420Xxx."
         let mut new_room: RoomType;
         loop {
             new_room = *rooms_possibilites.choose(&mut rand::thread_rng()).unwrap();
-            
+
             // if we don't have the same room
-            if new_room != laby_data.room_type { break; }
+            if new_room != laby_data.room_type {
+                break;
+            }
         }
         laby_data.room_type = new_room;
     }
@@ -332,7 +337,11 @@ of your worst fears. He is also ...xxXDarkKevin420Xxx."
                     };
 
                     // if we found someone we didn't found before
-                    if !laby_data.seen_npcs.iter().any(|username| username == &npc.username) {
+                    if !laby_data
+                        .seen_npcs
+                        .iter()
+                        .any(|username| username == &npc.username)
+                    {
                         break;
                     }
                 }

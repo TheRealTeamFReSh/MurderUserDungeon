@@ -41,18 +41,20 @@ pub enum GameOverReason {
     LabyrinthWinning,
     LetThemIn,
     NeedsDepleted,
+    LockPick,
 }
 
 impl GameOverReason {
     pub fn get_message(&self) -> &str {
         match self {
             GameOverReason::DoorLeftOpen => "Don't forget to close the door when focusing on something else.",
-            GameOverReason::TooManyRageQuit => "You ragequitted too many times, \nyou went in fury mode and made an heart attack.",
+            GameOverReason::TooManyRageQuit => "You ragequitted too many times, \nyou went in fury mode and had a heart attack.",
             GameOverReason::TicTacToeLosing => "How dare you... lose a game of TicTacToe...\n(There is no AI, it's like losing to a baby...)",
             GameOverReason::LabyrinthLosing => "It's hard to stay alive there...\nMaybe in another life you will thrive and be a real MLG!",
-            GameOverReason::LabyrinthWinning => "Congrats! What?! You really thought you could win?\n'Time to learn a lesson kiddo...",
+            GameOverReason::LabyrinthWinning => "You win...?",
             GameOverReason::LetThemIn => "Why break in when you can use the front door?",
-            GameOverReason::NeedsDepleted => "You are a human too with needs.\n\"Next time be sure to eat enough\" would say grandma...",
+            GameOverReason::NeedsDepleted => "Make sure to take care of your basic needs first.",
+            GameOverReason::LockPick => "When you hear the your lock click run to your hiding spot!",
         }
     }
 }
@@ -247,21 +249,11 @@ pub fn apply_animation(
             &mut Handle<ColorMaterial>,
             With<GameOverAnimationComponent>,
         )>,
-        Query<(
-            &Node,
-            &mut Handle<ColorMaterial>,
-            With<Hud>,
-        )>,
+        Query<(&Node, &mut Handle<ColorMaterial>, With<Hud>)>,
     )>,
     mut font_query: QuerySet<(
-        Query<(
-            &mut Text, 
-            With<GameOverAnimationComponent>,
-        )>,
-        Query<(
-            &mut Text, 
-            With<Hud>,
-        )>,
+        Query<(&mut Text, With<GameOverAnimationComponent>)>,
+        Query<(&mut Text, With<Hud>)>,
     )>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut anim_data: ResMut<GameOverAnimation>,
