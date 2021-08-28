@@ -1,3 +1,4 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 // Configure clippy for Bevy usage
 #![allow(clippy::type_complexity)]
 #![allow(clippy::too_many_arguments)]
