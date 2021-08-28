@@ -8,6 +8,7 @@ use super::INTERACTABLE_ICON_Z;
 
 const INTERACTABLE_ICON_SPRITE_SCALE: f32 = 2.5;
 const INTERACTABLE_ICON_Y_OFFSET: f32 = 6.0;
+const PEEPHOLE_ICON_X_OFFSET: f32 = 3.0;
 const INTERACTABLE_ICON_FRAME_TIME: f32 = 0.15;
 
 /// Types of interactable items
@@ -195,15 +196,40 @@ pub fn check_interactables_system(
         // spawn interact icon
         if old_interactable != interactable_in_range {
             if let Some(interactable_type) = interactable_in_range {
-                // spawn interact icon
-                spawn_interact_icon(
-                    &interactable_type,
-                    &mut commands,
-                    &interactables_resource,
-                    &asset_server,
-                    &mut texture_atlases,
-                    &rapier_config,
-                );
+                if let InteractableType::ClosedDoor = interactable_type {
+                    spawn_interact_icon(
+                        "textures/e_key_press.png",
+                        -PEEPHOLE_ICON_X_OFFSET,
+                        &interactable_type,
+                        &mut commands,
+                        &interactables_resource,
+                        &asset_server,
+                        &mut texture_atlases,
+                        &rapier_config,
+                    );
+                    spawn_interact_icon(
+                        "textures/c_key_press.png",
+                        PEEPHOLE_ICON_X_OFFSET,
+                        &interactable_type,
+                        &mut commands,
+                        &interactables_resource,
+                        &asset_server,
+                        &mut texture_atlases,
+                        &rapier_config,
+                    );
+                } else {
+                    // spawn interact icon
+                    spawn_interact_icon(
+                        "textures/e_key_press.png",
+                        0.0,
+                        &interactable_type,
+                        &mut commands,
+                        &interactables_resource,
+                        &asset_server,
+                        &mut texture_atlases,
+                        &rapier_config,
+                    );
+                }
             } else {
                 // despawn all interact icons
                 for interactable_icon_entity in interactable_icon_query.iter() {
@@ -219,6 +245,8 @@ pub struct InteractableIconComponent;
 
 /// Spawn an interactable icon
 fn spawn_interact_icon(
+    path: &str,
+    x_offset: f32,
     interactable_type: &InteractableType,
     commands: &mut Commands,
     interactables_resource: &InteractablesResource,
@@ -228,13 +256,13 @@ fn spawn_interact_icon(
 ) {
     let interactable_data = &interactables_resource.interactables[interactable_type];
 
-    let texture_handle = asset_server.load("textures/e_key_press.png");
+    let texture_handle = asset_server.load(path);
     let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(16.0, 16.0), 6, 1);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
     let sprite_transform = Transform {
         translation: Vec3::new(
-            interactable_data.position.x * rapier_config.scale,
+            (interactable_data.position.x * rapier_config.scale) + (x_offset * rapier_config.scale),
             (interactable_data.position.y * rapier_config.scale)
                 + (INTERACTABLE_ICON_Y_OFFSET * rapier_config.scale),
             INTERACTABLE_ICON_Z,
