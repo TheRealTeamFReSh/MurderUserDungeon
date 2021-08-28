@@ -4,19 +4,14 @@ use std::thread;
 use bevy::prelude::*;
 use rand::{prelude::SliceRandom, Rng};
 
-use crate::{
-    console::{event::PrintConsoleEvent, ConsoleData},
-    games::{
+use crate::{console::{event::PrintConsoleEvent, ConsoleData}, games::{
         laby::{
             art,
             data::{Directions, PlayerActions},
             utils::{self, display_bar},
         },
         ConsoleGamesData, GameList,
-    },
-    npcs::NPCsResource,
-    vulnerability::{BoolVulnerabilityType, VulnerabilityResource},
-};
+    }, npcs::{NPCData, NPCsResource}, vulnerability::{BoolVulnerabilityType, VulnerabilityResource}};
 
 use super::{
     data::{GameState, LabyrinthData, LabyrinthResourceFile, PlayerStats, RoomType},
@@ -24,11 +19,11 @@ use super::{
     items::ItemType,
 };
 
-const NUMBER_OF_TURN_TO_WIN: usize = 20;
+const NUMBER_OF_TURN_TO_WIN: usize = 30;
 
 pub fn game_loop(
     mut laby_data: ResMut<LabyrinthData>,
-    laby_res: Res<LabyrinthResourceFile>,
+    mut laby_res: ResMut<LabyrinthResourceFile>,
     mut console_writer: EventWriter<PrintConsoleEvent>,
     mut console_data: ResMut<ConsoleData>,
     mut player: ResMut<PlayerStats>,
@@ -52,9 +47,14 @@ pub fn game_loop(
         player.exp -= 10;
         player.level += 1;
         player.max_health += 2.0;
-        player.damages += 1.5;
+        player.damages += 1.0;
         player.health += 2.0;
         player.health = player.health.min(player.max_health);
+
+        for enemy in laby_res.enemies.iter_mut() {
+            enemy.health += 2.0;
+            enemy.damages += 0.5;
+        }
     }
 
     // first we clear the screen
@@ -109,7 +109,7 @@ pub fn game_loop(
                 }
 
                 RoomType::Item => {
-                    console_writer.send(PrintConsoleEvent(item_display(&laby_data, &laby_res)))
+                    console_writer.send(PrintConsoleEvent(item_display(&laby_data)))
                 }
 
                 RoomType::Npc => console_writer.send(PrintConsoleEvent(npc_display(&laby_data))),
@@ -135,7 +135,7 @@ fn display_status(laby_data: &ResMut<LabyrinthData>) -> String {
     res
 }
 
-fn display_tutorial(laby_res: &Res<LabyrinthResourceFile>, page: usize) -> String {
+fn display_tutorial(laby_res: &ResMut<LabyrinthResourceFile>, page: usize) -> String {
     let mut res = String::from("------------------==[Labyrinth]==-----------------\n\n");
 
     res.push_str(laby_res.tutorial.get(page).unwrap());
@@ -156,8 +156,9 @@ fn turn_display(laby_data: &ResMut<LabyrinthData>) -> String {
     res.push_str(laby_data.next_directions.get_ascii_art());
     res.push('\n');
     res.push_str(&format!(
-        "Number of steps since the beginning: {}\n",
-        laby_data.steps_number
+        "Room number: {}/{}\n",
+        laby_data.steps_number,
+        NUMBER_OF_TURN_TO_WIN
     ));
     res.push_str(&format!(
         "Available movements: [{}]\n\n",
@@ -195,7 +196,6 @@ fn enemy_display(laby_data: &ResMut<LabyrinthData>) -> String {
 
 fn item_display(
     laby_data: &ResMut<LabyrinthData>,
-    _laby_res: &Res<LabyrinthResourceFile>,
 ) -> String {
     let mut res = String::from("----------------------[View]----------------------\n");
     res.push_str(laby_data.item_type.get_ascii_art());
@@ -251,7 +251,7 @@ fn player_infos(player: &ResMut<PlayerStats>) -> String {
 
 pub fn new_turn(
     laby_data: &mut ResMut<LabyrinthData>,
-    laby_res: &Res<LabyrinthResourceFile>,
+    laby_res: &ResMut<LabyrinthResourceFile>,
     player: &mut ResMut<PlayerStats>,
     npc_res: &Res<NPCsResource>,
 ) {
@@ -305,11 +305,26 @@ of your worst fears. He is also ...xxXDarkKevin420Xxx."
         }
 
         RoomType::Npc => {
-            laby_data.npc = {
-                let index = rand::thread_rng().gen_range(0..npc_res.npcs.values().count());
+            // if there are npcs we haven't seen yet
+            if laby_data.seen_npcs.len() < npc_res.npcs.len() {
+                let mut npc: NPCData;
+                loop {
+                    npc = {
+                        let index = rand::thread_rng().gen_range(0..npc_res.npcs.values().count());
 
-                npc_res.npcs.values().nth(index).unwrap().clone()
-            };
+                        npc_res.npcs.values().nth(index).unwrap().clone()
+                    };
+
+                    // if we found someone we didn't found before
+                    if !laby_data.seen_npcs.contains(&npc) { break; }
+                }
+                laby_data.npc = npc;
+            }
+            // else we show a basic enemy
+            else {
+                laby_data.room_type = RoomType::Enemy;
+                laby_data.enemy = Enemy::get_random_enemy(&laby_res.enemies).clone();
+            }
         }
 
         RoomType::Corridor => {

@@ -46,7 +46,7 @@ pub struct NPCsResource {
     pub npcs: HashMap<String, NPCData>,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, PartialEq)]
 pub struct NPCData {
     pub sprite_id: usize,
     pub username: String,

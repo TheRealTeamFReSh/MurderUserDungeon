@@ -67,6 +67,7 @@ pub struct LabyrinthData {
     pub room_type: RoomType,
     pub enemy: Enemy,
     pub npc: NPCData,
+    pub seen_npcs: Vec<NPCData>,
     pub item_type: ItemType,
     pub next_directions: Directions,
     pub has_shown_turn_infos: bool,
@@ -95,6 +96,7 @@ impl Default for LabyrinthData {
                 username: "".to_string(),
             },
             tutorial_page: 0,
+            seen_npcs: Vec::new(),
         }
     }
 }
