@@ -1,4 +1,5 @@
 use rand::Rng;
+use ron::de::from_bytes;
 use serde::Deserialize;
 
 use crate::npcs::NPCData;
@@ -118,6 +119,20 @@ pub struct LabyrinthResourceFile {
     pub descriptions: Vec<String>,
     pub tutorial: Vec<String>,
     pub enemies: Vec<Enemy>,
+}
+
+impl LabyrinthResourceFile {
+    pub fn reset(&mut self) {
+        let new_res =  from_bytes::<LabyrinthResourceFile>(
+            include_bytes!(
+                "../../../data/labyrinth_data.ron"
+            )
+        ).unwrap();
+
+        self.enemies = new_res.enemies;
+        self.descriptions = new_res.descriptions;
+        self.tutorial = new_res.tutorial;
+    }
 }
 
 #[derive(PartialEq)]

@@ -52,7 +52,8 @@ pub fn game_loop(
         player.health = player.health.min(player.max_health);
 
         for enemy in laby_res.enemies.iter_mut() {
-            enemy.health += 2.0;
+            enemy.max_health += 2.0;
+            enemy.health = (enemy.health + 2.0).min(enemy.max_health);
             enemy.damages += 0.5;
         }
     }
@@ -90,6 +91,7 @@ pub fn game_loop(
                             cg_data.loaded_game = GameList::None;
                             cg_data.has_won_laby = true;
                             laby_data.reset();
+                            laby_res.reset();
                             player.reset();
                             return;
                         }
@@ -229,7 +231,7 @@ But he is still nice and if you talk with him/her
 you may get a small boon from it *wink wink*\n\n",
     );
 
-    res.push_str("Type 'talk' to speak with him/her or 'skip' to go to the next room\n");
+    res.push_str("Type 'talk' to speak with him/her 'insult' to .. insult the npc\nor 'skip' to go to the next room\n");
 
     res
 }

@@ -26,7 +26,7 @@ pub fn commands_handler(
     mut cg_data: ResMut<ConsoleGamesData>,
     mut data: ResMut<ConsoleData>,
     mut laby_data: ResMut<LabyrinthData>,
-    laby_res: ResMut<LabyrinthResourceFile>,
+    mut laby_res: ResMut<LabyrinthResourceFile>,
     mut vuln_res: ResMut<VulnerabilityResource>,
     mut player: ResMut<PlayerStats>,
     npc_res: Res<NPCsResource>,
@@ -58,6 +58,7 @@ pub fn commands_handler(
             "ragequit" => {
                 console_writer.send(PrintConsoleEvent("Quitting Labyrinth...".to_string()));
                 laby_data.reset();
+                laby_res.reset();
                 player.reset();
                 cg_data.ragequit(&mut vuln_res);
             }
