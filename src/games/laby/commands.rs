@@ -26,7 +26,7 @@ pub fn commands_handler(
     mut cg_data: ResMut<ConsoleGamesData>,
     mut data: ResMut<ConsoleData>,
     mut laby_data: ResMut<LabyrinthData>,
-    laby_res: Res<LabyrinthResourceFile>,
+    laby_res: ResMut<LabyrinthResourceFile>,
     mut vuln_res: ResMut<VulnerabilityResource>,
     mut player: ResMut<PlayerStats>,
     npc_res: Res<NPCsResource>,
