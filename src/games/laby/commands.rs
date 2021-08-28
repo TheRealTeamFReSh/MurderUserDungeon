@@ -235,7 +235,7 @@ pub fn commands_handler(
                     laby_data.status_message = msg.clone();
                     new_turn(&mut laby_data, &laby_res, &mut player, &npc_res);
                 } else {
-                    console_writer.send(PrintConsoleEvent("You insult the void and reminds you of your loneliness..".to_string()));
+                    console_writer.send(PrintConsoleEvent("You insult the void and are reminded of your loneliness".to_string()));
                 }
             }
             "loot" => {
