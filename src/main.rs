@@ -48,8 +48,7 @@ fn main() {
     .add_plugin(main_menu::Plugin)
     .add_plugin(misc::ui_text::UITextPlugin)
     .add_state(states::GameState::MainMenu)
-    .add_startup_system(spawn_ui_camera.system())
-    .add_system(exit_on_esc_system.system());
+    .add_startup_system(spawn_ui_camera.system());
 
     #[cfg(debug_assertions)]
     app.add_plugin(WorldInspectorPlugin::new());
