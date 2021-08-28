@@ -82,7 +82,7 @@ pub fn game_loop(
 
                         if laby_data.enemy.kind == EnemyType::Boss {
                             console_writer.send(PrintConsoleEvent(
-                                "Congrats! You beat the game and banged kevin's mom!\n".to_string(),
+                                "Congrats! You beat the game!\n".to_string(),
                             ));
                             cg_data.loaded_game = GameList::None;
                             cg_data.has_won_laby = true;
@@ -201,10 +201,12 @@ fn item_display(
 
     // Description
     res.push_str("-------------------[Description]------------------\n");
-    res.push_str("
+    res.push_str(
+        "
 This item has currently no description
 However you can type 'loot' to get its content
-or you can type 'skip' to go to the next room.\n\n");
+or you can type 'skip' to go to the next room.\n\n",
+    );
 
     res
 }
@@ -262,8 +264,7 @@ pub fn new_turn(
             damages: 2.0,
             description: "
 This is the end. He is the devil, the incarnation
-of your worst fears. He is also ..xxXDarkKevin69Xxx..
-and won't hesitate to bang your MOM."
+of your worst fears. He is also ...xxXDarkKevin420Xxx."
                 .to_string(),
             exp: 100,
             health: 25.0,

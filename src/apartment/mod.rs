@@ -1,8 +1,8 @@
 mod animation;
 mod bed;
-mod door;
+pub mod door;
 mod interactable;
-mod phone;
+pub mod phone;
 pub mod player;
 mod toilet;
 
@@ -33,6 +33,7 @@ pub const PLAYER_Z: f32 = 5.0;
 pub const FOREGROUND_Z: f32 = 10.0;
 pub const INTERACTABLE_ICON_Z: f32 = 11.0;
 pub const LIGHTING_Z: f32 = 10.5;
+pub const PEEPHOLE_Z: f32 = 10.2;
 
 impl Plugin for ApartmentPlugin {
     fn build(&self, app: &mut AppBuilder) {
@@ -61,6 +62,10 @@ impl Plugin for ApartmentPlugin {
                     day_cycle::DAY_LENGTH * ((phone::DELIVERY_TIME) / 24.0),
                     true,
                 ),
+                at_door_timer: Timer::from_seconds(
+                    day_cycle::DAY_LENGTH * ((phone::AT_DOOR_TIME) / 24.0),
+                    true,
+                ),
             })
             .insert_resource(
                 from_bytes::<animation::CharacterAnimationResource>(include_bytes!(
@@ -76,10 +81,7 @@ impl Plugin for ApartmentPlugin {
             )
             .insert_resource(animation::WalkingSound {
                 first_time: true,
-                timer: Timer::from_seconds(
-                    0.4,
-                    true,
-                ),
+                timer: Timer::from_seconds(0.4, true),
             })
             .add_system_set(
                 SystemSet::on_enter(GameState::MainGame)
@@ -135,18 +137,49 @@ impl Plugin for ApartmentPlugin {
                             .after("check_interactables"),
                     )
                     .with_system(
-                        animation::player_walking_sound_system.system()
-                            .after("player_movement")
+                        animation::player_walking_sound_system
+                            .system()
+                            .after("player_movement"),
                     )
                     .with_system(decrease_stats.system()),
             );
+
+        app.add_system_set(
+            SystemSet::on_update(GameState::PeepholeOpenedState)
+                .with_system(decrease_stats.system()),
+        );
+
+        app.add_system_set(
+            SystemSet::on_update(GameState::PlayerEatingState).with_system(decrease_stats.system()),
+        );
+
+        app.add_system_set(
+            SystemSet::on_update(GameState::PlayerOrderingPizzaState)
+                .with_system(decrease_stats.system()),
+        );
+
+        app.add_system_set(
+            SystemSet::on_update(GameState::PlayerSleepingState)
+                .with_system(decrease_stats.system()),
+        );
+
+        app.add_system_set(
+            SystemSet::on_update(GameState::PlayerPeeingState).with_system(decrease_stats.system()),
+        );
+
+        app.add_system_set(
+            SystemSet::on_update(GameState::PlayerHidingState).with_system(decrease_stats.system()),
+        );
+
         app.add_system(animation::basic_sprite_animation_system.system());
         app.add_system(bed::sleeping_system.system())
             .add_system(toilet::peeing_system.system())
             .add_system(phone::ordering_pizza_system.system())
             .add_system(phone::eating_system.system())
             .add_system(phone::pizza_delivery_system.system())
-            .add_system(player::hide_player_system.system());
+            .add_system(player::hide_player_system.system())
+            .add_system(door::exit_peephole_system.system())
+            .add_system(bed::exit_hiding_system.system().label("exit_hiding"));
         app.add_system(
             animation::animate_character_system
                 .system()
@@ -503,5 +536,62 @@ pub fn spawn_pizza(
 pub fn despawn_pizza(commands: &mut Commands, pizza_query: &Query<Entity, With<PizzaComponent>>) {
     for pizza in pizza_query.iter() {
         commands.entity(pizza).despawn();
+    }
+}
+
+pub struct PeepholeComponent;
+
+pub fn spawn_peephole(
+    path: &str,
+    commands: &mut Commands,
+    asset_server: &AssetServer,
+    materials: &mut Assets<ColorMaterial>,
+) {
+    // create background
+    let texture_handle = asset_server.load(path);
+    commands
+        .spawn()
+        .insert(PeepholeComponent)
+        .insert_bundle(SpriteBundle {
+            material: materials.add(texture_handle.into()),
+            transform: Transform::from_translation(Vec3::new(0.0, 0.0, PEEPHOLE_Z)),
+            ..Default::default()
+        })
+        .insert(Name::new("Peephole"));
+}
+
+pub fn despawn_peepholes(
+    commands: &mut Commands,
+    peephole_query: &Query<Entity, With<PeepholeComponent>>,
+) {
+    for peephole in peephole_query.iter() {
+        commands.entity(peephole).despawn();
+    }
+}
+
+pub struct HidingScreenComponent;
+
+pub fn spawn_hiding_screen(
+    commands: &mut Commands,
+    asset_server: &AssetServer,
+    materials: &mut Assets<ColorMaterial>,
+) {
+    commands
+        .spawn()
+        .insert(HidingScreenComponent)
+        .insert_bundle(SpriteBundle {
+            material: materials.add(asset_server.load("textures/hiding.png").into()),
+            transform: Transform::from_translation(Vec3::new(0.0, 0.0, PEEPHOLE_Z)),
+            ..Default::default()
+        })
+        .insert(Name::new("Hiding Screen"));
+}
+
+pub fn despawn_hiding_screen(
+    commands: &mut Commands,
+    hiding_screen_query: &Query<Entity, With<HidingScreenComponent>>,
+) {
+    for hiding_screen in hiding_screen_query.iter() {
+        commands.entity(hiding_screen).despawn();
     }
 }

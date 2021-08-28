@@ -24,6 +24,36 @@ impl prelude::Plugin for Plugin {
             SystemSet::on_update(GameState::ConsoleOpenedState)
                 .with_system(refresh_stat_hud.system())
                 .with_system(update_time_display.system()),
+        )
+        .add_system_set(
+            SystemSet::on_update(GameState::PeepholeOpenedState)
+                .with_system(refresh_stat_hud.system())
+                .with_system(update_time_display.system()),
+        )
+        .add_system_set(
+            SystemSet::on_update(GameState::PlayerPeeingState)
+                .with_system(refresh_stat_hud.system())
+                .with_system(update_time_display.system()),
+        )
+        .add_system_set(
+            SystemSet::on_update(GameState::PlayerSleepingState)
+                .with_system(refresh_stat_hud.system())
+                .with_system(update_time_display.system()),
+        )
+        .add_system_set(
+            SystemSet::on_update(GameState::PlayerOrderingPizzaState)
+                .with_system(refresh_stat_hud.system())
+                .with_system(update_time_display.system()),
+        )
+        .add_system_set(
+            SystemSet::on_update(GameState::PlayerHidingState)
+                .with_system(refresh_stat_hud.system())
+                .with_system(update_time_display.system()),
+        )
+        .add_system_set(
+            SystemSet::on_update(GameState::PlayerEatingState)
+                .with_system(refresh_stat_hud.system())
+                .with_system(update_time_display.system()),
         );
     }
 }
