@@ -90,6 +90,7 @@ pub fn sleeping_system(
 
             // if vulnerable, jumpscare and game over, otherwise wake up
             if vulnerability_resource.bool_vulnerabilities[&BoolVulnerabilityType::BedDoorLeftOpen]
+                && !vulnerability_resource.enemies.is_empty()
             {
                 audio.play(asset_server.load("audio/dramatic_scare.mp3"));
                 spawn_npc(

@@ -3,7 +3,8 @@ use crate::{
         interactable::despawn_interactable_icons, player::PlayerComponent, InteractableComponent,
         InteractableType, InteractablesResource,
     },
-    vulnerability::VulnerabilityResource,
+    misc::game_over::{GameOverData, GameOverReason},
+    vulnerability::{spawn_npc, AtDoorType, VulnerabilityResource},
 };
 
 use crate::states::GameState;
@@ -23,6 +24,8 @@ pub fn interact_door_system(
     asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     vulnerability_resource: Res<VulnerabilityResource>,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    mut go_data: ResMut<GameOverData>,
     audio: Res<Audio>,
 ) {
     for player_component in player_query.iter() {
@@ -48,6 +51,24 @@ pub fn interact_door_system(
 
                 // spawn an open door
                 spawn_open_door(&mut commands, &interactables_resource);
+
+                // check if enemy at door and game over if so
+                if let AtDoorType::NPC = vulnerability_resource.at_door {
+                    spawn_npc(
+                        "textures/npcs/npc_1_forward_spritesheet.png",
+                        Vec2::new(-222.0, 164.0),
+                        &mut commands,
+                        &asset_server,
+                        &mut texture_atlases,
+                    );
+                    if app_state.current() == &GameState::MainGame {
+                        go_data.reason = Some(GameOverReason::LetThemIn);
+                        app_state.set(GameState::GameOverState).unwrap();
+                        #[cfg(debug_assertions)]
+                        info!("Console closed");
+                    }
+                    audio.play(asset_server.load("audio/dramatic_scare.mp3"));
+                }
             } else if keyboard_input.just_pressed(KeyCode::C)
                 && app_state.current() == &GameState::MainGame
             {

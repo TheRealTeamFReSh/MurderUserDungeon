@@ -3,12 +3,15 @@ use crate::{
         player::{Hunger, PlayerComponent},
         InteractableComponent, InteractableType, InteractablesResource,
     },
+    misc::day_cycle::DAY_LENGTH,
     vulnerability::{AtDoorType, VulnerabilityResource},
 };
 
 use crate::states::GameState;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
+use rand::Rng;
+use std::time::Duration;
 
 pub const CALL_TIME: f32 = 5.0;
 pub const EAT_TIME: f32 = 5.4;
@@ -188,11 +191,25 @@ pub fn pizza_delivery_system(
 
             if pizza_delivery_resource.delivery_timer.just_finished() {
                 // random chance of spawning npc instead based on vulnerability level
-                pizza_delivery_resource.status = PizzaDeliveryStatus::AtDoor;
-                vulnerability_resource.at_door = AtDoorType::DeliveryPerson;
-                audio.play(asset_server.load("audio/knocking.mp3"));
-                #[cfg(debug_assertions)]
-                info!("Pizza is here!");
+                if rand::thread_rng().gen::<f32>() * vulnerability_resource.vulnerability_factor
+                    > 0.1
+                {
+                    vulnerability_resource.at_door = AtDoorType::NPC;
+                    audio.play(asset_server.load("audio/knocking.mp3"));
+                    pizza_delivery_resource
+                        .delivery_timer
+                        .set_elapsed(Duration::from_secs_f32(
+                            (2.0 / 5.0) * DAY_LENGTH * (DELIVERY_TIME) / 24.0,
+                        ));
+                    #[cfg(debug_assertions)]
+                    info!("Pizza is here?");
+                } else {
+                    pizza_delivery_resource.status = PizzaDeliveryStatus::AtDoor;
+                    vulnerability_resource.at_door = AtDoorType::DeliveryPerson;
+                    audio.play(asset_server.load("audio/knocking.mp3"));
+                    #[cfg(debug_assertions)]
+                    info!("Pizza is here!");
+                }
             }
         }
         PizzaDeliveryStatus::AtDoor => {
