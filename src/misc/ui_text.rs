@@ -42,7 +42,31 @@ impl Plugin for UITextPlugin {
             SystemSet::on_update(GameState::MainGame)
                 .with_system(set_ui_text.system())
                 .with_system(apply_animation.system().label("ui_bottom_text_animation")),
+        )
+        .add_system_set(
+            SystemSet::on_enter(GameState::ConsoleOpenedState)
+                .with_system(hide_text.system()),
         );
+    }
+}
+
+pub fn hide_text(
+    mut ui_bundle: ResMut<BottomTextUI>,
+    windows: Res<Windows>,
+    mut console_query: Query<(&TextUIContainer, &mut Style)>,
+) {
+    let current_window = windows.get_primary().unwrap();
+
+    ui_bundle.ui_data.fully_opened = false;
+    ui_bundle.ui_data.is_opening = false;
+    
+    let init_pos = Vec2::new(0.2 * current_window.width(), -0.1 * current_window.height());
+    ui_bundle.animation.start_position = init_pos;
+    ui_bundle.animation.end_position = init_pos;
+
+    if let Ok((_, mut style)) = console_query.single_mut() {
+        style.position.bottom = Val::Px(init_pos.y);
+        style.position.left = Val::Px(init_pos.x);
     }
 }
 
