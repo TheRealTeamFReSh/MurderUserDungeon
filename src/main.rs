@@ -18,6 +18,7 @@ mod states;
 mod vulnerability;
 
 use bevy::{app::AppExit, prelude::*, window::WindowMode};
+#[cfg(debug_assertions)]
 use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_kira_audio::AudioPlugin;
 
@@ -44,6 +45,7 @@ fn main() {
     .add_plugin(npcs::NPCsPlugin)
     .add_plugin(misc::day_cycle::DayCyclePlugin)
     .add_plugin(main_menu::Plugin)
+    .add_plugin(misc::ui_text::UITextPlugin)
     .add_state(states::GameState::MainMenu)
     .add_startup_system(spawn_ui_camera.system())
     .add_system(exit_on_esc_system.system());
