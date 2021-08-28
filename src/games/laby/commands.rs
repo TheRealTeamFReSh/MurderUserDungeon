@@ -221,7 +221,9 @@ pub fn commands_handler(
                         msg = "You become stronger by insulting this NPC. But you've made a new enemy...".to_string();
                         player.health += 1.0;
                         player.damages += 1.0;
-                        // TODO: add the enemy to the vuln vec
+                        
+                        // adding the npc to the list of enemies
+                        vuln_res.enemies.push(laby_data.npc.username.clone());
                     } else {
                         msg = "The NPC just doesn't care, he just goes away".to_string();
                     }

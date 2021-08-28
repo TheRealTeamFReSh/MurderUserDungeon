@@ -53,7 +53,7 @@ pub fn interact_door_system(
                 spawn_open_door(&mut commands, &interactables_resource);
 
                 // check if enemy at door and game over if so
-                if let AtDoorType::NPC = vulnerability_resource.at_door {
+                if let AtDoorType::Npc = vulnerability_resource.at_door {
                     vulnerability_resource.lockpicking_status = LockpickingStatus::None;
                     spawn_npc(
                         "textures/npcs/npc_1_forward_spritesheet.png",
@@ -87,7 +87,7 @@ pub fn interact_door_system(
                         &asset_server,
                         &mut materials,
                     ),
-                    crate::vulnerability::AtDoorType::NPC => super::spawn_peephole(
+                    crate::vulnerability::AtDoorType::Npc => super::spawn_peephole(
                         "textures/peepholes/peephole_npc_1.png",
                         &mut commands,
                         &asset_server,

@@ -1,19 +1,14 @@
 use bevy::prelude::*;
 use rand::{prelude::SliceRandom, Rng};
 
-use crate::{
-    console::{event::PrintConsoleEvent, ConsoleData},
-    games::{
+use crate::{console::{event::PrintConsoleEvent, ConsoleData}, games::{
         laby::{
             art,
             data::{Directions, PlayerActions},
             utils::{self, display_bar},
         },
         ConsoleGamesData, GameList,
-    },
-    npcs::NPCsResource,
-    vulnerability::{BoolVulnerabilityType, VulnerabilityResource},
-};
+    }, npcs::{NPCData, NPCsResource}, vulnerability::{BoolVulnerabilityType, VulnerabilityResource}};
 
 use super::{
     data::{GameState, LabyrinthData, LabyrinthResourceFile, PlayerStats, RoomType},
@@ -300,11 +295,26 @@ of your worst fears. He is also ...xxXDarkKevin420Xxx."
         }
 
         RoomType::Npc => {
-            laby_data.npc = {
-                let index = rand::thread_rng().gen_range(0..npc_res.npcs.values().count());
+            // if there are npcs we haven't seen yet
+            if laby_data.seen_npcs.len() < npc_res.npcs.len() {
+                let mut npc: NPCData;
+                loop {
+                    npc = {
+                        let index = rand::thread_rng().gen_range(0..npc_res.npcs.values().count());
 
-                npc_res.npcs.values().nth(index).unwrap().clone()
-            };
+                        npc_res.npcs.values().nth(index).unwrap().clone()
+                    };
+
+                    // if we found someone we didn't found before
+                    if !laby_data.seen_npcs.contains(&npc) { break; }
+                }
+                laby_data.npc = npc;
+            }
+            // else we show a basic enemy
+            else {
+                laby_data.room_type = RoomType::Enemy;
+                laby_data.enemy = Enemy::get_random_enemy(&laby_res.enemies).clone();
+            }
         }
 
         RoomType::Corridor => {

@@ -233,7 +233,7 @@ pub fn pizza_delivery_system(
                 if rand::thread_rng().gen::<f32>() * vulnerability_resource.vulnerability_factor
                     > 0.1
                 {
-                    vulnerability_resource.at_door = AtDoorType::NPC;
+                    vulnerability_resource.at_door = AtDoorType::Npc;
                     audio.play(asset_server.load("audio/knocking.mp3"));
                     pizza_delivery_resource
                         .delivery_timer
