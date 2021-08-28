@@ -203,6 +203,7 @@ fn build_ui(
 }
 
 fn on_enter_game_over(mut anim_data: ResMut<GameOverAnimation>, time: Res<Time>) {
+    #[cfg(debug_assertions)]
     info!("Enter game over state");
     anim_data.start_opacity = 0.0;
     anim_data.end_opacity = 1.0;

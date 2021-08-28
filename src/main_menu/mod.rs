@@ -258,6 +258,7 @@ fn return_button(
 ) {
     query.for_each(|interaction| match interaction {
         Interaction::Clicked => {
+            #[cfg(debug_assertions)]
             info!("Popped game state");
             app_state
                 .pop()

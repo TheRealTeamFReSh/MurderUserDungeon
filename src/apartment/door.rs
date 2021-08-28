@@ -31,6 +31,7 @@ pub fn interact_door_system(
             if keyboard_input.just_pressed(KeyCode::E)
                 && app_state.current() == &GameState::MainGame
             {
+                #[cfg(debug_assertions)]
                 info!("Door opened");
                 // despawn the closed door
                 for (interactable_entity, interactable_component) in interactable_query.iter() {
@@ -79,6 +80,7 @@ pub fn interact_door_system(
             if keyboard_input.just_pressed(KeyCode::E)
                 && app_state.current() == &GameState::MainGame
             {
+                #[cfg(debug_assertions)]
                 info!("Door closed");
                 // despawn the open door
                 for (interactable_entity, interactable_component) in interactable_query.iter() {

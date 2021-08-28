@@ -49,6 +49,7 @@ pub fn interact_pizza_system(
             {
                 if let PizzaDeliveryStatus::Delivered = pizza_delivery_resource.status {
                     if hunger.0 <= 50. {
+                        #[cfg(debug_assertions)]
                         info!("Eating pizza");
                         // despawn pizza interactable
                         for (interactable_entity, interactable_component) in
@@ -69,6 +70,7 @@ pub fn interact_pizza_system(
                             app_state.push(GameState::PlayerEatingState).unwrap();
                         }
                     } else {
+                        #[cfg(debug_assertions)]
                         info!("Not hungry enough to eat.")
                     }
                 }
@@ -104,6 +106,7 @@ pub fn eating_system(
             }
             super::despawn_pizza(&mut commands, &pizza_query);
             pizza_delivery_resource.status = PizzaDeliveryStatus::Unordered;
+            #[cfg(debug_assertions)]
             info!("Player done eating");
         }
     }
@@ -128,6 +131,7 @@ pub fn interact_phone_system(
                     PizzaDeliveryStatus::Ordered => info!("I already ordered pizza!"),
                     PizzaDeliveryStatus::AtDoor => info!("I already ordered pizza!"),
                     PizzaDeliveryStatus::Unordered => {
+                        #[cfg(debug_assertions)]
                         info!("Using Phone");
                         audio.play(asset_server.load("audio/pizza_orders/pizza_order_1.mp3"));
                         if app_state.current() == &GameState::MainGame {
@@ -161,6 +165,7 @@ pub fn ordering_pizza_system(
                 app_state.pop().unwrap();
             }
             pizza_delivery_resource.status = PizzaDeliveryStatus::Ordered;
+            #[cfg(debug_assertions)]
             info!("Player done ordering pizza");
         }
     }
@@ -186,6 +191,7 @@ pub fn pizza_delivery_system(
                 pizza_delivery_resource.status = PizzaDeliveryStatus::AtDoor;
                 vulnerability_resource.at_door = AtDoorType::DeliveryPerson;
                 audio.play(asset_server.load("audio/knocking.mp3"));
+                #[cfg(debug_assertions)]
                 info!("Pizza is here!");
             }
         }
@@ -197,6 +203,7 @@ pub fn pizza_delivery_system(
                 // deliveryperson leaves
                 pizza_delivery_resource.status = PizzaDeliveryStatus::Unordered;
                 vulnerability_resource.at_door = AtDoorType::None;
+                #[cfg(debug_assertions)]
                 info!("Delivery person left :(")
             } else {
                 for interactable_component in interactable_query.iter() {
@@ -206,6 +213,7 @@ pub fn pizza_delivery_system(
                         spawn_pizza_interactable(&mut commands, &interactables_resource);
                         vulnerability_resource.at_door = AtDoorType::None;
                         pizza_delivery_resource.at_door_timer.reset();
+                        #[cfg(debug_assertions)]
                         info!("I have the pizza.")
                     }
                 }

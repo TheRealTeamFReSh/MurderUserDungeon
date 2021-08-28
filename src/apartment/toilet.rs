@@ -23,12 +23,14 @@ pub fn interact_toilet_system(
                 && app_state.current() == &GameState::MainGame
             {
                 if peepeepoopoo.0 <= 50. {
+                    #[cfg(debug_assertions)]
                     info!("Using toilet");
                     audio.play(asset_server.load("audio/peeing.mp3"));
                     if app_state.current() == &GameState::MainGame {
                         app_state.push(GameState::PlayerPeeingState).unwrap();
                     }
                 } else {
+                    #[cfg(debug_assertions)]
                     info!("Don't need to pee");
                     // TODO: notify the player that he doesn't need to pee
                 }
@@ -60,6 +62,7 @@ pub fn peeing_system(
             if app_state.current() == &GameState::PlayerPeeingState {
                 app_state.pop().unwrap();
             }
+            #[cfg(debug_assertions)]
             info!("Player done peeing");
         }
     }

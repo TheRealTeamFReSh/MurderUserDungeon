@@ -3,6 +3,8 @@ pub mod event;
 mod input;
 mod ui;
 
+use crate::apartment::player::decrease_stats;
+
 use self::commands::should_run_cmd_handler;
 
 use super::states::GameState;
@@ -22,7 +24,8 @@ impl Plugin for ConsolePlugin {
             )
             .add_system_set(
                 SystemSet::on_enter(GameState::ConsoleOpenedState)
-                    .with_system(ui::open_console.system()),
+                    .with_system(ui::open_console.system())
+                    .with_system(input::opening_console_sound.system()),
             )
             .add_system_set(
                 SystemSet::on_update(GameState::ConsoleOpenedState)
@@ -38,12 +41,17 @@ impl Plugin for ConsolePlugin {
                 SystemSet::on_update(GameState::ConsoleOpenedState)
                     .with_run_criteria(should_run_cmd_handler.system())
                     .with_system(commands::commands_handler.system())
-                    .before("send_console_input"),
+                        .before("send_console_input"),
+            )
+            .add_system_set(
+                SystemSet::on_update(GameState::ConsoleOpenedState)
+                    .with_system(decrease_stats.system()),
             )
             .add_system_to_stage(CoreStage::PostUpdate, ui::apply_animation.system())
             .add_system_set(
                 SystemSet::on_exit(GameState::ConsoleOpenedState)
-                    .with_system(ui::close_console.system()),
+                    .with_system(ui::close_console.system())
+                    .with_system(input::closing_console_sound.system()),
             )
             .insert_resource(ConsoleData::default())
             .insert_resource(ConsoleAnimation {

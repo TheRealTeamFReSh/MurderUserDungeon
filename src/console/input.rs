@@ -21,6 +21,7 @@ pub fn trigger_open_console(
                 && app_state.current() == &GameState::MainGame
             {
                 app_state.push(GameState::ConsoleOpenedState).unwrap();
+                #[cfg(debug_assertions)]
                 info!("Console opened");
             }
         }
@@ -30,8 +31,10 @@ pub fn trigger_open_console(
         && keyboard_input.just_pressed(KeyCode::Escape)
     {
         app_state.pop().unwrap();
+        #[cfg(debug_assertions)]
         info!("Console closed");
         if cg_data.has_won_laby {
+            #[cfg(debug_assertions)]
             info!("Has won death");
             *vuln_res
                 .bool_vulnerabilities
@@ -172,4 +175,18 @@ pub fn update_enter_command(
             color: Color::rgba_u8(102, 255, 102, 255),
         },
     });
+}
+
+pub fn opening_console_sound(
+    audio: Res<Audio>,
+    asset_server: Res<AssetServer>,
+) {
+    audio.play(asset_server.load("audio/crt_on.mp3"));
+}
+
+pub fn closing_console_sound(
+    audio: Res<Audio>,
+    asset_server: Res<AssetServer>,
+) {
+    audio.play(asset_server.load("audio/crt_off.mp3"));
 }

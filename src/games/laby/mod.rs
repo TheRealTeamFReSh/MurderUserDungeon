@@ -46,6 +46,7 @@ impl Plugin for LabyrinthGamePlugin {
 
 pub fn start_game(cg_data: &mut ResMut<ConsoleGamesData>) {
     cg_data.loaded_game = GameList::Labyrinth;
+    #[cfg(debug_assertions)]
     info!("Starting labyrinth game");
 }
 
