@@ -187,6 +187,7 @@ fn enemy_display(laby_data: &ResMut<LabyrinthData>) -> String {
             laby_data.enemy.max_health.into()
         )
     ));
+    res.push_str("Available actions: [prepare, protect, attack, skip]\n");
     res.push('\n');
 
     // Description
