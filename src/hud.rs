@@ -21,6 +21,10 @@ impl prelude::Plugin for Plugin {
                 .with_system(update_time_display.system()),
         )
         .add_system_set(
+            SystemSet::on_exit(GameState::MainGame)
+                .with_system(despawn_ui.system()),
+        )
+        .add_system_set(
             SystemSet::on_update(GameState::ConsoleOpenedState)
                 .with_system(refresh_stat_hud.system())
                 .with_system(update_time_display.system()),
@@ -57,6 +61,8 @@ impl prelude::Plugin for Plugin {
         );
     }
 }
+
+pub struct Hud;
 
 #[derive(Clone, Copy)]
 enum StatDisplay {
@@ -122,7 +128,8 @@ fn spawn_stat_bar(
             material,
             ..NodeBundle::default()
         })
-        .insert(stat);
+        .insert(stat)
+        .insert(Hud);
 
     commands.spawn_bundle(TextBundle {
         style: Style {
@@ -153,7 +160,7 @@ fn spawn_stat_bar(
             TextAlignment::default(),
         ),
         ..TextBundle::default()
-    });
+    }).insert(Hud);
 }
 
 fn refresh_stat_hud(
@@ -209,7 +216,7 @@ fn build_time_display(
             TextAlignment::default(),
         ),
         ..TextBundle::default()
-    });
+    }).insert(Hud);
 
     commands
         .spawn_bundle(TextBundle {
@@ -234,7 +241,8 @@ fn build_time_display(
             ),
             ..TextBundle::default()
         })
-        .insert(TimeDisplay);
+        .insert(TimeDisplay)
+        .insert(Hud);
 }
 
 fn update_time_display(time: Res<DayCycleResource>, query: Query<&mut Text, With<TimeDisplay>>) {
@@ -244,5 +252,14 @@ fn update_time_display(time: Res<DayCycleResource>, query: Query<&mut Text, With
                 section.value = format!("{:02}:{:02}", time.get_hour(), time.get_minute());
             }
         });
+    }
+}
+
+fn despawn_ui(
+    mut commands: Commands,
+    query: Query<Entity, With<Hud>>,
+) {
+    for entity in query.iter() {
+        commands.entity(entity).despawn_recursive();
     }
 }

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::states::GameState;
+use crate::{hud::Hud, states::GameState};
 
 pub struct GameOverPlugin;
 
@@ -241,12 +241,28 @@ pub struct GameOverAnimation {
 }
 
 pub fn apply_animation(
-    mut mat_query: Query<(
-        &Node,
-        &mut Handle<ColorMaterial>,
-        With<GameOverAnimationComponent>,
+    mut mat_query: QuerySet<(
+        Query<(
+            &Node,
+            &mut Handle<ColorMaterial>,
+            With<GameOverAnimationComponent>,
+        )>,
+        Query<(
+            &Node,
+            &mut Handle<ColorMaterial>,
+            With<Hud>,
+        )>,
     )>,
-    mut font_query: Query<(&mut Text, With<GameOverAnimationComponent>)>,
+    mut font_query: QuerySet<(
+        Query<(
+            &mut Text, 
+            With<GameOverAnimationComponent>,
+        )>,
+        Query<(
+            &mut Text, 
+            With<Hud>,
+        )>,
+    )>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut anim_data: ResMut<GameOverAnimation>,
     time: Res<Time>,
@@ -266,15 +282,42 @@ pub fn apply_animation(
     }
 
     // changing material opacity
-    for (_, color, _) in mat_query.iter_mut() {
+    for (_, color, _) in mat_query.q0_mut().iter_mut() {
         let color_mat = materials.get_mut(color.id).unwrap();
         color_mat.color.set_a(background_value as f32);
     }
 
     // changin font opacity
-    for (mut text, _) in font_query.iter_mut() {
+    for (mut text, _) in font_query.q0_mut().iter_mut() {
         for section in text.sections.iter_mut() {
             section.style.color.set_a(text_value as f32);
+        }
+    }
+
+    // changing material opacity
+    for (_, color, _) in mat_query.q1_mut().iter_mut() {
+        let color_mat = materials.get_mut(color.id).unwrap();
+        let col_val = 1.0 - background_value as f32;
+        let prev_color = color_mat.color;
+        color_mat.color = Color::rgba(
+            prev_color.r() * col_val,
+            prev_color.g() * col_val,
+            prev_color.b() * col_val,
+            prev_color.a() * col_val,
+        );
+    }
+
+    // changin font opacity
+    for (mut text, _) in font_query.q1_mut().iter_mut() {
+        for section in text.sections.iter_mut() {
+            let col_val = 1.0 - background_value as f32;
+            let prev_color = section.style.color;
+            section.style.color = Color::rgba(
+                prev_color.r() * col_val,
+                prev_color.g() * col_val,
+                prev_color.b() * col_val,
+                prev_color.a() * col_val,
+            );
         }
     }
 
