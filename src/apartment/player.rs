@@ -1,13 +1,9 @@
-use crate::{
-    apartment::{
+use crate::{apartment::{
         animation::{
             CharacterAnimationComponent, CharacterAnimationResource, CharacterAnimationType,
         },
         PLAYER_Z,
-    },
-    misc::game_over::GameOverData,
-    states::GameState,
-};
+    }, misc::game_over::GameOverData, states::GameState, vulnerability::{BoolVulnerabilityType, VulnerabilityResource}};
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
@@ -231,34 +227,25 @@ pub fn decrease_stats(
     mut sleepiness: ResMut<Sleepiness>,
     mut peepeepoopoo: ResMut<PeePeePooPoo>,
     mut timer: ResMut<StatsTimer>,
+    mut vuln_res: ResMut<VulnerabilityResource>,
     time: Res<Time>,
 ) {
     timer.0.tick(time.delta());
     if timer.0.finished() {
         let hunger_reduction = 0.66;
-        if hunger.0 >= hunger_reduction {
-            hunger.0 -= hunger_reduction
-        } else {
-            hunger.0 = 0.
-        };
+        hunger.0 = (hunger.0 - hunger_reduction).max(0.0);
+
         let sleepiness_reduction = 0.55;
-        if sleepiness.0 >= sleepiness_reduction {
-            sleepiness.0 -= sleepiness_reduction;
-        } else {
-            sleepiness.0 = 0.
-        }
+        sleepiness.0 = (sleepiness.0 - sleepiness_reduction).max(0.0);
+
         let peepeepoopoo_reduction = 0.83;
-        if peepeepoopoo.0 >= peepeepoopoo_reduction {
-            peepeepoopoo.0 -= peepeepoopoo_reduction;
-        } else {
-            peepeepoopoo.0 = 0.
+        peepeepoopoo.0 = (peepeepoopoo.0 - peepeepoopoo_reduction).max(0.0);
+
+        if hunger.0 == 0.0 || sleepiness.0 == 0.0 || peepeepoopoo.0 == 0.0 {
+            *vuln_res
+                .bool_vulnerabilities
+                .get_mut(&BoolVulnerabilityType::NeedsDepleted)
+                .unwrap() = true;
         }
-        /*
-        #[cfg(debug_assertions)]
-        info!(
-            "Hunger: {}, sleepiness: {}, peepeepoopoo: {}",
-            hunger.0, sleepiness.0, peepeepoopoo.0
-        );
-        */
     }
 }
