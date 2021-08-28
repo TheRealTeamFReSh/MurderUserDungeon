@@ -90,14 +90,18 @@ pub fn commands_handler(
                 if laby_data.game_state == GameState::Exploring
                     && ((laby_data.room_type == RoomType::Enemy
                         && laby_data.enemy.kind != EnemyType::Boss)
-                        || laby_data.room_type == RoomType::Item
-                        || laby_data.room_type == RoomType::Npc)
+                        || laby_data.room_type == RoomType::Item)
                 {
                     console_writer.send(PrintConsoleEvent("Skipping room...".to_string()));
                     laby_data.status_message = "Skipping room...".to_string();
                     new_turn(&mut laby_data, &laby_res, &mut player, &npc_res);
                     laby_data.has_shown_turn_infos = false;
                     laby_data.wait_for_continue = false;
+                } else if laby_data.room_type == RoomType::Npc {
+                    let msg=  "The NPC feels insulted you skipped him/her... He/she hates you".to_string();
+                    console_writer.send(PrintConsoleEvent(msg.clone()));
+                    laby_data.status_message = msg;
+                    vuln_res.enemies.push(laby_data.npc.username.clone());
                 } else if laby_data.game_state == GameState::Tutorial  {
                     laby_data.game_state = GameState::Exploring;
                     laby_data.has_shown_turn_infos = false;
@@ -195,12 +199,16 @@ pub fn commands_handler(
             "talk" => {
                 if laby_data.room_type == RoomType::Npc {
                     let will_give_boon = rand::thread_rng().gen_ratio(2, 10);
+                    let feel_insulted = rand::thread_rng().gen_ratio(5, 10);
 
                     let msg: String;
                     if will_give_boon {
                         msg = "The NPC was happy you talked with him and wants to give you something".to_string();
                         player.health += 1.0;
                         player.damages += 1.0;
+                    } else if feel_insulted {
+                        msg = "The NPC feels insulted by your words... He/she hates you".to_string();
+                        vuln_res.enemies.push(laby_data.npc.username.clone());
                     } else {
                         msg = "I think you just made a friend! Pretty nice huh?".to_string();
                     }
