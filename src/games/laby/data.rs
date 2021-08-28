@@ -125,7 +125,7 @@ impl LabyrinthResourceFile {
     pub fn reset(&mut self) {
         let new_res =  from_bytes::<LabyrinthResourceFile>(
             include_bytes!(
-                "../../../data/character_animations.ron"
+                "../../../data/labyrinth_data.ron"
             )
         ).unwrap();
 
