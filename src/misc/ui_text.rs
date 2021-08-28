@@ -8,40 +8,33 @@ pub struct UITextPlugin;
 
 impl Plugin for UITextPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app
-            .insert_resource(TextUIData {
-                duration_coef: 1./10.,
-                content: String::from(""),
-                fully_opened: false,
-                is_opening: false,
-                timer: Timer::from_seconds(4.0, false),
-            })
-            .insert_resource(TextUIAnimation {
-                start_position: Vec2::ZERO,
-                end_position: Vec2::ZERO,
-                moving_speed: 5.0,
-                start_time: 0.0,
-            })
-            .add_system_set(
-                SystemSet::on_enter(GameState::MainGame)
-                    .with_system(
-                        build_ui.system()
-                        .label("build_ui_text")
-                        .before("build_terminal")
-                    ),
-            )
-            .add_system_set(
-                SystemSet::on_update(GameState::MainGame)
-                    .with_system(set_ui_text.system())
-                    .with_system(
-                        apply_animation.system()
-                        .label("ui_bottom_text_animation")
-                    )
-                    .with_system(
-                        debug_open.system()
-                        .after("ui_bottom_text_animation")
-                    ),
-            );
+        app.insert_resource(TextUIData {
+            duration_coef: 1. / 10.,
+            content: String::from(""),
+            fully_opened: false,
+            is_opening: false,
+            timer: Timer::from_seconds(4.0, false),
+        })
+        .insert_resource(TextUIAnimation {
+            start_position: Vec2::ZERO,
+            end_position: Vec2::ZERO,
+            moving_speed: 5.0,
+            start_time: 0.0,
+        })
+        .add_system_set(
+            SystemSet::on_enter(GameState::MainGame).with_system(
+                build_ui
+                    .system()
+                    .label("build_ui_text")
+                    .before("build_terminal"),
+            ),
+        )
+        .add_system_set(
+            SystemSet::on_update(GameState::MainGame)
+                .with_system(set_ui_text.system())
+                .with_system(apply_animation.system().label("ui_bottom_text_animation"))
+                .with_system(debug_open.system().after("ui_bottom_text_animation")),
+        );
     }
 }
 
@@ -55,31 +48,27 @@ pub struct TextUIData {
 
 impl TextUIData {
     pub fn show_text(
-        &mut self, 
+        &mut self,
         anim_data: &mut ResMut<TextUIAnimation>,
         windows: &Res<Windows>,
-        time: &Res<Time>, 
-        content: String
+        time: &Res<Time>,
+        content: String,
     ) {
         let current_window = windows.get_primary().unwrap();
 
         // opening the ui
         self.is_opening = true;
         self.content = content.clone();
-        
+
         // setting the open duration
         let duration = self.duration_coef * content.len() as f32;
         self.timer.set_duration(Duration::from_secs_f32(duration));
 
         // set the animation data
-        anim_data.start_position = Vec2::new(
-            0.2 * current_window.width(),
-            -0.1 * current_window.height(),
-        );
-        anim_data.end_position = Vec2::new(
-            0.2 * current_window.width(),
-            0.01 * current_window.height(),
-        );
+        anim_data.start_position =
+            Vec2::new(0.2 * current_window.width(), -0.1 * current_window.height());
+        anim_data.end_position =
+            Vec2::new(0.2 * current_window.width(), 0.01 * current_window.height());
         anim_data.start_time = time.seconds_since_startup();
     }
 }
@@ -103,7 +92,7 @@ fn build_ui(
     windows: Res<Windows>,
 ) {
     let current_window = windows.get_primary().unwrap();
-    let tran_col_h = materials.add(Color::rgba_u8(0, 0, 0, 0).into()); 
+    let tran_col_h = materials.add(Color::rgba_u8(0, 0, 0, 0).into());
 
     let container = NodeBundle {
         material: tran_col_h,
@@ -128,27 +117,24 @@ fn build_ui(
                     font_size: 25.0,
                     font: asset_server.load("fonts/FiraSans-Medium.ttf"),
                     color: Color::WHITE,
-                }
+                },
             }],
             alignment: TextAlignment {
                 horizontal: HorizontalAlign::Center,
                 vertical: VerticalAlign::Center,
-            }
+            },
         },
         ..Default::default()
     };
 
-    commands.spawn_bundle(container)
+    commands
+        .spawn_bundle(container)
         .insert(TextUIContainer)
         .with_children(|parent| {
-            parent.spawn_bundle(text)
-                .insert(TextUINode);
+            parent.spawn_bundle(text).insert(TextUINode);
         });
 
-    let init_position = Vec2::new(
-        0.2 * current_window.width(),
-        -0.1 * current_window.height(),
-    );
+    let init_position = Vec2::new(0.2 * current_window.width(), -0.1 * current_window.height());
     anim_data.start_position = init_position;
     anim_data.end_position = init_position;
 }
@@ -168,7 +154,10 @@ pub fn apply_animation(
         .start_position
         .lerp(anim_data.end_position, value as f32);
 
-    if data.is_opening && new_position.abs_diff_eq(anim_data.end_position, 1.0) && !data.fully_opened {
+    if data.is_opening
+        && new_position.abs_diff_eq(anim_data.end_position, 1.0)
+        && !data.fully_opened
+    {
         data.timer.reset();
         data.fully_opened = true;
     }
@@ -177,12 +166,10 @@ pub fn apply_animation(
         if data.timer.finished() {
             data.fully_opened = false;
             data.is_opening = false;
-            
+
             anim_data.start_position = anim_data.end_position;
-            anim_data.end_position = Vec2::new(
-                0.2 * current_window.width(),
-                -0.1 * current_window.height(),
-            );
+            anim_data.end_position =
+                Vec2::new(0.2 * current_window.width(), -0.1 * current_window.height());
             anim_data.start_time = time.seconds_since_startup();
         }
     }
@@ -193,10 +180,7 @@ pub fn apply_animation(
     }
 }
 
-pub fn set_ui_text(
-    mut query: Query<&mut Text, With<TextUINode>>,
-    data: Res<TextUIData>,
-) {
+pub fn set_ui_text(mut query: Query<&mut Text, With<TextUINode>>, data: Res<TextUIData>) {
     for mut text in query.iter_mut() {
         text.sections[0].value = data.content.clone();
     }
@@ -210,6 +194,11 @@ pub fn debug_open(
     time: Res<Time>,
 ) {
     if keyboard_input.just_pressed(KeyCode::T) {
-        ui_data.show_text(&mut anim_data, &windows, &time, String::from("Hello this is a text showing on screen"));
+        ui_data.show_text(
+            &mut anim_data,
+            &windows,
+            &time,
+            String::from("Hello this is a text showing on screen"),
+        );
     }
 }

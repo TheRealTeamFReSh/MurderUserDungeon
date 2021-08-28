@@ -1,15 +1,24 @@
-use crate::{apartment::{
-    player::{Hunger, PlayerComponent},
-    InteractableComponent, InteractableType, InteractablesResource,
-}, misc::ui_text::{TextUIAnimation, TextUIData}};
-
 use crate::states::GameState;
+use crate::{
+    apartment::{
+        player::{Hunger, PlayerComponent},
+        InteractableComponent, InteractableType, InteractablesResource,
+    },
+    misc::{
+        day_cycle::DAY_LENGTH,
+        ui_text::{TextUIAnimation, TextUIData},
+    },
+    vulnerability::{AtDoorType, VulnerabilityResource},
+};
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
+use rand::Rng;
+use std::time::Duration;
 
 pub const CALL_TIME: f32 = 5.0;
 pub const EAT_TIME: f32 = 5.4;
-pub const DELIVERY_TIME: f32 = 1.0; // in in-game hours (uses day_cycle)
+pub const DELIVERY_TIME: f32 = 3.0; // in in-game hours (uses day_cycle)
+pub const AT_DOOR_TIME: f32 = 0.75; // in in-game hours
 
 // tracks if player has pizza available
 
@@ -22,6 +31,7 @@ pub enum PizzaDeliveryStatus {
 pub struct PizzaDeliveryResource {
     pub status: PizzaDeliveryStatus,
     pub delivery_timer: Timer,
+    pub at_door_timer: Timer,
 }
 
 /// Handles interacting with bed
@@ -71,9 +81,9 @@ pub fn interact_pizza_system(
                     } else {
                         ui_bottom_text.show_text(
                             &mut anim_data,
-                            &windows, 
+                            &windows,
                             &time,
-                            "I'm not hungry yet".to_string()
+                            "I'm not hungry yet".to_string(),
                         );
                     }
                 }
@@ -136,21 +146,21 @@ pub fn interact_phone_system(
                 match pizza_delivery_resource.status {
                     PizzaDeliveryStatus::Delivered => ui_bottom_text.show_text(
                         &mut anim_data,
-                        &windows, 
+                        &windows,
                         &time,
-                        "Pizza is already here".to_string()
+                        "Pizza is already here".to_string(),
                     ),
                     PizzaDeliveryStatus::Ordered => ui_bottom_text.show_text(
                         &mut anim_data,
-                        &windows, 
+                        &windows,
                         &time,
-                        "I already ordered pizza!".to_string()
+                        "I already ordered pizza!".to_string(),
                     ),
                     PizzaDeliveryStatus::AtDoor => ui_bottom_text.show_text(
                         &mut anim_data,
-                        &windows, 
+                        &windows,
                         &time,
-                        "I already ordered pizza!".to_string()
+                        "I already ordered pizza!".to_string(),
                     ),
                     PizzaDeliveryStatus::Unordered => {
                         #[cfg(debug_assertions)]
@@ -199,6 +209,7 @@ pub fn pizza_delivery_system(
     mut materials: ResMut<Assets<ColorMaterial>>,
     interactables_resource: Res<InteractablesResource>,
     interactable_query: Query<&InteractableComponent>,
+    mut vulnerability_resource: ResMut<VulnerabilityResource>,
     time: Res<Time>,
     asset_server: Res<AssetServer>,
     audio: Res<Audio>,
@@ -211,24 +222,52 @@ pub fn pizza_delivery_system(
             pizza_delivery_resource.delivery_timer.tick(time.delta());
 
             if pizza_delivery_resource.delivery_timer.just_finished() {
-                pizza_delivery_resource.status = PizzaDeliveryStatus::AtDoor;
-                audio.play(asset_server.load("audio/knocking.mp3"));
                 ui_bottom_text.show_text(
                     &mut anim_data,
-                    &windows, 
+                    &windows,
                     &time,
-                    "Pizza is here!".to_string()
+                    "Pizza is here!".to_string(),
                 );
+
+                // random chance of spawning npc instead based on vulnerability level
+                if rand::thread_rng().gen::<f32>() * vulnerability_resource.vulnerability_factor
+                    > 0.1
+                {
+                    vulnerability_resource.at_door = AtDoorType::NPC;
+                    audio.play(asset_server.load("audio/knocking.mp3"));
+                    pizza_delivery_resource
+                        .delivery_timer
+                        .set_elapsed(Duration::from_secs_f32(
+                            (2.0 / 5.0) * DAY_LENGTH * (DELIVERY_TIME) / 24.0,
+                        ));
+                } else {
+                    pizza_delivery_resource.status = PizzaDeliveryStatus::AtDoor;
+                    vulnerability_resource.at_door = AtDoorType::DeliveryPerson;
+                    audio.play(asset_server.load("audio/knocking.mp3"));
+                }
             }
         }
         PizzaDeliveryStatus::AtDoor => {
-            for interactable_component in interactable_query.iter() {
-                if let InteractableType::OpenDoor = interactable_component.interactable_type {
-                    pizza_delivery_resource.status = PizzaDeliveryStatus::Delivered;
-                    super::spawn_pizza(&mut commands, &asset_server, &mut materials);
-                    spawn_pizza_interactable(&mut commands, &interactables_resource);
-                    #[cfg(debug_assertions)]
-                    info!("I have the pizza.")
+            // countdown time at door and leave if player hasn't answered
+            pizza_delivery_resource.at_door_timer.tick(time.delta());
+
+            if pizza_delivery_resource.at_door_timer.just_finished() {
+                // deliveryperson leaves
+                pizza_delivery_resource.status = PizzaDeliveryStatus::Unordered;
+                vulnerability_resource.at_door = AtDoorType::None;
+                #[cfg(debug_assertions)]
+                info!("Delivery person left :(")
+            } else {
+                for interactable_component in interactable_query.iter() {
+                    if let InteractableType::OpenDoor = interactable_component.interactable_type {
+                        pizza_delivery_resource.status = PizzaDeliveryStatus::Delivered;
+                        super::spawn_pizza(&mut commands, &asset_server, &mut materials);
+                        spawn_pizza_interactable(&mut commands, &interactables_resource);
+                        vulnerability_resource.at_door = AtDoorType::None;
+                        pizza_delivery_resource.at_door_timer.reset();
+                        #[cfg(debug_assertions)]
+                        info!("I have the pizza.")
+                    }
                 }
             }
         }

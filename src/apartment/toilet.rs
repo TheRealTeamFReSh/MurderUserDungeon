@@ -1,7 +1,10 @@
-use crate::{apartment::{
-    player::{PeePeePooPoo, PlayerComponent},
-    InteractableType,
-}, misc::ui_text::{TextUIAnimation, TextUIData}};
+use crate::{
+    apartment::{
+        player::{PeePeePooPoo, PlayerComponent},
+        InteractableType,
+    },
+    misc::ui_text::{TextUIAnimation, TextUIData},
+};
 
 use crate::states::GameState;
 use bevy::prelude::*;
@@ -36,9 +39,9 @@ pub fn interact_toilet_system(
                 } else {
                     ui_bottom_text.show_text(
                         &mut anim_data,
-                        &windows, 
+                        &windows,
                         &time,
-                        "I don't want to pee yet".to_string()
+                        "I don't want to pee yet".to_string(),
                     );
                 }
             }

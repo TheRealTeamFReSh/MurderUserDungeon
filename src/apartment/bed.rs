@@ -3,11 +3,14 @@ use crate::misc::ui_text::{TextUIAnimation, TextUIData};
 use crate::vulnerability::{spawn_npc, BoolVulnerabilityType, VulnerabilityResource};
 use crate::{
     apartment::{
+        interactable::despawn_interactable_icons,
+        phone::{PizzaDeliveryResource, PizzaDeliveryStatus},
         player::{PlayerComponent, Sleepiness},
         InteractableComponent, InteractableType, PlayerInBedComponent,
     },
     misc::game_over::{GameOverData, GameOverReason},
 };
+use std::time::Duration;
 
 use crate::states::GameState;
 use bevy::prelude::*;
@@ -30,6 +33,7 @@ pub fn interact_bed_system(
     windows: Res<Windows>,
     time: Res<Time>,
     mut anim_data: ResMut<TextUIAnimation>,
+    interactable_icon_query: Query<Entity, With<super::interactable::InteractableIconComponent>>,
 ) {
     for player_component in player_query.iter() {
         if let Some(InteractableType::Bed) = player_component.interactable_in_range {
@@ -56,13 +60,39 @@ pub fn interact_bed_system(
                 } else {
                     ui_bottom_text.show_text(
                         &mut anim_data,
-                        &windows, 
+                        &windows,
                         &time,
-                        "I'm not tired yet".to_string()
+                        "I'm not tired yet".to_string(),
                     );
                 }
+            } else if keyboard_input.just_pressed(KeyCode::C)
+                && app_state.current() == &GameState::MainGame
+            {
+                app_state.push(GameState::PlayerHidingState).unwrap();
+                vulnerability_resource.is_hiding = true;
+
+                despawn_interactable_icons(&mut commands, &interactable_icon_query);
+                super::spawn_hiding_screen(&mut commands, &asset_server, &mut materials);
+                info!("Hiding under bed.")
             }
         }
+    }
+}
+
+pub fn exit_hiding_system(
+    mut commands: Commands,
+    hiding_screen_query: Query<Entity, With<super::HidingScreenComponent>>,
+    keyboard_input: Res<Input<KeyCode>>,
+    mut app_state: ResMut<State<GameState>>,
+    mut vulnerability_resource: ResMut<VulnerabilityResource>,
+) {
+    if keyboard_input.just_released(KeyCode::C)
+        && app_state.current() == &GameState::PlayerHidingState
+    {
+        vulnerability_resource.is_hiding = false;
+        app_state.pop().unwrap();
+        super::despawn_hiding_screen(&mut commands, &hiding_screen_query);
+        info!("Exit hiding ")
     }
 }
 
@@ -85,6 +115,7 @@ pub fn sleeping_system(
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     mut go_data: ResMut<GameOverData>,
     mut day_resource: ResMut<DayCycleResource>,
+    mut pizza_delivery_resource: ResMut<PizzaDeliveryResource>,
 ) {
     if app_state.current() == &GameState::PlayerSleepingState {
         sleep_resource.sleep_timer.tick(time.delta());
@@ -95,6 +126,7 @@ pub fn sleeping_system(
 
             // if vulnerable, jumpscare and game over, otherwise wake up
             if vulnerability_resource.bool_vulnerabilities[&BoolVulnerabilityType::BedDoorLeftOpen]
+                && !vulnerability_resource.enemies.is_empty()
             {
                 audio.play(asset_server.load("audio/dramatic_scare.mp3"));
                 spawn_npc(
@@ -117,6 +149,19 @@ pub fn sleeping_system(
                     app_state.pop().unwrap();
                 }
                 day_resource.sleep();
+
+                // deliver pizza if ordered
+                let pizza_time = pizza_delivery_resource
+                    .delivery_timer
+                    .duration()
+                    .as_secs_f32()
+                    - 0.1;
+
+                if let PizzaDeliveryStatus::Ordered = pizza_delivery_resource.status {
+                    pizza_delivery_resource
+                        .delivery_timer
+                        .set_elapsed(Duration::from_secs_f32(pizza_time));
+                }
                 #[cfg(debug_assertions)]
                 info!("Player woke up");
             }

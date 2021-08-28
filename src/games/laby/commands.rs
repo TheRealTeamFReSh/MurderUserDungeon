@@ -206,7 +206,10 @@ pub fn commands_handler(
                     laby_data.status_message = msg.clone();
                     new_turn(&mut laby_data, &laby_res, &mut player, &npc_res);
                 } else {
-                    console_writer.send(PrintConsoleEvent("You try to talk to yourself and gained nothing but loneliness..".to_string()));
+                    console_writer.send(PrintConsoleEvent(
+                        "You try to talk to yourself and gained nothing but loneliness.."
+                            .to_string(),
+                    ));
                 }
             }
             "loot" => {
@@ -228,7 +231,10 @@ pub fn commands_handler(
                     laby_data.status_message = msg.clone();
                     new_turn(&mut laby_data, &laby_res, &mut player, &npc_res);
                 } else {
-                    console_writer.send(PrintConsoleEvent("You try to loot this room..\n There is nothing but rocks (sry)...".to_string()));
+                    console_writer.send(PrintConsoleEvent(
+                        "You try to loot this room..\n There is nothing but rocks (sry)..."
+                            .to_string(),
+                    ));
                 }
             }
 
