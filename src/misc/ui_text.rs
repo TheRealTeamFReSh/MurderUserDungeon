@@ -78,7 +78,7 @@ impl TextUIData {
         );
         anim_data.end_position = Vec2::new(
             0.2 * current_window.width(),
-            0.015 * current_window.height(),
+            0.01 * current_window.height(),
         );
         anim_data.start_time = time.seconds_since_startup();
     }

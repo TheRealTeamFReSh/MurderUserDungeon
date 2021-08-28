@@ -1,7 +1,7 @@
-use crate::apartment::{
+use crate::{apartment::{
     player::{Hunger, PlayerComponent},
     InteractableComponent, InteractableType, InteractablesResource,
-};
+}, misc::ui_text::{TextUIAnimation, TextUIData}};
 
 use crate::states::GameState;
 use bevy::prelude::*;
@@ -36,6 +36,10 @@ pub fn interact_pizza_system(
     hunger: Res<Hunger>,
     pizza_delivery_resource: Res<PizzaDeliveryResource>,
     audio: Res<Audio>,
+    mut ui_bottom_text: ResMut<TextUIData>,
+    windows: Res<Windows>,
+    time: Res<Time>,
+    mut anim_data: ResMut<TextUIAnimation>,
 ) {
     for player_component in player_query.iter() {
         if let Some(InteractableType::Pizza) = player_component.interactable_in_range {
@@ -65,8 +69,12 @@ pub fn interact_pizza_system(
                             app_state.push(GameState::PlayerEatingState).unwrap();
                         }
                     } else {
-                        #[cfg(debug_assertions)]
-                        info!("Not hungry enough to eat.")
+                        ui_bottom_text.show_text(
+                            &mut anim_data,
+                            &windows, 
+                            &time,
+                            "I'm not hungry yet".to_string()
+                        );
                     }
                 }
             }
@@ -115,6 +123,10 @@ pub fn interact_phone_system(
     asset_server: Res<AssetServer>,
     pizza_delivery_resource: Res<PizzaDeliveryResource>,
     audio: Res<Audio>,
+    mut ui_bottom_text: ResMut<TextUIData>,
+    windows: Res<Windows>,
+    time: Res<Time>,
+    mut anim_data: ResMut<TextUIAnimation>,
 ) {
     for player_component in player_query.iter() {
         if let Some(InteractableType::Phone) = player_component.interactable_in_range {
@@ -122,9 +134,24 @@ pub fn interact_phone_system(
                 && app_state.current() == &GameState::MainGame
             {
                 match pizza_delivery_resource.status {
-                    PizzaDeliveryStatus::Delivered => info!("Pizza is already here!"),
-                    PizzaDeliveryStatus::Ordered => info!("I already ordered pizza!"),
-                    PizzaDeliveryStatus::AtDoor => info!("I already ordered pizza!"),
+                    PizzaDeliveryStatus::Delivered => ui_bottom_text.show_text(
+                        &mut anim_data,
+                        &windows, 
+                        &time,
+                        "Pizza is already here".to_string()
+                    ),
+                    PizzaDeliveryStatus::Ordered => ui_bottom_text.show_text(
+                        &mut anim_data,
+                        &windows, 
+                        &time,
+                        "I already ordered pizza!".to_string()
+                    ),
+                    PizzaDeliveryStatus::AtDoor => ui_bottom_text.show_text(
+                        &mut anim_data,
+                        &windows, 
+                        &time,
+                        "I already ordered pizza!".to_string()
+                    ),
                     PizzaDeliveryStatus::Unordered => {
                         #[cfg(debug_assertions)]
                         info!("Using Phone");
@@ -175,6 +202,9 @@ pub fn pizza_delivery_system(
     time: Res<Time>,
     asset_server: Res<AssetServer>,
     audio: Res<Audio>,
+    mut ui_bottom_text: ResMut<TextUIData>,
+    windows: Res<Windows>,
+    mut anim_data: ResMut<TextUIAnimation>,
 ) {
     match pizza_delivery_resource.status {
         PizzaDeliveryStatus::Ordered => {
@@ -183,8 +213,12 @@ pub fn pizza_delivery_system(
             if pizza_delivery_resource.delivery_timer.just_finished() {
                 pizza_delivery_resource.status = PizzaDeliveryStatus::AtDoor;
                 audio.play(asset_server.load("audio/knocking.mp3"));
-                #[cfg(debug_assertions)]
-                info!("Pizza is here!");
+                ui_bottom_text.show_text(
+                    &mut anim_data,
+                    &windows, 
+                    &time,
+                    "Pizza is here!".to_string()
+                );
             }
         }
         PizzaDeliveryStatus::AtDoor => {
