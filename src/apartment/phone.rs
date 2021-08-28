@@ -143,7 +143,16 @@ pub fn interact_phone_system(
                     PizzaDeliveryStatus::Unordered => {
                         #[cfg(debug_assertions)]
                         info!("Using Phone");
-                        audio.play(asset_server.load("audio/pizza_orders/pizza_order_1.mp3"));
+                        let random_pizza_order = rand::thread_rng().gen_range(1..5);
+                        audio.play(
+                            asset_server.load(
+                                format!(
+                                    "audio/pizza_orders/pizza_order_{}.mp3",
+                                    random_pizza_order
+                                )
+                                .as_str(),
+                            ),
+                        );
                         if app_state.current() == &GameState::MainGame {
                             app_state.push(GameState::PlayerOrderingPizzaState).unwrap();
                         }
