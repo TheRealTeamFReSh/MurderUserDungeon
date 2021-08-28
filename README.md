@@ -65,9 +65,9 @@ You have two ways to win the game:
 
 Made for the Rusty Jam 2021 [https://itch.io/jam/rusty-jam](https://itch.io/jam/rusty-jam) in 7 days by TheRealTeamFReSh:
 
-    Nightlyside - [https://nightlyside.github.io](https://nightlyside.github.io)
-    Sheepyhead - [https://github.com/Sheepyhead](https://github.com/Sheepyhead)
-    cdsupina - [https://github.com/cdsupina](https://github.com/cdsupina)
+- Nightlyside - [https://nightlyside.github.io](https://nightlyside.github.io)
+- Sheepyhead - [https://github.com/Sheepyhead](https://github.com/Sheepyhead)
+- cdsupina - [https://github.com/cdsupina](https://github.com/cdsupina)
 
 The project is under the double license MIT/Apache, same goes for the assets. You can check the licensing here: [https://github.com/TheRealTeamFReSh/RustyJam/blob/master/LICENSE](https://github.com/TheRealTeamFReSh/RustyJam/blob/master/LICENSE)
 
