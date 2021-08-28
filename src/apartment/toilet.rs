@@ -41,7 +41,7 @@ pub fn interact_toilet_system(
                         &mut anim_data,
                         &windows,
                         &time,
-                        "I don't want to pee yet".to_string(),
+                        "I don't need to pee yet".to_string(),
                     );
                 }
             }
