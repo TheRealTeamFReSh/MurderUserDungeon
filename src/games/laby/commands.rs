@@ -188,15 +188,15 @@ pub fn commands_handler(
             }
             "talk" => {
                 if laby_data.room_type == RoomType::Npc {
-                    let will_give_boon = rand::thread_rng().gen_ratio(8, 10);
+                    let will_give_boon = rand::thread_rng().gen_ratio(2, 10);
 
                     let msg: String;
                     if will_give_boon {
-                        msg = "In his happyness the npc gives you health and properity (lol damages instead)".to_string();
-                        player.health += 2.0;
-                        player.damages += 2.0;
+                        msg = "The NPC was happy you talked with him and wants to give you something".to_string();
+                        player.health += 1.0;
+                        player.damages += 1.0;
                     } else {
-                        msg = "The NPC gives you the cold shoulder.. maybe next time?".to_string();
+                        msg = "I think you just made a friend! Pretty nice huh?".to_string();
                     }
 
                     laby_data.has_shown_turn_infos = false;
@@ -209,14 +209,38 @@ pub fn commands_handler(
                     console_writer.send(PrintConsoleEvent("You try to talk to yourself and gained nothing but loneliness..".to_string()));
                 }
             }
+            "insult" => {
+                if laby_data.room_type == RoomType::Npc {
+                    let will_give_boon = rand::thread_rng().gen_ratio(9, 10);
+
+                    let msg: String;
+                    if will_give_boon {
+                        msg = "You become stronger by insulting this NPC. But you've made a new enemy...".to_string();
+                        player.health += 1.0;
+                        player.damages += 1.0;
+                        // TODO: add the enemy to the vuln vec
+                    } else {
+                        msg = "The NPC just doesn't care, he just goes away".to_string();
+                    }
+
+                    laby_data.has_shown_turn_infos = false;
+                    laby_data.wait_for_continue = false;
+
+                    console_writer.send(PrintConsoleEvent(msg.clone()));
+                    laby_data.status_message = msg.clone();
+                    new_turn(&mut laby_data, &laby_res, &mut player, &npc_res);
+                } else {
+                    console_writer.send(PrintConsoleEvent("You insult the void and reminds you of your loneliness..".to_string()));
+                }
+            }
             "loot" => {
                 if laby_data.room_type == RoomType::Item {
-                    let will_give_boon = rand::thread_rng().gen_ratio(8, 10);
+                    let will_give_boon = rand::thread_rng().gen_ratio(7, 10);
 
                     let msg: String;
                     if will_give_boon {
                         msg = "You managed to find a good item and gained damages".to_string();
-                        player.damages += 1.0;
+                        player.damages += 0.5;
                     } else {
                         msg = "Ah crap its too rusty... maybe next time?".to_string();
                     }
@@ -274,7 +298,8 @@ fn display_help(page_number: usize) -> String {
         res.push_str("- infos: Display informations about the place you stand\n");
         res.push_str("- skip: skip this room to go to the next (if you can)\n");
     } else {
-        res.push_str("- talk: talks to an npc to receive its boon\n");
+        res.push_str("- talk: talks to an npc to maybe receive a boon\n");
+        res.push_str("- insult: insults the npc to become stronger\n");
         res.push_str("- loot: loots the item (when you find one)\n");
         res.push_str("- continue: to continue a story/speech\n");
         res.push_str("- attack: attacks the monster / NPC\n");

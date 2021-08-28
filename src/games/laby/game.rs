@@ -21,7 +21,7 @@ use super::{
     items::ItemType,
 };
 
-const NUMBER_OF_TURN_TO_WIN: usize = 20;
+const NUMBER_OF_TURN_TO_WIN: usize = 30;
 
 pub fn game_loop(
     mut laby_data: ResMut<LabyrinthData>,
@@ -49,7 +49,7 @@ pub fn game_loop(
         player.exp -= 10;
         player.level += 1;
         player.max_health += 2.0;
-        player.damages += 1.5;
+        player.damages += 1.0;
         player.health += 2.0;
         player.health = player.health.min(player.max_health);
     }
@@ -153,8 +153,9 @@ fn turn_display(laby_data: &ResMut<LabyrinthData>) -> String {
     res.push_str(laby_data.next_directions.get_ascii_art());
     res.push('\n');
     res.push_str(&format!(
-        "Number of steps since the beginning: {}\n",
-        laby_data.steps_number
+        "Room number: {}/{}\n",
+        laby_data.steps_number,
+        NUMBER_OF_TURN_TO_WIN
     ));
     res.push_str(&format!(
         "Available movements: [{}]\n\n",
