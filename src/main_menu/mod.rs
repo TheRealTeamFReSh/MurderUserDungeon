@@ -199,7 +199,7 @@ fn build_control_menu(mut commands: Commands, ass: ResMut<AssetServer>) {
             parent.spawn_bundle(TextBundle {
                 style: Style { ..Style::default() },
                 text: Text::with_section(
-                    "USE \"WASD\" TO MOVE AND \"E\" TO INTERACT WITH THINGS.\nUSE \"C\" AT THE DOOR TO LOOK THROUGH THE PEEPHOLE.\n\n BE CAREFUL.\n\n YOUR APARTMENT SEEMS SAFE.",
+                    "USE \"WASD\" TO MOVE AND \"E\" TO INTERACT WITH THINGS.\nUSE \"C\" AT THE DOOR TO LOOK THROUGH THE PEEPHOLE.\nUSE \"C\" AT THE BED TO HIDE UNDER IT.\n\n BE CAREFUL.\n\n YOUR APARTMENT SEEMS SAFE.",
                     TextStyle {
                         font: font.clone(),
                         font_size: 24.0,
