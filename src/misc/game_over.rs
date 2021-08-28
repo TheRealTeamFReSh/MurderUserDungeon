@@ -40,6 +40,7 @@ pub enum GameOverReason {
     LabyrinthLosing,
     LabyrinthWinning,
     LetThemIn,
+    NeedsDepleted,
 }
 
 impl GameOverReason {
@@ -51,6 +52,7 @@ impl GameOverReason {
             GameOverReason::LabyrinthLosing => "It's hard to stay alive there...\nMaybe in another life you will thrive and be a real MLG!",
             GameOverReason::LabyrinthWinning => "Congrats! What?! You really thought you could win?\n'Time to learn a lesson kiddo...",
             GameOverReason::LetThemIn => "Why break in when you can use the front door?",
+            GameOverReason::NeedsDepleted => "You are a human too with needs.\n\"Next time be sure to eat enough\" would say grandma...",
         }
     }
 }

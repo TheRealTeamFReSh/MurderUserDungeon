@@ -9,6 +9,7 @@ mod toilet;
 use bevy::prelude::*;
 use bevy_prototype_debug_lines::*;
 use bevy_rapier2d::prelude::*;
+use rand::Rng;
 use ron::de::from_bytes;
 
 use crate::{
@@ -39,10 +40,10 @@ impl Plugin for ApartmentPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
             .add_plugin(DebugLinesPlugin)
-            .insert_resource(player::Health(100.))
-            .insert_resource(player::Hunger(100.))
-            .insert_resource(player::Sleepiness(100.))
-            .insert_resource(player::PeePeePooPoo(100.))
+            .insert_resource(player::Health(rand::thread_rng().gen_range(80.0..=100.0)))
+            .insert_resource(player::Hunger(rand::thread_rng().gen_range(80.0..=100.0)))
+            .insert_resource(player::Sleepiness(rand::thread_rng().gen_range(80.0..=100.0)))
+            .insert_resource(player::PeePeePooPoo(rand::thread_rng().gen_range(80.0..=100.0)))
             .insert_resource(player::StatsTimer(Timer::from_seconds(1.0, true)))
             .insert_resource(bed::SleepingResource {
                 sleep_timer: Timer::from_seconds(bed::SLEEP_TIME, false),
