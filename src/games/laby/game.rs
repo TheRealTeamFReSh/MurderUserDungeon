@@ -318,8 +318,9 @@ of your worst fears. He is also ...xxXDarkKevin420Xxx."
                     };
 
                     // if we found someone we didn't found before
-                    if !laby_data.seen_npcs.contains(&npc) { break; }
+                    if !laby_data.seen_npcs.contains(&npc.username) { break; }
                 }
+                laby_data.seen_npcs.push(npc.username.clone());
                 laby_data.npc = npc;
             }
             // else we show a basic enemy

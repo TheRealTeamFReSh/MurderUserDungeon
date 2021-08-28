@@ -68,7 +68,7 @@ pub struct LabyrinthData {
     pub room_type: RoomType,
     pub enemy: Enemy,
     pub npc: NPCData,
-    pub seen_npcs: Vec<NPCData>,
+    pub seen_npcs: Vec<String>,
     pub item_type: ItemType,
     pub next_directions: Directions,
     pub has_shown_turn_infos: bool,
