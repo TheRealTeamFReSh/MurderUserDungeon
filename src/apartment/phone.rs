@@ -1,3 +1,4 @@
+use crate::misc::ui_text::BottomTextUI;
 use crate::states::GameState;
 use crate::{
     apartment::{
@@ -6,7 +7,6 @@ use crate::{
     },
     misc::{
         day_cycle::DAY_LENGTH,
-        ui_text::{TextUIAnimation, TextUIData},
     },
     vulnerability::{AtDoorType, VulnerabilityResource},
 };
@@ -46,10 +46,7 @@ pub fn interact_pizza_system(
     hunger: Res<Hunger>,
     pizza_delivery_resource: Res<PizzaDeliveryResource>,
     audio: Res<Audio>,
-    mut ui_bottom_text: ResMut<TextUIData>,
-    windows: Res<Windows>,
-    time: Res<Time>,
-    mut anim_data: ResMut<TextUIAnimation>,
+    mut ui_bundle: ResMut<BottomTextUI>,
 ) {
     for player_component in player_query.iter() {
         if let Some(InteractableType::Pizza) = player_component.interactable_in_range {
@@ -79,12 +76,7 @@ pub fn interact_pizza_system(
                             app_state.push(GameState::PlayerEatingState).unwrap();
                         }
                     } else {
-                        ui_bottom_text.show_text(
-                            &mut anim_data,
-                            &windows,
-                            &time,
-                            "I'm not hungry yet".to_string(),
-                        );
+                        ui_bundle.show_text("I'm not hungry yet".to_string());
                     }
                 }
             }
@@ -133,10 +125,7 @@ pub fn interact_phone_system(
     asset_server: Res<AssetServer>,
     pizza_delivery_resource: Res<PizzaDeliveryResource>,
     audio: Res<Audio>,
-    mut ui_bottom_text: ResMut<TextUIData>,
-    windows: Res<Windows>,
-    time: Res<Time>,
-    mut anim_data: ResMut<TextUIAnimation>,
+    mut ui_bundle: ResMut<BottomTextUI>,
 ) {
     for player_component in player_query.iter() {
         if let Some(InteractableType::Phone) = player_component.interactable_in_range {
@@ -144,24 +133,9 @@ pub fn interact_phone_system(
                 && app_state.current() == &GameState::MainGame
             {
                 match pizza_delivery_resource.status {
-                    PizzaDeliveryStatus::Delivered => ui_bottom_text.show_text(
-                        &mut anim_data,
-                        &windows,
-                        &time,
-                        "Pizza is already here".to_string(),
-                    ),
-                    PizzaDeliveryStatus::Ordered => ui_bottom_text.show_text(
-                        &mut anim_data,
-                        &windows,
-                        &time,
-                        "I already ordered pizza!".to_string(),
-                    ),
-                    PizzaDeliveryStatus::AtDoor => ui_bottom_text.show_text(
-                        &mut anim_data,
-                        &windows,
-                        &time,
-                        "I already ordered pizza!".to_string(),
-                    ),
+                    PizzaDeliveryStatus::Delivered => ui_bundle.show_text("Pizza is already here".to_string()),
+                    PizzaDeliveryStatus::Ordered => ui_bundle.show_text("I already ordered pizza!".to_string()),
+                    PizzaDeliveryStatus::AtDoor => ui_bundle.show_text("I already ordered pizza!".to_string()),
                     PizzaDeliveryStatus::Unordered => {
                         #[cfg(debug_assertions)]
                         info!("Using Phone");
@@ -213,21 +187,14 @@ pub fn pizza_delivery_system(
     time: Res<Time>,
     asset_server: Res<AssetServer>,
     audio: Res<Audio>,
-    mut ui_bottom_text: ResMut<TextUIData>,
-    windows: Res<Windows>,
-    mut anim_data: ResMut<TextUIAnimation>,
+    mut ui_bundle: ResMut<BottomTextUI>,
 ) {
     match pizza_delivery_resource.status {
         PizzaDeliveryStatus::Ordered => {
             pizza_delivery_resource.delivery_timer.tick(time.delta());
 
             if pizza_delivery_resource.delivery_timer.just_finished() {
-                ui_bottom_text.show_text(
-                    &mut anim_data,
-                    &windows,
-                    &time,
-                    "Pizza is here!".to_string(),
-                );
+                ui_bundle.show_text("Pizza is here!".to_string());
 
                 // random chance of spawning npc instead based on vulnerability level
                 if rand::thread_rng().gen::<f32>() * vulnerability_resource.vulnerability_factor
@@ -255,8 +222,7 @@ pub fn pizza_delivery_system(
                 // deliveryperson leaves
                 pizza_delivery_resource.status = PizzaDeliveryStatus::Unordered;
                 vulnerability_resource.at_door = AtDoorType::None;
-                #[cfg(debug_assertions)]
-                info!("Delivery person left :(")
+                ui_bundle.show_text("Delivery person left :(!".to_string());
             } else {
                 for interactable_component in interactable_query.iter() {
                     if let InteractableType::OpenDoor = interactable_component.interactable_type {

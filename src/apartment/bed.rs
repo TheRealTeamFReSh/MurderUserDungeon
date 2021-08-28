@@ -1,5 +1,5 @@
 use crate::misc::day_cycle::DayCycleResource;
-use crate::misc::ui_text::{TextUIAnimation, TextUIData};
+use crate::misc::ui_text::BottomTextUI;
 use crate::vulnerability::{spawn_npc, BoolVulnerabilityType, VulnerabilityResource};
 use crate::{
     apartment::{
@@ -29,10 +29,7 @@ pub fn interact_bed_system(
     asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     audio: Res<Audio>,
-    mut ui_bottom_text: ResMut<TextUIData>,
-    windows: Res<Windows>,
-    time: Res<Time>,
-    mut anim_data: ResMut<TextUIAnimation>,
+    mut ui_bundle: ResMut<BottomTextUI>,
     interactable_icon_query: Query<Entity, With<super::interactable::InteractableIconComponent>>,
 ) {
     for player_component in player_query.iter() {
@@ -58,12 +55,7 @@ pub fn interact_bed_system(
                         }
                     }
                 } else {
-                    ui_bottom_text.show_text(
-                        &mut anim_data,
-                        &windows,
-                        &time,
-                        "I'm not tired yet".to_string(),
-                    );
+                    ui_bundle.show_text("I'm not tired yet".to_string());
                 }
             } else if keyboard_input.just_pressed(KeyCode::C)
                 && app_state.current() == &GameState::MainGame
