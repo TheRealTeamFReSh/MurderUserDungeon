@@ -196,7 +196,7 @@ pub fn check_interactables_system(
         // spawn interact icon
         if old_interactable != interactable_in_range {
             if let Some(interactable_type) = interactable_in_range {
-                if let InteractableType::ClosedDoor = interactable_type {
+                if let InteractableType::ClosedDoor | InteractableType::Bed = interactable_type {
                     spawn_interact_icon(
                         "textures/e_key_press.png",
                         -PEEPHOLE_ICON_X_OFFSET,

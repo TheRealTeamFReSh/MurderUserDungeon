@@ -1,8 +1,8 @@
 mod animation;
 mod bed;
-mod door;
+pub mod door;
 mod interactable;
-mod phone;
+pub mod phone;
 pub mod player;
 mod toilet;
 
@@ -167,6 +167,10 @@ impl Plugin for ApartmentPlugin {
             SystemSet::on_update(GameState::PlayerPeeingState).with_system(decrease_stats.system()),
         );
 
+        app.add_system_set(
+            SystemSet::on_update(GameState::PlayerHidingState).with_system(decrease_stats.system()),
+        );
+
         app.add_system(animation::basic_sprite_animation_system.system());
         app.add_system(bed::sleeping_system.system())
             .add_system(toilet::peeing_system.system())
@@ -174,7 +178,8 @@ impl Plugin for ApartmentPlugin {
             .add_system(phone::eating_system.system())
             .add_system(phone::pizza_delivery_system.system())
             .add_system(player::hide_player_system.system())
-            .add_system(door::exit_peephole_system.system());
+            .add_system(door::exit_peephole_system.system())
+            .add_system(bed::exit_hiding_system.system().label("exit_hiding"));
         app.add_system(
             animation::animate_character_system
                 .system()
@@ -561,5 +566,32 @@ pub fn despawn_peepholes(
 ) {
     for peephole in peephole_query.iter() {
         commands.entity(peephole).despawn();
+    }
+}
+
+pub struct HidingScreenComponent;
+
+pub fn spawn_hiding_screen(
+    commands: &mut Commands,
+    asset_server: &AssetServer,
+    materials: &mut Assets<ColorMaterial>,
+) {
+    commands
+        .spawn()
+        .insert(HidingScreenComponent)
+        .insert_bundle(SpriteBundle {
+            material: materials.add(asset_server.load("textures/hiding.png").into()),
+            transform: Transform::from_translation(Vec3::new(0.0, 0.0, PEEPHOLE_Z)),
+            ..Default::default()
+        })
+        .insert(Name::new("Hiding Screen"));
+}
+
+pub fn despawn_hiding_screen(
+    commands: &mut Commands,
+    hiding_screen_query: &Query<Entity, With<HidingScreenComponent>>,
+) {
+    for hiding_screen in hiding_screen_query.iter() {
+        commands.entity(hiding_screen).despawn();
     }
 }

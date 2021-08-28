@@ -2,6 +2,7 @@ use crate::misc::day_cycle::DayCycleResource;
 use crate::vulnerability::{spawn_npc, BoolVulnerabilityType, VulnerabilityResource};
 use crate::{
     apartment::{
+        interactable::despawn_interactable_icons,
         phone::{PizzaDeliveryResource, PizzaDeliveryStatus},
         player::{PlayerComponent, Sleepiness},
         InteractableComponent, InteractableType, PlayerInBedComponent,
@@ -27,6 +28,7 @@ pub fn interact_bed_system(
     asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     audio: Res<Audio>,
+    interactable_icon_query: Query<Entity, With<super::interactable::InteractableIconComponent>>,
 ) {
     for player_component in player_query.iter() {
         if let Some(InteractableType::Bed) = player_component.interactable_in_range {
@@ -55,8 +57,34 @@ pub fn interact_bed_system(
                     info!("Not tired");
                     // TODO: notify the player that he is not tired
                 }
+            } else if keyboard_input.just_pressed(KeyCode::C)
+                && app_state.current() == &GameState::MainGame
+            {
+                app_state.push(GameState::PlayerHidingState).unwrap();
+                vulnerability_resource.is_hiding = true;
+
+                despawn_interactable_icons(&mut commands, &interactable_icon_query);
+                super::spawn_hiding_screen(&mut commands, &asset_server, &mut materials);
+                info!("Hiding under bed.")
             }
         }
+    }
+}
+
+pub fn exit_hiding_system(
+    mut commands: Commands,
+    hiding_screen_query: Query<Entity, With<super::HidingScreenComponent>>,
+    keyboard_input: Res<Input<KeyCode>>,
+    mut app_state: ResMut<State<GameState>>,
+    mut vulnerability_resource: ResMut<VulnerabilityResource>,
+) {
+    if keyboard_input.just_released(KeyCode::C)
+        && app_state.current() == &GameState::PlayerHidingState
+    {
+        vulnerability_resource.is_hiding = false;
+        app_state.pop().unwrap();
+        super::despawn_hiding_screen(&mut commands, &hiding_screen_query);
+        info!("Exit hiding ")
     }
 }
 

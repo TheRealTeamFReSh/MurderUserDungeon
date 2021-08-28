@@ -46,6 +46,11 @@ impl prelude::Plugin for Plugin {
                 .with_system(update_time_display.system()),
         )
         .add_system_set(
+            SystemSet::on_update(GameState::PlayerHidingState)
+                .with_system(refresh_stat_hud.system())
+                .with_system(update_time_display.system()),
+        )
+        .add_system_set(
             SystemSet::on_update(GameState::PlayerEatingState)
                 .with_system(refresh_stat_hud.system())
                 .with_system(update_time_display.system()),

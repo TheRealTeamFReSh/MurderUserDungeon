@@ -4,7 +4,7 @@ use crate::{
         InteractableType, InteractablesResource,
     },
     misc::game_over::{GameOverData, GameOverReason},
-    vulnerability::{spawn_npc, AtDoorType, VulnerabilityResource},
+    vulnerability::{spawn_npc, AtDoorType, LockpickingStatus, VulnerabilityResource},
 };
 
 use crate::states::GameState;
@@ -23,7 +23,7 @@ pub fn interact_door_system(
     mut app_state: ResMut<State<GameState>>,
     asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    vulnerability_resource: Res<VulnerabilityResource>,
+    mut vulnerability_resource: ResMut<VulnerabilityResource>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     mut go_data: ResMut<GameOverData>,
     audio: Res<Audio>,
@@ -54,6 +54,7 @@ pub fn interact_door_system(
 
                 // check if enemy at door and game over if so
                 if let AtDoorType::NPC = vulnerability_resource.at_door {
+                    vulnerability_resource.lockpicking_status = LockpickingStatus::None;
                     spawn_npc(
                         "textures/npcs/npc_1_forward_spritesheet.png",
                         Vec2::new(-222.0, 164.0),

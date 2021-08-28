@@ -51,6 +51,10 @@ impl Plugin for DayCyclePlugin {
                 .with_system(day_cycle_system.system()),
         )
         .add_system_set(
+            SystemSet::on_update(GameState::PlayerHidingState)
+                .with_system(day_cycle_system.system()),
+        )
+        .add_system_set(
             SystemSet::on_update(GameState::PlayerSleepingState)
                 .with_system(day_cycle_system.system()),
         );
