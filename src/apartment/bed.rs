@@ -1,5 +1,5 @@
 use crate::misc::day_cycle::DayCycleResource;
-use crate::misc::ui_text::UITextBundle;
+use crate::misc::ui_text::BottomTextUI;
 use crate::vulnerability::{spawn_npc, BoolVulnerabilityType, VulnerabilityResource};
 use crate::{
     apartment::{
@@ -29,7 +29,7 @@ pub fn interact_bed_system(
     asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     audio: Res<Audio>,
-    mut ui_bundle: ResMut<UITextBundle>,
+    mut ui_bundle: ResMut<BottomTextUI>,
     interactable_icon_query: Query<Entity, With<super::interactable::InteractableIconComponent>>,
 ) {
     for player_component in player_query.iter() {

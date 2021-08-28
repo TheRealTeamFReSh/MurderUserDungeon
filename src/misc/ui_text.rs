@@ -8,7 +8,7 @@ pub struct UITextPlugin;
 
 impl Plugin for UITextPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.insert_resource(UITextBundle {
+        app.insert_resource(BottomTextUI {
             ui_data: TextUIData {
                 duration_coef: 1. / 10.,
                 content: String::from(""),
@@ -43,7 +43,7 @@ impl Plugin for UITextPlugin {
 }
 
 pub fn setup_bundle(
-    mut ui_bundle: ResMut<UITextBundle>,
+    mut ui_bundle: ResMut<BottomTextUI>,
     windows: Res<Windows>,
 ) {
     let current_window = windows.get_primary().unwrap();
@@ -55,7 +55,7 @@ pub fn setup_bundle(
 }
 
 #[derive(Bundle)]
-pub struct UITextBundle {
+pub struct BottomTextUI {
     ui_data: TextUIData,
     animation: TextUIAnimation,
     window_size: Vec2,
@@ -70,7 +70,7 @@ pub struct TextUIData {
     pub knows_anim_start: bool,
 }
 
-impl UITextBundle {
+impl BottomTextUI {
     pub fn show_text(
         &mut self,
         content: String,
@@ -105,7 +105,7 @@ pub struct TextUINode;
 fn build_ui(
     mut commands: Commands,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    mut ui_bundle: ResMut<UITextBundle>,
+    mut ui_bundle: ResMut<BottomTextUI>,
     asset_server: Res<AssetServer>,
     windows: Res<Windows>,
 ) {
@@ -159,7 +159,7 @@ fn build_ui(
 
 pub fn apply_animation(
     mut console_query: Query<(&TextUIContainer, &mut Style)>,
-    mut ui_bundle: ResMut<UITextBundle>,
+    mut ui_bundle: ResMut<BottomTextUI>,
     time: Res<Time>,
     windows: Res<Windows>,
 ) {
@@ -202,7 +202,7 @@ pub fn apply_animation(
     }
 }
 
-pub fn set_ui_text(mut query: Query<&mut Text, With<TextUINode>>, bundle: Res<UITextBundle>) {
+pub fn set_ui_text(mut query: Query<&mut Text, With<TextUINode>>, bundle: Res<BottomTextUI>) {
     for mut text in query.iter_mut() {
         text.sections[0].value = bundle.ui_data.content.clone();
     }

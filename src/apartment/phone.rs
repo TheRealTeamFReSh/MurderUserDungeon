@@ -1,4 +1,4 @@
-use crate::misc::ui_text::UITextBundle;
+use crate::misc::ui_text::BottomTextUI;
 use crate::states::GameState;
 use crate::{
     apartment::{
@@ -46,7 +46,7 @@ pub fn interact_pizza_system(
     hunger: Res<Hunger>,
     pizza_delivery_resource: Res<PizzaDeliveryResource>,
     audio: Res<Audio>,
-    mut ui_bundle: ResMut<UITextBundle>,
+    mut ui_bundle: ResMut<BottomTextUI>,
 ) {
     for player_component in player_query.iter() {
         if let Some(InteractableType::Pizza) = player_component.interactable_in_range {
@@ -125,7 +125,7 @@ pub fn interact_phone_system(
     asset_server: Res<AssetServer>,
     pizza_delivery_resource: Res<PizzaDeliveryResource>,
     audio: Res<Audio>,
-    mut ui_bundle: ResMut<UITextBundle>,
+    mut ui_bundle: ResMut<BottomTextUI>,
 ) {
     for player_component in player_query.iter() {
         if let Some(InteractableType::Phone) = player_component.interactable_in_range {
@@ -187,7 +187,7 @@ pub fn pizza_delivery_system(
     time: Res<Time>,
     asset_server: Res<AssetServer>,
     audio: Res<Audio>,
-    mut ui_bundle: ResMut<UITextBundle>,
+    mut ui_bundle: ResMut<BottomTextUI>,
 ) {
     match pizza_delivery_resource.status {
         PizzaDeliveryStatus::Ordered => {

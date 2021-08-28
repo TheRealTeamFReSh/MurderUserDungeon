@@ -1,7 +1,7 @@
 use crate::{apartment::{
         player::{PeePeePooPoo, PlayerComponent},
         InteractableType,
-    }, misc::ui_text::UITextBundle};
+    }, misc::ui_text::BottomTextUI};
 
 use crate::states::GameState;
 use bevy::prelude::*;
@@ -16,7 +16,7 @@ pub fn interact_toilet_system(
     mut app_state: ResMut<State<GameState>>,
     asset_server: Res<AssetServer>,
     audio: Res<Audio>,
-    mut ui_bundle: ResMut<UITextBundle>,
+    mut ui_bundle: ResMut<BottomTextUI>,
 ) {
     for player_component in player_query.iter() {
         if let Some(InteractableType::Toilet) = player_component.interactable_in_range {
