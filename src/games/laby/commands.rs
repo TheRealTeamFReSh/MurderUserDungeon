@@ -98,6 +98,11 @@ pub fn commands_handler(
                     new_turn(&mut laby_data, &laby_res, &mut player, &npc_res);
                     laby_data.has_shown_turn_infos = false;
                     laby_data.wait_for_continue = false;
+                } else if laby_data.game_state == GameState::Tutorial  {
+                    laby_data.game_state = GameState::Exploring;
+                    laby_data.has_shown_turn_infos = false;
+                    laby_data.wait_for_continue = false;
+                    new_turn(&mut laby_data, &laby_res, &mut player, &npc_res);
                 } else {
                     console_writer
                         .send(PrintConsoleEvent("You can't skip this room...".to_string()));
