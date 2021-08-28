@@ -1,3 +1,6 @@
+use core::time;
+use std::thread;
+
 use bevy::prelude::*;
 use rand::{prelude::SliceRandom, Rng};
 
@@ -248,6 +251,9 @@ pub fn new_turn(
     player: &mut ResMut<PlayerStats>,
     npc_res: &Res<NPCsResource>,
 ) {
+    // first wait a bit
+    thread::sleep(time::Duration::from_secs_f32(rand::thread_rng().gen_range(0.2..=0.7)));
+
     laby_data.steps_number += 1;
 
     player.health += 1.0;
