@@ -185,7 +185,7 @@ pub fn update_logs_area(
             let mut msg = msg.clone();
             msg.push('\n');
 
-            std::array::IntoIter::new([TextSection {
+            IntoIterator::into_iter([TextSection {
                 value: msg.clone(),
                 style: TextStyle {
                     font: asset_server.load("fonts/VT323-Regular.ttf"),
