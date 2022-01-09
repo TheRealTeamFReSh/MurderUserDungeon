@@ -12,52 +12,52 @@ impl prelude::Plugin for Plugin {
     fn build(&self, app: &mut prelude::AppBuilder) {
         app.add_system_set(
             SystemSet::on_enter(GameState::MainGame)
-                .with_system(build_stat_hud.system().before("build_terminal"))
-                .with_system(build_time_display.system().before("build_terminal")),
+                .with_system(build_stat_hud.before("build_terminal"))
+                .with_system(build_time_display.before("build_terminal")),
         )
         .add_system_set(
             SystemSet::on_update(GameState::MainGame)
-                .with_system(refresh_stat_hud.system())
-                .with_system(update_time_display.system()),
+                .with_system(refresh_stat_hud)
+                .with_system(update_time_display),
         )
         .add_system_set(
             SystemSet::on_exit(GameState::MainGame)
-                .with_system(despawn_ui.system()),
+                .with_system(despawn_ui),
         )
         .add_system_set(
             SystemSet::on_update(GameState::ConsoleOpenedState)
-                .with_system(refresh_stat_hud.system())
-                .with_system(update_time_display.system()),
+                .with_system(refresh_stat_hud)
+                .with_system(update_time_display),
         )
         .add_system_set(
             SystemSet::on_update(GameState::PeepholeOpenedState)
-                .with_system(refresh_stat_hud.system())
-                .with_system(update_time_display.system()),
+                .with_system(refresh_stat_hud)
+                .with_system(update_time_display),
         )
         .add_system_set(
             SystemSet::on_update(GameState::PlayerPeeingState)
-                .with_system(refresh_stat_hud.system())
-                .with_system(update_time_display.system()),
+                .with_system(refresh_stat_hud)
+                .with_system(update_time_display),
         )
         .add_system_set(
             SystemSet::on_update(GameState::PlayerSleepingState)
-                .with_system(refresh_stat_hud.system())
-                .with_system(update_time_display.system()),
+                .with_system(refresh_stat_hud)
+                .with_system(update_time_display),
         )
         .add_system_set(
             SystemSet::on_update(GameState::PlayerOrderingPizzaState)
-                .with_system(refresh_stat_hud.system())
-                .with_system(update_time_display.system()),
+                .with_system(refresh_stat_hud)
+                .with_system(update_time_display),
         )
         .add_system_set(
             SystemSet::on_update(GameState::PlayerHidingState)
-                .with_system(refresh_stat_hud.system())
-                .with_system(update_time_display.system()),
+                .with_system(refresh_stat_hud)
+                .with_system(update_time_display),
         )
         .add_system_set(
             SystemSet::on_update(GameState::PlayerEatingState)
-                .with_system(refresh_stat_hud.system())
-                .with_system(update_time_display.system()),
+                .with_system(refresh_stat_hud)
+                .with_system(update_time_display),
         );
     }
 }

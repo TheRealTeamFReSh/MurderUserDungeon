@@ -20,15 +20,15 @@ impl Plugin for GameOverPlugin {
         });
         app.add_system_set(
             SystemSet::on_enter(GameState::GameOverState)
-                .with_system(on_enter_game_over.system())
-                .with_system(build_ui.system()),
+                .with_system(on_enter_game_over)
+                .with_system(build_ui),
         );
         app.add_system_set(
             SystemSet::on_update(GameState::GameOverState)
-                .with_system(show_game_over_screen.system())
-                .with_system(apply_animation.system()),
+                .with_system(show_game_over_screen)
+                .with_system(apply_animation),
         );
-        app.add_system(set_game_over_message.system());
+        app.add_system(set_game_over_message);
     }
 }
 

@@ -27,16 +27,16 @@ impl Plugin for LabyrinthGamePlugin {
         );
         app.add_system_set(
             SystemSet::on_update(GameState::ConsoleOpenedState)
-                .with_run_criteria(should_run.system())
+                .with_run_criteria(should_run)
                 .with_system(
                     game::game_loop
-                        .system()
+                        
                         .label("laby_game_loop")
                         .before("laby_cmd_handler"),
                 )
                 .with_system(
                     commands::commands_handler
-                        .system()
+                        
                         .label("laby_cmd_handler")
                         .before("send_console_input"),
                 ),

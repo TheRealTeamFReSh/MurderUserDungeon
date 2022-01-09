@@ -14,9 +14,9 @@ impl Plugin for TicTacToePlugin {
         app.insert_resource(game::TicTacToeData::default());
         app.add_system_set(
             SystemSet::on_update(GameState::ConsoleOpenedState)
-                .with_run_criteria(should_run.system())
-                .with_system(game::game_loop.system())
-                .with_system(commands::commands_handler.system())
+                .with_run_criteria(should_run)
+                .with_system(game::game_loop)
+                .with_system(commands::commands_handler)
                 .before("send_console_input"),
         );
     }

@@ -86,11 +86,11 @@ impl Plugin for ApartmentPlugin {
             })
             .add_system_set(
                 SystemSet::on_enter(GameState::MainGame)
-                    .with_system(setup.system().label("apartment_setup"))
-                    .with_system(player::spawn_player.system().after("apartment_setup"))
+                    .with_system(setup.label("apartment_setup"))
+                    .with_system(player::spawn_player.after("apartment_setup"))
                     .with_system(
                         interactable::spawn_furniture_system
-                            .system()
+                            
                             .after("apartment_setup"),
                     ),
             )
@@ -98,99 +98,99 @@ impl Plugin for ApartmentPlugin {
                 SystemSet::on_update(GameState::MainGame)
                     .with_system(
                         player::player_movement_system
-                            .system()
+                            
                             .label("player_movement"),
                     )
                     .with_system(
                         interactable::check_interactables_system
-                            .system()
+                            
                             .label("check_interactables"),
                     )
                     .with_system(
                         player::set_player_animation_system
-                            .system()
+                            
                             .after("player_movement")
                             .label("set_player_animation"),
                     )
                     .with_system(
                         door::interact_door_system
-                            .system()
+                            
                             .after("check_interactables"),
                     )
                     .with_system(
                         bed::interact_bed_system
-                            .system()
+                            
                             .after("check_interactables"),
                     )
                     .with_system(
                         toilet::interact_toilet_system
-                            .system()
+                            
                             .after("check_interactables"),
                     )
                     .with_system(
                         phone::interact_pizza_system
-                            .system()
+                            
                             .after("check_interactables"),
                     )
                     .with_system(
                         phone::interact_phone_system
-                            .system()
+                            
                             .after("check_interactables"),
                     )
                     .with_system(
                         animation::player_walking_sound_system
-                            .system()
+                            
                             .after("player_movement"),
                     )
-                    .with_system(decrease_stats.system()),
+                    .with_system(decrease_stats),
             );
 
         app.add_system_set(
             SystemSet::on_update(GameState::PeepholeOpenedState)
-                .with_system(decrease_stats.system()),
+                .with_system(decrease_stats),
         );
 
         app.add_system_set(
-            SystemSet::on_update(GameState::PlayerEatingState).with_system(decrease_stats.system()),
+            SystemSet::on_update(GameState::PlayerEatingState).with_system(decrease_stats),
         );
 
         app.add_system_set(
             SystemSet::on_update(GameState::PlayerOrderingPizzaState)
-                .with_system(decrease_stats.system()),
+                .with_system(decrease_stats),
         );
 
         app.add_system_set(
             SystemSet::on_update(GameState::PlayerSleepingState)
-                .with_system(decrease_stats.system()),
+                .with_system(decrease_stats),
         );
 
         app.add_system_set(
-            SystemSet::on_update(GameState::PlayerPeeingState).with_system(decrease_stats.system()),
+            SystemSet::on_update(GameState::PlayerPeeingState).with_system(decrease_stats),
         );
 
         app.add_system_set(
-            SystemSet::on_update(GameState::PlayerHidingState).with_system(decrease_stats.system()),
+            SystemSet::on_update(GameState::PlayerHidingState).with_system(decrease_stats),
         );
 
-        app.add_system(animation::basic_sprite_animation_system.system());
-        app.add_system(bed::sleeping_system.system())
-            .add_system(toilet::peeing_system.system())
-            .add_system(phone::ordering_pizza_system.system())
-            .add_system(phone::eating_system.system())
-            .add_system(phone::pizza_delivery_system.system())
-            .add_system(player::hide_player_system.system())
-            .add_system(door::exit_peephole_system.system())
-            .add_system(bed::exit_hiding_system.system().label("exit_hiding"));
+        app.add_system(animation::basic_sprite_animation_system);
+        app.add_system(bed::sleeping_system)
+            .add_system(toilet::peeing_system)
+            .add_system(phone::ordering_pizza_system)
+            .add_system(phone::eating_system)
+            .add_system(phone::pizza_delivery_system)
+            .add_system(player::hide_player_system)
+            .add_system(door::exit_peephole_system)
+            .add_system(bed::exit_hiding_system.label("exit_hiding"));
         app.add_system(
             animation::animate_character_system
-                .system()
+                
                 .after("set_player_animation"),
         );
 
         if cfg!(debug_assertions) {
             app.add_system_set(
                 SystemSet::on_update(GameState::MainGame)
-                    .with_system(collider_debug_lines_system.system()),
+                    .with_system(collider_debug_lines_system),
             );
         }
     }

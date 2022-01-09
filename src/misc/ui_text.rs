@@ -25,27 +25,27 @@ impl Plugin for UITextPlugin {
             },
             window_size: Vec2::ZERO,
         })
-        .add_startup_system(setup_bundle.system())
+        .add_startup_system(setup_bundle)
         .add_system_set(
             SystemSet::on_enter(GameState::MainGame).with_system(
                 build_ui
-                    .system()
+                    
                     .label("build_ui_text")
                     .before("build_terminal"),
             ),
         )
         .add_system_set(
             SystemSet::on_exit(GameState::MainGame)
-                .with_system(despawn_ui.system()),
+                .with_system(despawn_ui),
         )
         .add_system_set(
             SystemSet::on_update(GameState::MainGame)
-                .with_system(set_ui_text.system())
-                .with_system(apply_animation.system().label("ui_bottom_text_animation")),
+                .with_system(set_ui_text)
+                .with_system(apply_animation.label("ui_bottom_text_animation")),
         )
         .add_system_set(
             SystemSet::on_enter(GameState::ConsoleOpenedState)
-                .with_system(hide_text.system()),
+                .with_system(hide_text),
         );
     }
 }

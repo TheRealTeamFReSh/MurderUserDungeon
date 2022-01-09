@@ -9,28 +9,28 @@ pub struct Plugin;
 impl prelude::Plugin for Plugin {
     fn build(&self, app: &mut AppBuilder) {
         app.add_system_set(
-            SystemSet::on_enter(GameState::MainMenu).with_system(build_main_menu.system()),
+            SystemSet::on_enter(GameState::MainMenu).with_system(build_main_menu),
         )
         .add_system_set(
-            SystemSet::on_resume(GameState::MainMenu).with_system(build_main_menu.system()),
+            SystemSet::on_resume(GameState::MainMenu).with_system(build_main_menu),
         )
         .add_system_set(
-            SystemSet::on_update(GameState::MainMenu).with_system(click_menu_item.system()),
+            SystemSet::on_update(GameState::MainMenu).with_system(click_menu_item),
         )
         .add_system_set(
-            SystemSet::on_pause(GameState::MainMenu).with_system(despawn_menu_items.system()),
+            SystemSet::on_pause(GameState::MainMenu).with_system(despawn_menu_items),
         )
         .add_system_set(
-            SystemSet::on_exit(GameState::MainMenu).with_system(despawn_menu_items.system()),
+            SystemSet::on_exit(GameState::MainMenu).with_system(despawn_menu_items),
         )
         .add_system_set(
-            SystemSet::on_enter(GameState::ControlMenu).with_system(build_control_menu.system()),
+            SystemSet::on_enter(GameState::ControlMenu).with_system(build_control_menu),
         )
         .add_system_set(
-            SystemSet::on_update(GameState::ControlMenu).with_system(return_button.system()),
+            SystemSet::on_update(GameState::ControlMenu).with_system(return_button),
         )
         .add_system_set(
-            SystemSet::on_exit(GameState::ControlMenu).with_system(despawn_control_menu.system()),
+            SystemSet::on_exit(GameState::ControlMenu).with_system(despawn_control_menu),
         );
     }
 }

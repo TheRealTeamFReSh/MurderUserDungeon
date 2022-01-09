@@ -22,41 +22,41 @@ impl Plugin for DayCyclePlugin {
             days_passed: 0,
         })
         .add_system_set(
-            SystemSet::on_enter(GameState::MainGame).with_system(setup_lighting_system.system()),
+            SystemSet::on_enter(GameState::MainGame).with_system(setup_lighting_system),
         )
         .add_system_set(
-            SystemSet::on_update(GameState::MainGame).with_system(day_cycle_system.system()),
+            SystemSet::on_update(GameState::MainGame).with_system(day_cycle_system),
         )
         .add_system_set(
             SystemSet::on_update(GameState::ConsoleOpenedState)
-                .with_system(day_cycle_system.system()),
+                .with_system(day_cycle_system),
         )
         .add_system_set(
-            SystemSet::on_update(GameState::GameOverState).with_system(day_cycle_system.system()),
+            SystemSet::on_update(GameState::GameOverState).with_system(day_cycle_system),
         )
         .add_system_set(
             SystemSet::on_update(GameState::PlayerEatingState)
-                .with_system(day_cycle_system.system()),
+                .with_system(day_cycle_system),
         )
         .add_system_set(
             SystemSet::on_update(GameState::PlayerOrderingPizzaState)
-                .with_system(day_cycle_system.system()),
+                .with_system(day_cycle_system),
         )
         .add_system_set(
             SystemSet::on_update(GameState::PlayerPeeingState)
-                .with_system(day_cycle_system.system()),
+                .with_system(day_cycle_system),
         )
         .add_system_set(
             SystemSet::on_update(GameState::PeepholeOpenedState)
-                .with_system(day_cycle_system.system()),
+                .with_system(day_cycle_system),
         )
         .add_system_set(
             SystemSet::on_update(GameState::PlayerHidingState)
-                .with_system(day_cycle_system.system()),
+                .with_system(day_cycle_system),
         )
         .add_system_set(
             SystemSet::on_update(GameState::PlayerSleepingState)
-                .with_system(day_cycle_system.system()),
+                .with_system(day_cycle_system),
         );
     }
 }

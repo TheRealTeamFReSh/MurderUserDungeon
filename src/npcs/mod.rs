@@ -15,7 +15,7 @@ impl Plugin for NPCsPlugin {
         .insert_resource(NPCsResource {
             npcs: HashMap::new(),
         })
-        .add_startup_system(generate_npcs_system.system());
+        .add_startup_system(generate_npcs_system);
     }
 }
 

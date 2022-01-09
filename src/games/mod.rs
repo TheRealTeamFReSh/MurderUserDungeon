@@ -24,7 +24,7 @@ impl Plugin for ConsoleGamesPlugin {
             ragequit_count: 0,
             has_won_laby: false,
         });
-        app.add_startup_system(setup.system());
+        app.add_startup_system(setup);
         app.add_plugin(laby::LabyrinthGamePlugin);
         app.add_plugin(tictactoe::TicTacToePlugin);
     }
