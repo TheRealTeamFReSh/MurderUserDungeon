@@ -70,7 +70,7 @@ fn build_main_menu(
             ..NodeBundle::default()
         })
         .insert(MainMenu)
-        .with_children(|mut parent| {
+        .with_children(|parent| {
             parent.spawn_bundle(TextBundle {
                 style: Style { ..Style::default() },
                 text: Text::with_section(
@@ -89,9 +89,9 @@ fn build_main_menu(
             });
 
             use MenuItem::*;
-            spawn_button(&mut parent, font.clone(), Play);
-            spawn_button(&mut parent, font.clone(), Controls);
-            spawn_button(&mut parent, font.clone(), Exit);
+            spawn_button(parent, font.clone(), Play);
+            spawn_button(parent, font.clone(), Controls);
+            spawn_button(parent, font.clone(), Exit);
         });
 }
 
