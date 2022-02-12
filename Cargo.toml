@@ -1,25 +1,17 @@
 [package]
 name = "rustyjam"
 version = "0.1.0"
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = { version = "0.6.0" }
-bevy-inspector-egui = "0.7.1"
-#bevy_rapier2d = {version = "0.11.0", features = ["simd-stable", "render"] }
+bevy = "0.6.0"
+#bevy-inspector-egui = "0.7.1"
+bevy_rapier2d = {version = "0.12.1", features = ["simd-stable", "render"] }
 #bevy_prototype_debug_lines = { git = "https://github.com/Toqozz/bevy_debug_lines" }
 bevy_kira_audio = "0.8.0"
-sysinfo = "0.22.5"
+#sysinfo = "0.22.5"
 rand = "0.8.4"
 serde = "1.0.127"
 ron = "0.7.0"
-
-# Enable optimizations for dependencies (incl. Bevy) but not our code
-[profile.dev.package."*"]
-opt-level = 3
-
-# Enable only a small amount of optimizations for our code
-[profile.dev]
-opt-level = 3

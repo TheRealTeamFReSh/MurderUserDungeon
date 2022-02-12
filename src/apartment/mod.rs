@@ -7,7 +7,7 @@ pub mod player;
 mod toilet;
 
 use bevy::prelude::*;
-use bevy_prototype_debug_lines::*;
+//use bevy_prototype_debug_lines::*;
 use bevy_rapier2d::prelude::*;
 use rand::Rng;
 use ron::de::from_bytes;
@@ -37,13 +37,16 @@ pub const LIGHTING_Z: f32 = 10.5;
 pub const PEEPHOLE_Z: f32 = 10.2;
 
 impl Plugin for ApartmentPlugin {
-    fn build(&self, app: &mut AppBuilder) {
+    fn build(&self, app: &mut App) {
         app.add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
-            .add_plugin(DebugLinesPlugin)
             .insert_resource(player::Health(rand::thread_rng().gen_range(80.0..=100.0)))
             .insert_resource(player::Hunger(rand::thread_rng().gen_range(80.0..=100.0)))
-            .insert_resource(player::Sleepiness(rand::thread_rng().gen_range(80.0..=100.0)))
-            .insert_resource(player::PeePeePooPoo(rand::thread_rng().gen_range(80.0..=100.0)))
+            .insert_resource(player::Sleepiness(
+                rand::thread_rng().gen_range(80.0..=100.0),
+            ))
+            .insert_resource(player::PeePeePooPoo(
+                rand::thread_rng().gen_range(80.0..=100.0),
+            ))
             .insert_resource(player::StatsTimer(Timer::from_seconds(1.0, true)))
             .insert_resource(bed::SleepingResource {
                 sleep_timer: Timer::from_seconds(bed::SLEEP_TIME, false),
@@ -88,66 +91,30 @@ impl Plugin for ApartmentPlugin {
                 SystemSet::on_enter(GameState::MainGame)
                     .with_system(setup.label("apartment_setup"))
                     .with_system(player::spawn_player.after("apartment_setup"))
-                    .with_system(
-                        interactable::spawn_furniture_system
-                            
-                            .after("apartment_setup"),
-                    ),
+                    .with_system(interactable::spawn_furniture_system.after("apartment_setup")),
             )
             .add_system_set(
                 SystemSet::on_update(GameState::MainGame)
+                    .with_system(player::player_movement_system.label("player_movement"))
                     .with_system(
-                        player::player_movement_system
-                            
-                            .label("player_movement"),
-                    )
-                    .with_system(
-                        interactable::check_interactables_system
-                            
-                            .label("check_interactables"),
+                        interactable::check_interactables_system.label("check_interactables"),
                     )
                     .with_system(
                         player::set_player_animation_system
-                            
                             .after("player_movement")
                             .label("set_player_animation"),
                     )
-                    .with_system(
-                        door::interact_door_system
-                            
-                            .after("check_interactables"),
-                    )
-                    .with_system(
-                        bed::interact_bed_system
-                            
-                            .after("check_interactables"),
-                    )
-                    .with_system(
-                        toilet::interact_toilet_system
-                            
-                            .after("check_interactables"),
-                    )
-                    .with_system(
-                        phone::interact_pizza_system
-                            
-                            .after("check_interactables"),
-                    )
-                    .with_system(
-                        phone::interact_phone_system
-                            
-                            .after("check_interactables"),
-                    )
-                    .with_system(
-                        animation::player_walking_sound_system
-                            
-                            .after("player_movement"),
-                    )
+                    .with_system(door::interact_door_system.after("check_interactables"))
+                    .with_system(bed::interact_bed_system.after("check_interactables"))
+                    .with_system(toilet::interact_toilet_system.after("check_interactables"))
+                    .with_system(phone::interact_pizza_system.after("check_interactables"))
+                    .with_system(phone::interact_phone_system.after("check_interactables"))
+                    .with_system(animation::player_walking_sound_system.after("player_movement"))
                     .with_system(decrease_stats),
             );
 
         app.add_system_set(
-            SystemSet::on_update(GameState::PeepholeOpenedState)
-                .with_system(decrease_stats),
+            SystemSet::on_update(GameState::PeepholeOpenedState).with_system(decrease_stats),
         );
 
         app.add_system_set(
@@ -155,13 +122,11 @@ impl Plugin for ApartmentPlugin {
         );
 
         app.add_system_set(
-            SystemSet::on_update(GameState::PlayerOrderingPizzaState)
-                .with_system(decrease_stats),
+            SystemSet::on_update(GameState::PlayerOrderingPizzaState).with_system(decrease_stats),
         );
 
         app.add_system_set(
-            SystemSet::on_update(GameState::PlayerSleepingState)
-                .with_system(decrease_stats),
+            SystemSet::on_update(GameState::PlayerSleepingState).with_system(decrease_stats),
         );
 
         app.add_system_set(
@@ -181,16 +146,11 @@ impl Plugin for ApartmentPlugin {
             .add_system(player::hide_player_system)
             .add_system(door::exit_peephole_system)
             .add_system(bed::exit_hiding_system.label("exit_hiding"));
-        app.add_system(
-            animation::animate_character_system
-                
-                .after("set_player_animation"),
-        );
+        app.add_system(animation::animate_character_system.after("set_player_animation"));
 
         if cfg!(debug_assertions) {
             app.add_system_set(
-                SystemSet::on_update(GameState::MainGame)
-                    .with_system(collider_debug_lines_system),
+                SystemSet::on_update(GameState::MainGame).with_system(collider_debug_lines_system),
             );
         }
     }
@@ -211,11 +171,11 @@ fn setup(
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
 
     // create background
-    let texture_handle = asset_server.load("textures/apartment_background.png");
+    //let texture_handle = asset_server.load("textures/apartment_background.png");
     commands
         .spawn()
         .insert_bundle(SpriteBundle {
-            material: materials.add(texture_handle.into()),
+            texture: asset_server.load("textures/apartment_background.png"),
             transform: Transform::from_translation(Vec3::new(0.0, 0.0, BACKGROUND_Z)),
             ..Default::default()
         })
@@ -224,11 +184,11 @@ fn setup(
     spawn_hallway_cover(&mut commands, &asset_server, &mut materials);
 
     // create foreground
-    let texture_handle = asset_server.load("textures/apartment_foreground.png");
+    //let texture_handle = asset_server.load("textures/apartment_foreground.png");
     commands
         .spawn()
         .insert_bundle(SpriteBundle {
-            material: materials.add(texture_handle.into()),
+            texture: asset_server.load("textures/apartment_foreground.png"),
             transform: Transform::from_translation(Vec3::new(0.0, 0.0, FOREGROUND_Z)),
             ..Default::default()
         })
@@ -464,12 +424,12 @@ pub fn spawn_hallway_cover(
     materials: &mut Assets<ColorMaterial>,
 ) {
     // create background
-    let texture_handle = asset_server.load("textures/apartment_hallway_cover.png");
+    //let texture_handle = asset_server.load("textures/apartment_hallway_cover.png");
     commands
         .spawn()
         .insert(HallwayCoverComponent)
         .insert_bundle(SpriteBundle {
-            material: materials.add(texture_handle.into()),
+            texture: asset_server.load("textures/apartment_hallway_cover.png"),
             transform: Transform::from_translation(Vec3::new(0.0, 0.0, HALLWAY_COVER_Z)),
             ..Default::default()
         })
