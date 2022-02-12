@@ -9,7 +9,7 @@
 
 mod apartment;
 mod console;
-mod debug;
+//mod debug;
 mod games;
 mod hud;
 mod main_menu;
@@ -20,11 +20,10 @@ mod vulnerability;
 
 use bevy::{app::AppExit, prelude::*, window::WindowMode};
 #[cfg(debug_assertions)]
-use bevy_inspector_egui::WorldInspectorPlugin;
-use bevy_kira_audio::AudioPlugin;
+//use bevy_inspector_egui::WorldInspectorPlugin;
 
 fn main() {
-    let mut app = App::build();
+    let mut app = App::new();
 
     app.insert_resource(WindowDescriptor {
         width: 800.0,
@@ -37,7 +36,6 @@ fn main() {
     })
     .add_plugins(DefaultPlugins)
     .add_plugin(console::ConsolePlugin)
-    .add_plugin(AudioPlugin)
     .add_plugin(apartment::ApartmentPlugin)
     .add_plugin(vulnerability::VulnerabilityPlugin)
     .add_plugin(games::ConsoleGamesPlugin)
@@ -48,10 +46,10 @@ fn main() {
     .add_plugin(main_menu::Plugin)
     .add_plugin(misc::ui_text::UITextPlugin)
     .add_state(states::GameState::MainMenu)
-    .add_startup_system(spawn_ui_camera.system());
+    .add_startup_system(spawn_ui_camera);
 
-    #[cfg(debug_assertions)]
-    app.add_plugin(WorldInspectorPlugin::new());
+    //#[cfg(debug_assertions)]
+    //app.add_plugin(WorldInspectorPlugin::new());
 
     app.run();
 }

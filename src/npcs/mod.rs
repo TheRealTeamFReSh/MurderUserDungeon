@@ -8,14 +8,14 @@ pub const NPC_COUNT: usize = 3;
 pub struct NPCsPlugin;
 
 impl Plugin for NPCsPlugin {
-    fn build(&self, app: &mut AppBuilder) {
+    fn build(&self, app: &mut App) {
         app.insert_resource(
             from_bytes::<UsernamesResource>(include_bytes!("../../data/usernames.ron")).unwrap(),
         )
         .insert_resource(NPCsResource {
             npcs: HashMap::new(),
         })
-        .add_startup_system(generate_npcs_system.system());
+        .add_startup_system(generate_npcs_system);
     }
 }
 

@@ -18,13 +18,13 @@ pub enum GameList {
 pub struct ConsoleGamesPlugin;
 
 impl Plugin for ConsoleGamesPlugin {
-    fn build(&self, app: &mut AppBuilder) {
+    fn build(&self, app: &mut App) {
         app.insert_resource(ConsoleGamesData {
             loaded_game: GameList::None,
             ragequit_count: 0,
             has_won_laby: false,
         });
-        app.add_startup_system(setup.system());
+        app.add_startup_system(setup);
         app.add_plugin(laby::LabyrinthGamePlugin);
         app.add_plugin(tictactoe::TicTacToePlugin);
     }
@@ -57,26 +57,26 @@ fn setup() {
 
 pub fn handle_play_command(
     args: &[&str],
-    mut console_writer: &mut EventWriter<PrintConsoleEvent>,
-    mut cg_data: &mut ResMut<ConsoleGamesData>,
+    console_writer: &mut EventWriter<PrintConsoleEvent>,
+    cg_data: &mut ResMut<ConsoleGamesData>,
 ) {
     // if there is only the command
     if args.len() == 1 {
         console_writer.send(PrintConsoleEvent("No game specified...".to_string()));
-        print_games_list(&mut console_writer);
+        print_games_list(console_writer);
         return;
     }
 
     match args[1].to_lowercase().as_str() {
-        "labyrinth" => laby::start_game(&mut cg_data),
-        "tictactoe" => tictactoe::start_game(&mut cg_data),
+        "labyrinth" => laby::start_game(cg_data),
+        "tictactoe" => tictactoe::start_game(cg_data),
 
         _ => {
             console_writer.send(PrintConsoleEvent(format!(
                 "The game '{}' isn't installed yet...",
                 args[1]
             )));
-            print_games_list(&mut console_writer);
+            print_games_list(console_writer);
         }
     }
 }

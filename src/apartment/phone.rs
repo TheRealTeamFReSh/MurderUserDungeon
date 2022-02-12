@@ -269,7 +269,7 @@ pub fn spawn_pizza_interactable(
             range: interactable_data.range,
         })
         .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static,
+            body_type: RigidBodyType::Static.into(),
             position: interactable_data.position.into(),
             ..Default::default()
         })

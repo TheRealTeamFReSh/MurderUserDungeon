@@ -152,7 +152,7 @@ pub fn update_enter_command(
     asset_server: Res<AssetServer>,
     time: Res<Time>,
 ) {
-    let mut text = enter_command_text.single_mut().unwrap();
+    let mut text = enter_command_text.single_mut();
     text.sections = vec![];
 
     if state.enter_command.len() > 144 {

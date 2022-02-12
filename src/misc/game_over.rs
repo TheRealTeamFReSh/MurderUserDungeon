@@ -7,7 +7,7 @@ pub struct GameOverPlugin;
 pub const DEATH_SOUND_DELAY: f32 = 3.6;
 
 impl Plugin for GameOverPlugin {
-    fn build(&self, app: &mut AppBuilder) {
+    fn build(&self, app: &mut App) {
         let mut game_over_sound_timer = Timer::from_seconds(DEATH_SOUND_DELAY, false);
         game_over_sound_timer.pause();
         app.insert_resource(GameOverAnimation {
@@ -20,15 +20,15 @@ impl Plugin for GameOverPlugin {
         });
         app.add_system_set(
             SystemSet::on_enter(GameState::GameOverState)
-                .with_system(on_enter_game_over.system())
-                .with_system(build_ui.system()),
+                .with_system(on_enter_game_over)
+                .with_system(build_ui),
         );
         app.add_system_set(
             SystemSet::on_update(GameState::GameOverState)
-                .with_system(show_game_over_screen.system())
-                .with_system(apply_animation.system()),
+                .with_system(show_game_over_screen)
+                .with_system(apply_animation),
         );
-        app.add_system(set_game_over_message.system());
+        app.add_system(set_game_over_message);
     }
 }
 
@@ -63,11 +63,17 @@ pub struct GameOverData {
     pub hide_player_sprite: bool,
 }
 
+#[derive(Component)]
 pub struct GameOverBackground;
+#[derive(Component)]
 pub struct TextTitleContainer;
+#[derive(Component)]
 pub struct TextTitle;
+#[derive(Component)]
 pub struct TextReasonContainer;
+#[derive(Component)]
 pub struct TextReason;
+#[derive(Component)]
 pub struct GameOverAnimationComponent;
 
 fn build_ui(
@@ -80,7 +86,8 @@ fn build_ui(
     let transparent_col = Color::rgba_u8(0, 0, 0, 0);
 
     let background = NodeBundle {
-        material: materials.add(Color::rgba_u8(0, 0, 0, 255).into()),
+        //material: materials.add(Color::rgba_u8(0, 0, 0, 255).into()),
+        color: Color::rgba_u8(0, 0, 0, 255).into(),
         style: Style {
             size: Size::new(
                 Val::Px(current_window.width()),
@@ -100,7 +107,8 @@ fn build_ui(
         ..Default::default()
     };
     let container = NodeBundle {
-        material: materials.add(transparent_col.into()),
+        //material: materials.add(transparent_col.into()),
+        color: transparent_col.into(),
         style: Style {
             size: Size::new(Val::Percent(70.), Val::Percent(50.0)),
             justify_content: JustifyContent::SpaceAround,
@@ -122,7 +130,8 @@ fn build_ui(
             justify_content: JustifyContent::FlexEnd,
             ..Default::default()
         },
-        material: materials.add(transparent_col.into()),
+        //material: materials.add(transparent_col.into()),
+        color: transparent_col.into(),
         ..Default::default()
     };
     let title_text = TextBundle {
@@ -144,7 +153,8 @@ fn build_ui(
     };
 
     let reason_text_container = NodeBundle {
-        material: materials.add(transparent_col.into()),
+        //material: materials.add(transparent_col.into()),
+        color: transparent_col.into(),
         style: Style {
             padding: Rect {
                 top: Val::Percent(10.),
@@ -219,7 +229,7 @@ fn on_enter_game_over(mut anim_data: ResMut<GameOverAnimation>, time: Res<Time>)
 }
 
 fn show_game_over_screen(mut query: Query<(&Transform, With<GameOverBackground>)>) {
-    let (_transform, _) = query.single_mut().unwrap();
+    let (_transform, _) = query.single_mut();
 }
 
 fn set_game_over_message(
@@ -244,16 +254,16 @@ pub struct GameOverAnimation {
 
 pub fn apply_animation(
     mut mat_query: QuerySet<(
-        Query<(
+        QueryState<(
             &Node,
             &mut Handle<ColorMaterial>,
             With<GameOverAnimationComponent>,
         )>,
-        Query<(&Node, &mut Handle<ColorMaterial>, With<Hud>)>,
+        QueryState<(&Node, &mut Handle<ColorMaterial>, With<Hud>)>,
     )>,
     mut font_query: QuerySet<(
-        Query<(&mut Text, With<GameOverAnimationComponent>)>,
-        Query<(&mut Text, With<Hud>)>,
+        QueryState<(&mut Text, With<GameOverAnimationComponent>)>,
+        QueryState<(&mut Text, With<Hud>)>,
     )>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut anim_data: ResMut<GameOverAnimation>,
@@ -274,20 +284,20 @@ pub fn apply_animation(
     }
 
     // changing material opacity
-    for (_, color, _) in mat_query.q0_mut().iter_mut() {
+    for (_, color, _) in mat_query.q0().iter_mut() {
         let color_mat = materials.get_mut(color.id).unwrap();
         color_mat.color.set_a(background_value as f32);
     }
 
     // changin font opacity
-    for (mut text, _) in font_query.q0_mut().iter_mut() {
+    for (mut text, _) in font_query.q0().iter_mut() {
         for section in text.sections.iter_mut() {
             section.style.color.set_a(text_value as f32);
         }
     }
 
     // changing material opacity
-    for (_, color, _) in mat_query.q1_mut().iter_mut() {
+    for (_, color, _) in mat_query.q1().iter_mut() {
         let color_mat = materials.get_mut(color.id).unwrap();
         let col_val = 1.0 - background_value as f32;
         let prev_color = color_mat.color;
@@ -300,7 +310,7 @@ pub fn apply_animation(
     }
 
     // changin font opacity
-    for (mut text, _) in font_query.q1_mut().iter_mut() {
+    for (mut text, _) in font_query.q1().iter_mut() {
         for section in text.sections.iter_mut() {
             let col_val = 1.0 - background_value as f32;
             let prev_color = section.style.color;

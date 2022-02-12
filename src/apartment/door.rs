@@ -151,7 +151,7 @@ pub fn spawn_closed_door(commands: &mut Commands, interactables_resource: &Inter
             range: interactable_data.range,
         })
         .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static,
+            body_type: RigidBodyType::Static.into(),
             position: interactable_data.position.into(),
             ..Default::default()
         })
@@ -159,12 +159,15 @@ pub fn spawn_closed_door(commands: &mut Commands, interactables_resource: &Inter
             shape: ColliderShape::cuboid(
                 interactable_data.collider_size.x,
                 interactable_data.collider_size.y,
-            ),
+            )
+            .into(),
+
             material: ColliderMaterial {
                 friction: 0.0,
                 restitution: 0.0,
                 ..Default::default()
-            },
+            }
+            .into(),
             ..Default::default()
         })
         .insert(RigidBodyPositionSync::Discrete)
@@ -183,7 +186,7 @@ pub fn spawn_open_door(commands: &mut Commands, interactables_resource: &Interac
             range: interactable_data.range,
         })
         .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static,
+            body_type: RigidBodyType::Static.into(),
             position: interactable_data.position.into(),
             ..Default::default()
         })
