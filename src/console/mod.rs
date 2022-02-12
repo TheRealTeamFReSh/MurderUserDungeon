@@ -14,7 +14,7 @@ use sysinfo::{System, SystemExt};
 pub struct ConsolePlugin;
 
 impl Plugin for ConsolePlugin {
-    fn build(&self, app: &mut AppBuilder) {
+    fn build(&self, app: &mut App) {
         app.add_event::<event::PrintConsoleEvent>()
             .add_event::<event::EnteredConsoleCommandEvent>()
             .add_system_set(
@@ -29,11 +29,7 @@ impl Plugin for ConsolePlugin {
             )
             .add_system_set(
                 SystemSet::on_update(GameState::ConsoleOpenedState)
-                    .with_system(
-                        input::handle_input_keys
-                            
-                            .label("send_console_input"),
-                    )
+                    .with_system(input::handle_input_keys.label("send_console_input"))
                     .with_system(input::update_enter_command)
                     .with_system(ui::update_logs_area),
             )
@@ -44,8 +40,7 @@ impl Plugin for ConsolePlugin {
                     .before("send_console_input"),
             )
             .add_system_set(
-                SystemSet::on_update(GameState::ConsoleOpenedState)
-                    .with_system(decrease_stats),
+                SystemSet::on_update(GameState::ConsoleOpenedState).with_system(decrease_stats),
             )
             .add_system_to_stage(CoreStage::PostUpdate, ui::apply_animation)
             .add_system_set(
@@ -60,11 +55,7 @@ impl Plugin for ConsolePlugin {
             })
             .init_resource::<System>()
             .add_system(event::add_message_events_to_console)
-            .add_system(
-                input::trigger_open_console
-                    
-                    .after("check_interactables"),
-            );
+            .add_system(input::trigger_open_console.after("check_interactables"));
     }
 }
 

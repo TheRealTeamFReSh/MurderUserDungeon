@@ -12,7 +12,7 @@ pub const SLEEP_HOURS: f32 = 8.0;
 pub struct DayCyclePlugin;
 
 impl Plugin for DayCyclePlugin {
-    fn build(&self, app: &mut AppBuilder) {
+    fn build(&self, app: &mut App) {
         app.insert_resource(DayCycleResource {
             day_timer: Timer::from_seconds(DAY_LENGTH, true),
             day_length: DAY_LENGTH,
@@ -21,42 +21,31 @@ impl Plugin for DayCyclePlugin {
             sleep_hours: SLEEP_HOURS,
             days_passed: 0,
         })
+        .add_system_set(SystemSet::on_enter(GameState::MainGame).with_system(setup_lighting_system))
+        .add_system_set(SystemSet::on_update(GameState::MainGame).with_system(day_cycle_system))
         .add_system_set(
-            SystemSet::on_enter(GameState::MainGame).with_system(setup_lighting_system),
-        )
-        .add_system_set(
-            SystemSet::on_update(GameState::MainGame).with_system(day_cycle_system),
-        )
-        .add_system_set(
-            SystemSet::on_update(GameState::ConsoleOpenedState)
-                .with_system(day_cycle_system),
+            SystemSet::on_update(GameState::ConsoleOpenedState).with_system(day_cycle_system),
         )
         .add_system_set(
             SystemSet::on_update(GameState::GameOverState).with_system(day_cycle_system),
         )
         .add_system_set(
-            SystemSet::on_update(GameState::PlayerEatingState)
-                .with_system(day_cycle_system),
+            SystemSet::on_update(GameState::PlayerEatingState).with_system(day_cycle_system),
         )
         .add_system_set(
-            SystemSet::on_update(GameState::PlayerOrderingPizzaState)
-                .with_system(day_cycle_system),
+            SystemSet::on_update(GameState::PlayerOrderingPizzaState).with_system(day_cycle_system),
         )
         .add_system_set(
-            SystemSet::on_update(GameState::PlayerPeeingState)
-                .with_system(day_cycle_system),
+            SystemSet::on_update(GameState::PlayerPeeingState).with_system(day_cycle_system),
         )
         .add_system_set(
-            SystemSet::on_update(GameState::PeepholeOpenedState)
-                .with_system(day_cycle_system),
+            SystemSet::on_update(GameState::PeepholeOpenedState).with_system(day_cycle_system),
         )
         .add_system_set(
-            SystemSet::on_update(GameState::PlayerHidingState)
-                .with_system(day_cycle_system),
+            SystemSet::on_update(GameState::PlayerHidingState).with_system(day_cycle_system),
         )
         .add_system_set(
-            SystemSet::on_update(GameState::PlayerSleepingState)
-                .with_system(day_cycle_system),
+            SystemSet::on_update(GameState::PlayerSleepingState).with_system(day_cycle_system),
         );
     }
 }
@@ -130,6 +119,7 @@ fn day_cycle_system(
     }
 }
 
+#[derive(Component)]
 pub struct LightingComponent;
 
 fn setup_lighting_system(
@@ -142,7 +132,8 @@ fn setup_lighting_system(
         .day_timer
         .set_elapsed(Duration::from_secs_f32((STARTING_HOUR / 24.0) * DAY_LENGTH));
 
-    let texture_handle: Handle<Texture> = asset_server.load("textures/lighting.png");
+    //let texture_handle: Handle<Texture> = asset_server.load("textures/lighting.png");
+    /*
     let color_material = ColorMaterial {
         color: Color::Rgba {
             red: 1.0,
@@ -150,15 +141,25 @@ fn setup_lighting_system(
             blue: 1.0,
             alpha: day_cycle_resource.get_alpha(),
         },
-        texture: Some(texture_handle),
+        texture: Some(asset_server.load("textures/lighting.png")),
     };
+    */
 
     commands
         .spawn()
         .insert(LightingComponent)
         .insert_bundle(SpriteBundle {
-            material: materials.add(color_material),
+            sprite: Sprite {
+                color: Color::Rgba {
+                    red: 1.0,
+                    green: 1.0,
+                    blue: 1.0,
+                    alpha: day_cycle_resource.get_alpha(),
+                },
+                ..Default::default()
+            },
             transform: Transform::from_translation(Vec3::new(0.0, 0.0, LIGHTING_Z)),
+            texture: asset_server.load("textures/lighting.png"),
             ..Default::default()
         })
         .insert(Name::new("Lighting"));

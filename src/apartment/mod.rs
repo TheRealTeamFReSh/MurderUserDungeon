@@ -12,10 +12,7 @@ use bevy_rapier2d::prelude::*;
 use rand::Rng;
 use ron::de::from_bytes;
 
-use crate::{
-    apartment::player::decrease_stats, debug::collider_debug_lines_system, misc::day_cycle,
-    states::GameState,
-};
+use crate::{apartment::player::decrease_stats, misc::day_cycle, states::GameState};
 
 pub use self::{
     animation::BasicAnimationComponent,
@@ -148,11 +145,13 @@ impl Plugin for ApartmentPlugin {
             .add_system(bed::exit_hiding_system.label("exit_hiding"));
         app.add_system(animation::animate_character_system.after("set_player_animation"));
 
+        /*
         if cfg!(debug_assertions) {
             app.add_system_set(
                 SystemSet::on_update(GameState::MainGame).with_system(collider_debug_lines_system),
             );
         }
+        */
     }
 }
 
@@ -199,17 +198,18 @@ fn setup(
     commands
         .spawn()
         .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static,
+            body_type: RigidBodyType::Static.into(),
             position: Vec2::new(12.0, 11.7).into(),
             ..Default::default()
         })
         .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(30.0, 6.2),
+            shape: ColliderShape::cuboid(30.0, 6.2).into(),
             material: ColliderMaterial {
                 friction: 0.0,
                 restitution: 0.0,
                 ..Default::default()
-            },
+            }
+            .into(),
             ..Default::default()
         })
         .insert(RigidBodyPositionSync::Discrete)
@@ -219,17 +219,18 @@ fn setup(
     commands
         .spawn()
         .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static,
+            body_type: RigidBodyType::Static.into(),
             position: Vec2::new(-33.3, 11.7).into(),
             ..Default::default()
         })
         .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(7.0, 6.2),
+            shape: ColliderShape::cuboid(7.0, 6.2).into(),
             material: ColliderMaterial {
                 friction: 0.0,
                 restitution: 0.0,
                 ..Default::default()
-            },
+            }
+            .into(),
             ..Default::default()
         })
         .insert(RigidBodyPositionSync::Discrete)
@@ -239,17 +240,18 @@ fn setup(
     commands
         .spawn()
         .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static,
+            body_type: RigidBodyType::Static.into(),
             position: Vec2::new(-5.3, -24.5).into(),
             ..Default::default()
         })
         .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(27.5, 1.0),
+            shape: ColliderShape::cuboid(27.5, 1.0).into(),
             material: ColliderMaterial {
                 friction: 0.0,
                 restitution: 0.0,
                 ..Default::default()
-            },
+            }
+            .into(),
             ..Default::default()
         })
         .insert(RigidBodyPositionSync::Discrete)
@@ -259,17 +261,18 @@ fn setup(
     commands
         .spawn()
         .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static,
+            body_type: RigidBodyType::Static.into(),
             position: Vec2::new(20.6, -9.0).into(),
             ..Default::default()
         })
         .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(1.0, 16.0),
+            shape: ColliderShape::cuboid(1.0, 16.0).into(),
             material: ColliderMaterial {
                 friction: 0.0,
                 restitution: 0.0,
                 ..Default::default()
-            },
+            }
+            .into(),
             ..Default::default()
         })
         .insert(RigidBodyPositionSync::Discrete)
@@ -279,17 +282,18 @@ fn setup(
     commands
         .spawn()
         .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static,
+            body_type: RigidBodyType::Static.into(),
             position: Vec2::new(-31.6, -9.0).into(),
             ..Default::default()
         })
         .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(1.0, 16.0),
+            shape: ColliderShape::cuboid(1.0, 16.0).into(),
             material: ColliderMaterial {
                 friction: 0.0,
                 restitution: 0.0,
                 ..Default::default()
-            },
+            }
+            .into(),
             ..Default::default()
         })
         .insert(RigidBodyPositionSync::Discrete)
@@ -299,17 +303,18 @@ fn setup(
     commands
         .spawn()
         .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static,
+            body_type: RigidBodyType::Static.into(),
             position: Vec2::new(0.0, 25.0).into(),
             ..Default::default()
         })
         .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(40.0, 1.0),
+            shape: ColliderShape::cuboid(40.0, 1.0).into(),
             material: ColliderMaterial {
                 friction: 0.0,
                 restitution: 0.0,
                 ..Default::default()
-            },
+            }
+            .into(),
             ..Default::default()
         })
         .insert(RigidBodyPositionSync::Discrete)
@@ -319,17 +324,18 @@ fn setup(
     commands
         .spawn()
         .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static,
+            body_type: RigidBodyType::Static.into(),
             position: Vec2::new(41.5, 21.5).into(),
             ..Default::default()
         })
         .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(1.0, 4.0),
+            shape: ColliderShape::cuboid(1.0, 4.0).into(),
             material: ColliderMaterial {
                 friction: 0.0,
                 restitution: 0.0,
                 ..Default::default()
-            },
+            }
+            .into(),
             ..Default::default()
         })
         .insert(RigidBodyPositionSync::Discrete)
@@ -339,17 +345,18 @@ fn setup(
     commands
         .spawn()
         .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static,
+            body_type: RigidBodyType::Static.into(),
             position: Vec2::new(-41.5, 21.5).into(),
             ..Default::default()
         })
         .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(1.0, 4.0),
+            shape: ColliderShape::cuboid(1.0, 4.0).into(),
             material: ColliderMaterial {
                 friction: 0.0,
                 restitution: 0.0,
                 ..Default::default()
-            },
+            }
+            .into(),
             ..Default::default()
         })
         .insert(RigidBodyPositionSync::Discrete)
@@ -359,17 +366,18 @@ fn setup(
     commands
         .spawn()
         .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static,
+            body_type: RigidBodyType::Static.into(),
             position: Vec2::new(11.1, -10.8).into(),
             ..Default::default()
         })
         .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(8.2, 6.2),
+            shape: ColliderShape::cuboid(8.2, 6.2).into(),
             material: ColliderMaterial {
                 friction: 0.0,
                 restitution: 0.0,
                 ..Default::default()
-            },
+            }
+            .into(),
             ..Default::default()
         })
         .insert(RigidBodyPositionSync::Discrete)
@@ -379,17 +387,18 @@ fn setup(
     commands
         .spawn()
         .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static,
+            body_type: RigidBodyType::Static.into(),
             position: Vec2::new(-9.6, -10.1).into(),
             ..Default::default()
         })
         .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(4.5, 3.1),
+            shape: ColliderShape::cuboid(4.5, 3.1).into(),
             material: ColliderMaterial {
                 friction: 0.0,
                 restitution: 0.0,
                 ..Default::default()
-            },
+            }
+            .into(),
             ..Default::default()
         })
         .insert(RigidBodyPositionSync::Discrete)
@@ -399,23 +408,25 @@ fn setup(
     commands
         .spawn()
         .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static,
+            body_type: RigidBodyType::Static.into(),
             position: Vec2::new(-22.0, -22.0).into(),
             ..Default::default()
         })
         .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(3.0, 2.5),
+            shape: ColliderShape::cuboid(3.0, 2.5).into(),
             material: ColliderMaterial {
                 friction: 0.0,
                 restitution: 0.0,
                 ..Default::default()
-            },
+            }
+            .into(),
             ..Default::default()
         })
         .insert(RigidBodyPositionSync::Discrete)
         .insert(Name::new("Desk Chair"));
 }
 
+#[derive(Component)]
 pub struct HallwayCoverComponent;
 
 pub fn spawn_hallway_cover(
@@ -445,6 +456,7 @@ pub fn despawn_hallway_cover(
     }
 }
 
+#[derive(Component)]
 pub struct PlayerInBedComponent;
 
 pub fn spawn_player_in_bed(
@@ -453,12 +465,12 @@ pub fn spawn_player_in_bed(
     materials: &mut Assets<ColorMaterial>,
 ) {
     // create background
-    let texture_handle = asset_server.load("textures/player_in_bed.png");
+    //let texture_handle = asset_server.load("textures/player_in_bed.png");
     commands
         .spawn()
         .insert(PlayerInBedComponent)
         .insert_bundle(SpriteBundle {
-            material: materials.add(texture_handle.into()),
+            texture: asset_server.load("textures/player_in_bed.png"),
             transform: Transform::from_translation(Vec3::new(0.0, 0.0, PLAYER_IN_BED_Z)),
             ..Default::default()
         })
@@ -474,6 +486,7 @@ pub fn despawn_player_in_bed(
     }
 }
 
+#[derive(Component)]
 pub struct PizzaComponent;
 
 pub fn spawn_pizza(
@@ -482,12 +495,12 @@ pub fn spawn_pizza(
     materials: &mut Assets<ColorMaterial>,
 ) {
     // create background
-    let texture_handle = asset_server.load("textures/pizza.png");
+    //let texture_handle = asset_server.load("textures/pizza.png");
     commands
         .spawn()
         .insert(PizzaComponent)
         .insert_bundle(SpriteBundle {
-            material: materials.add(texture_handle.into()),
+            texture: asset_server.load("textures/pizza.png"),
             transform: Transform::from_translation(Vec3::new(0.0, 0.0, PIZZA_Z)),
             ..Default::default()
         })
@@ -500,6 +513,7 @@ pub fn despawn_pizza(commands: &mut Commands, pizza_query: &Query<Entity, With<P
     }
 }
 
+#[derive(Component)]
 pub struct PeepholeComponent;
 
 pub fn spawn_peephole(
@@ -509,12 +523,12 @@ pub fn spawn_peephole(
     materials: &mut Assets<ColorMaterial>,
 ) {
     // create background
-    let texture_handle = asset_server.load(path);
+    //let texture_handle = asset_server.load(path);
     commands
         .spawn()
         .insert(PeepholeComponent)
         .insert_bundle(SpriteBundle {
-            material: materials.add(texture_handle.into()),
+            texture: asset_server.load(path),
             transform: Transform::from_translation(Vec3::new(0.0, 0.0, PEEPHOLE_Z)),
             ..Default::default()
         })
@@ -530,6 +544,7 @@ pub fn despawn_peepholes(
     }
 }
 
+#[derive(Component)]
 pub struct HidingScreenComponent;
 
 pub fn spawn_hiding_screen(
@@ -541,7 +556,7 @@ pub fn spawn_hiding_screen(
         .spawn()
         .insert(HidingScreenComponent)
         .insert_bundle(SpriteBundle {
-            material: materials.add(asset_server.load("textures/hiding.png").into()),
+            texture: asset_server.load("textures/hiding.png"),
             transform: Transform::from_translation(Vec3::new(0.0, 0.0, PEEPHOLE_Z)),
             ..Default::default()
         })

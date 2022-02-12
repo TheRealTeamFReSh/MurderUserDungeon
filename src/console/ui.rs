@@ -1,8 +1,11 @@
 use super::{commands::print_motd, event::PrintConsoleEvent, ConsoleAnimation, ConsoleData};
 use bevy::prelude::*;
 
+#[derive(Component)]
 pub struct LogsArea;
+#[derive(Component)]
 pub struct CommandLineText;
+#[derive(Component)]
 pub struct ConsoleUI;
 
 use sysinfo::System;
@@ -37,7 +40,8 @@ pub fn build_ui(
             flex_direction: FlexDirection::ColumnReverse,
             ..Default::default()
         },
-        material: materials.add(Color::rgba_u8(5, 17, 0, 255).into()),
+        color: Color::rgba_u8(5, 17, 0, 255).into(),
+        //material: materials.add(Color::rgba_u8(5, 17, 0, 255).into()),
         ..Default::default()
     };
 
@@ -57,7 +61,8 @@ pub fn build_ui(
                         flex_wrap: FlexWrap::Wrap,
                         ..Default::default()
                     },
-                    material: materials.add(transparent_col.into()),
+                    color: transparent_col.into(),
+                    //material: materials.add(transparent_col.into()),
                     ..Default::default()
                 })
                 .with_children(|parent| {
@@ -74,7 +79,8 @@ pub fn build_ui(
                                 flex_wrap: FlexWrap::Wrap,
                                 ..Default::default()
                             },
-                            material: materials.add(transparent_col.into()),
+                            color: transparent_col.into(),
+                            //material: materials.add(transparent_col.into()),
                             ..Default::default()
                         })
                         .with_children(|parent| {
@@ -96,7 +102,8 @@ pub fn build_ui(
                                 flex_wrap: FlexWrap::Wrap,
                                 ..Default::default()
                             },
-                            material: materials.add(transparent_col.into()),
+                            color: transparent_col.into(),
+                            //material: materials.add(transparent_col.into()),
                             ..Default::default()
                         })
                         .with_children(|parent| {
@@ -167,7 +174,7 @@ pub fn apply_animation(
         data.fully_opened = true;
     }
 
-    if let Ok((_, mut style)) = console_query.single_mut() {
+    if let Ok((_, mut style)) = console_query.get_single_mut() {
         style.position.top = Val::Px(new_position.y);
         style.position.left = Val::Px(new_position.x);
     }
@@ -196,6 +203,6 @@ pub fn update_logs_area(
         })
         .collect::<Vec<_>>();
 
-    let mut text = logs_area_query.single_mut().unwrap();
+    let mut text = logs_area_query.single_mut();
     text.sections = sections;
 }

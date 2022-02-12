@@ -1,9 +1,14 @@
-use crate::{apartment::{
+use crate::{
+    apartment::{
         animation::{
             CharacterAnimationComponent, CharacterAnimationResource, CharacterAnimationType,
         },
         PLAYER_Z,
-    }, misc::game_over::GameOverData, states::GameState, vulnerability::{BoolVulnerabilityType, VulnerabilityResource}};
+    },
+    misc::game_over::GameOverData,
+    states::GameState,
+    vulnerability::{BoolVulnerabilityType, VulnerabilityResource},
+};
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
@@ -12,7 +17,7 @@ use super::InteractableType;
 pub const PLAYER_SPRITE_SCALE: f32 = 2.0;
 
 /// Stores core attributes of player
-#[derive(Debug)]
+#[derive(Debug, Component)]
 pub struct PlayerComponent {
     pub speed: f32,
     pub interactable_in_range: Option<InteractableType>,
@@ -54,13 +59,13 @@ pub fn spawn_player(
             texture_atlas: texture_atlas_handle,
             transform: sprite_transform,
             sprite: TextureAtlasSprite {
-                index: character_animations.animations[&character_starting_animation].0,
+                index: character_animations.animations[&character_starting_animation].0 as usize,
                 ..Default::default()
             },
             ..Default::default()
         })
         .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Dynamic,
+            body_type: RigidBodyType::Dynamic.into(),
             mass_properties: RigidBodyMassPropsFlags::ROTATION_LOCKED.into(),
             position: Vec2::new(10.0, 0.0).into(),
             ..Default::default()
@@ -75,13 +80,14 @@ pub fn spawn_player(
         ))
         .with_children(|parent| {
             parent.spawn().insert_bundle(ColliderBundle {
-                shape: ColliderShape::cuboid(3.0, 1.0),
+                shape: ColliderShape::cuboid(3.0, 1.0).into(),
                 position: Vec2::new(0.0, -3.8).into(),
                 material: ColliderMaterial {
                     friction: 0.0,
                     restitution: 0.0,
                     ..Default::default()
-                },
+                }
+                .into(),
                 ..Default::default()
             });
         });
@@ -95,7 +101,7 @@ pub fn set_player_animation_system(
         (
             &mut CharacterAnimationComponent,
             &mut TextureAtlasSprite,
-            &RigidBodyVelocity,
+            &RigidBodyVelocityComponent,
         ),
         With<PlayerComponent>,
     >,
@@ -152,7 +158,7 @@ pub fn set_player_animation_system(
         if restart_animation {
             let animation_data =
                 character_animations.animations[&character_animation.animation_type];
-            sprite.index = animation_data.0;
+            sprite.index = animation_data.0 as usize;
             character_animation.timer = Timer::from_seconds(animation_data.2, true);
         }
     }
@@ -179,7 +185,7 @@ pub fn hide_player_system(
 pub fn player_movement_system(
     keyboard_input: Res<Input<KeyCode>>,
     rapier_config: Res<RapierConfiguration>,
-    mut player_info: Query<(&PlayerComponent, &mut RigidBodyVelocity)>,
+    mut player_info: Query<(&PlayerComponent, &mut RigidBodyVelocityComponent)>,
     app_state: Res<State<GameState>>,
 ) {
     // if we are not playing the game prevent the player from moving

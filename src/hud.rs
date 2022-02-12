@@ -9,7 +9,7 @@ use bevy::prelude::*;
 pub struct Plugin;
 
 impl prelude::Plugin for Plugin {
-    fn build(&self, app: &mut prelude::AppBuilder) {
+    fn build(&self, app: &mut prelude::App) {
         app.add_system_set(
             SystemSet::on_enter(GameState::MainGame)
                 .with_system(build_stat_hud.before("build_terminal"))
@@ -20,10 +20,7 @@ impl prelude::Plugin for Plugin {
                 .with_system(refresh_stat_hud)
                 .with_system(update_time_display),
         )
-        .add_system_set(
-            SystemSet::on_exit(GameState::MainGame)
-                .with_system(despawn_ui),
-        )
+        .add_system_set(SystemSet::on_exit(GameState::MainGame).with_system(despawn_ui))
         .add_system_set(
             SystemSet::on_update(GameState::ConsoleOpenedState)
                 .with_system(refresh_stat_hud)
@@ -62,9 +59,10 @@ impl prelude::Plugin for Plugin {
     }
 }
 
+#[derive(Component)]
 pub struct Hud;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Component)]
 enum StatDisplay {
     Hunger,
     Sleep,
@@ -80,32 +78,12 @@ fn build_stat_hud(
 
     let font = ass.load("fonts/VT323-Regular.ttf");
 
-    spawn_stat_bar(
-        &mut commands,
-        Hunger,
-        materials.add(Color::GREEN.into()),
-        &font,
-    );
-    spawn_stat_bar(
-        &mut commands,
-        Sleep,
-        materials.add(Color::CYAN.into()),
-        &font,
-    );
-    spawn_stat_bar(
-        &mut commands,
-        PeePoo,
-        materials.add(Color::YELLOW.into()),
-        &font,
-    );
+    spawn_stat_bar(&mut commands, Hunger, Color::GREEN.into(), &font);
+    spawn_stat_bar(&mut commands, Sleep, Color::CYAN.into(), &font);
+    spawn_stat_bar(&mut commands, PeePoo, Color::YELLOW.into(), &font);
 }
 
-fn spawn_stat_bar(
-    commands: &mut Commands,
-    stat: StatDisplay,
-    material: Handle<ColorMaterial>,
-    font: &Handle<Font>,
-) {
+fn spawn_stat_bar(commands: &mut Commands, stat: StatDisplay, color: UiColor, font: &Handle<Font>) {
     commands
         .spawn_bundle(NodeBundle {
             style: Style {
@@ -125,49 +103,51 @@ fn spawn_stat_bar(
                 position_type: PositionType::Absolute,
                 ..Style::default()
             },
-            material,
+            color,
             ..NodeBundle::default()
         })
         .insert(stat)
         .insert(Hud);
 
-    commands.spawn_bundle(TextBundle {
-        style: Style {
-            size: Size::default(),
-            position: Rect {
-                left: Val::Percent(79.0),
-                bottom: match stat {
-                    StatDisplay::Hunger => Val::Percent(14.5),
-                    StatDisplay::Sleep => Val::Percent(19.5),
-                    StatDisplay::PeePoo => Val::Percent(24.5),
+    commands
+        .spawn_bundle(TextBundle {
+            style: Style {
+                size: Size::default(),
+                position: Rect {
+                    left: Val::Percent(79.0),
+                    bottom: match stat {
+                        StatDisplay::Hunger => Val::Percent(14.5),
+                        StatDisplay::Sleep => Val::Percent(19.5),
+                        StatDisplay::PeePoo => Val::Percent(24.5),
+                    },
+                    ..Rect::default()
                 },
-                ..Rect::default()
+                position_type: PositionType::Absolute,
+                ..Style::default()
             },
-            position_type: PositionType::Absolute,
-            ..Style::default()
-        },
-        text: Text::with_section(
-            match stat {
-                StatDisplay::Hunger => "HUNGER",
-                StatDisplay::Sleep => "SLEEP",
-                StatDisplay::PeePoo => "PISS",
-            },
-            TextStyle {
-                font: font.clone(),
-                font_size: 18.0,
-                color: Color::WHITE,
-            },
-            TextAlignment::default(),
-        ),
-        ..TextBundle::default()
-    }).insert(Hud);
+            text: Text::with_section(
+                match stat {
+                    StatDisplay::Hunger => "HUNGER",
+                    StatDisplay::Sleep => "SLEEP",
+                    StatDisplay::PeePoo => "PISS",
+                },
+                TextStyle {
+                    font: font.clone(),
+                    font_size: 18.0,
+                    color: Color::WHITE,
+                },
+                TextAlignment::default(),
+            ),
+            ..TextBundle::default()
+        })
+        .insert(Hud);
 }
 
 fn refresh_stat_hud(
     hunger: Res<Hunger>,
     sleepiness: Res<Sleepiness>,
     peepeepoopoo: Res<PeePeePooPoo>,
-    query: Query<(&mut Style, &StatDisplay)>,
+    mut query: Query<(&mut Style, &StatDisplay)>,
 ) {
     query.for_each_mut(|(mut style, stat)| match stat {
         StatDisplay::Hunger => {
@@ -188,6 +168,7 @@ fn refresh_stat_hud(
     });
 }
 
+#[derive(Component)]
 struct TimeDisplay;
 
 fn build_time_display(
@@ -195,28 +176,30 @@ fn build_time_display(
     time: Res<DayCycleResource>,
     ass: ResMut<AssetServer>,
 ) {
-    commands.spawn_bundle(TextBundle {
-        style: Style {
-            size: Size::default(),
-            position: Rect {
-                left: Val::Percent(79.0),
-                bottom: Val::Percent(30.0),
-                ..Rect::default()
+    commands
+        .spawn_bundle(TextBundle {
+            style: Style {
+                size: Size::default(),
+                position: Rect {
+                    left: Val::Percent(79.0),
+                    bottom: Val::Percent(30.0),
+                    ..Rect::default()
+                },
+                position_type: PositionType::Absolute,
+                ..Style::default()
             },
-            position_type: PositionType::Absolute,
-            ..Style::default()
-        },
-        text: Text::with_section(
-            "TIME",
-            TextStyle {
-                font: ass.load("fonts/VT323-Regular.ttf"),
-                font_size: 18.,
-                color: Color::WHITE,
-            },
-            TextAlignment::default(),
-        ),
-        ..TextBundle::default()
-    }).insert(Hud);
+            text: Text::with_section(
+                "TIME",
+                TextStyle {
+                    font: ass.load("fonts/VT323-Regular.ttf"),
+                    font_size: 18.,
+                    color: Color::WHITE,
+                },
+                TextAlignment::default(),
+            ),
+            ..TextBundle::default()
+        })
+        .insert(Hud);
 
     commands
         .spawn_bundle(TextBundle {
@@ -245,7 +228,10 @@ fn build_time_display(
         .insert(Hud);
 }
 
-fn update_time_display(time: Res<DayCycleResource>, query: Query<&mut Text, With<TimeDisplay>>) {
+fn update_time_display(
+    time: Res<DayCycleResource>,
+    mut query: Query<&mut Text, With<TimeDisplay>>,
+) {
     if time.is_changed() {
         query.for_each_mut(|mut text| {
             if let Some(mut section) = text.sections.first_mut() {
@@ -255,10 +241,7 @@ fn update_time_display(time: Res<DayCycleResource>, query: Query<&mut Text, With
     }
 }
 
-fn despawn_ui(
-    mut commands: Commands,
-    query: Query<Entity, With<Hud>>,
-) {
+fn despawn_ui(mut commands: Commands, query: Query<Entity, With<Hud>>) {
     for entity in query.iter() {
         commands.entity(entity).despawn_recursive();
     }

@@ -18,7 +18,7 @@ pub enum GameList {
 pub struct ConsoleGamesPlugin;
 
 impl Plugin for ConsoleGamesPlugin {
-    fn build(&self, app: &mut AppBuilder) {
+    fn build(&self, app: &mut App) {
         app.insert_resource(ConsoleGamesData {
             loaded_game: GameList::None,
             ragequit_count: 0,

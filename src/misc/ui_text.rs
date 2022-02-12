@@ -7,7 +7,7 @@ use crate::states::GameState;
 pub struct UITextPlugin;
 
 impl Plugin for UITextPlugin {
-    fn build(&self, app: &mut AppBuilder) {
+    fn build(&self, app: &mut App) {
         app.insert_resource(BottomTextUI {
             ui_data: TextUIData {
                 duration_coef: 1. / 10.,
@@ -23,30 +23,20 @@ impl Plugin for UITextPlugin {
                 moving_speed: 5.0,
                 start_time: 0.0,
             },
-            window_size: Vec2::ZERO,
+            window_size: WindowSizeComponent(Vec2::ZERO),
         })
         .add_startup_system(setup_bundle)
         .add_system_set(
-            SystemSet::on_enter(GameState::MainGame).with_system(
-                build_ui
-                    
-                    .label("build_ui_text")
-                    .before("build_terminal"),
-            ),
+            SystemSet::on_enter(GameState::MainGame)
+                .with_system(build_ui.label("build_ui_text").before("build_terminal")),
         )
-        .add_system_set(
-            SystemSet::on_exit(GameState::MainGame)
-                .with_system(despawn_ui),
-        )
+        .add_system_set(SystemSet::on_exit(GameState::MainGame).with_system(despawn_ui))
         .add_system_set(
             SystemSet::on_update(GameState::MainGame)
                 .with_system(set_ui_text)
                 .with_system(apply_animation.label("ui_bottom_text_animation")),
         )
-        .add_system_set(
-            SystemSet::on_enter(GameState::ConsoleOpenedState)
-                .with_system(hide_text),
-        );
+        .add_system_set(SystemSet::on_enter(GameState::ConsoleOpenedState).with_system(hide_text));
     }
 }
 
@@ -59,36 +49,35 @@ pub fn hide_text(
 
     ui_bundle.ui_data.fully_opened = false;
     ui_bundle.ui_data.is_opening = false;
-    
+
     let init_pos = Vec2::new(0.2 * current_window.width(), -0.1 * current_window.height());
     ui_bundle.animation.start_position = init_pos;
     ui_bundle.animation.end_position = init_pos;
 
-    if let Ok((_, mut style)) = console_query.single_mut() {
+    if let (_, mut style) = console_query.single_mut() {
         style.position.bottom = Val::Px(init_pos.y);
         style.position.left = Val::Px(init_pos.x);
     }
 }
 
-pub fn setup_bundle(
-    mut ui_bundle: ResMut<BottomTextUI>,
-    windows: Res<Windows>,
-) {
+pub fn setup_bundle(mut ui_bundle: ResMut<BottomTextUI>, windows: Res<Windows>) {
     let current_window = windows.get_primary().unwrap();
 
-    ui_bundle.window_size = Vec2::new(
-        current_window.width(),
-        current_window.height(),
-    );
+    ui_bundle.window_size =
+        WindowSizeComponent(Vec2::new(current_window.width(), current_window.height()));
 }
+
+#[derive(Component)]
+pub struct WindowSizeComponent(Vec2);
 
 #[derive(Bundle)]
 pub struct BottomTextUI {
     ui_data: TextUIData,
     animation: TextUIAnimation,
-    window_size: Vec2,
+    window_size: WindowSizeComponent,
 }
 
+#[derive(Component)]
 pub struct TextUIData {
     pub duration_coef: f32,
     pub content: String,
@@ -99,27 +88,27 @@ pub struct TextUIData {
 }
 
 impl BottomTextUI {
-    pub fn show_text(
-        &mut self,
-        content: String,
-    ) {
+    pub fn show_text(&mut self, content: String) {
         // opening the ui
         self.ui_data.is_opening = true;
         self.ui_data.content = content.clone();
 
         // setting the open duration
         let duration = self.ui_data.duration_coef * content.len() as f32;
-        self.ui_data.timer.set_duration(Duration::from_secs_f32(duration));
+        self.ui_data
+            .timer
+            .set_duration(Duration::from_secs_f32(duration));
 
         // set the animation data
         self.animation.start_position =
-            Vec2::new(0.2 * self.window_size.x, -0.1 * self.window_size.y);
+            Vec2::new(0.2 * self.window_size.0.x, -0.1 * self.window_size.0.y);
         self.animation.end_position =
-            Vec2::new(0.2 * self.window_size.x, 0.01 * self.window_size.y);
+            Vec2::new(0.2 * self.window_size.0.x, 0.01 * self.window_size.0.y);
         self.ui_data.knows_anim_start = false;
     }
 }
 
+#[derive(Component)]
 pub struct TextUIAnimation {
     pub start_position: Vec2,
     pub end_position: Vec2,
@@ -127,7 +116,9 @@ pub struct TextUIAnimation {
     pub moving_speed: f64,
 }
 
+#[derive(Component)]
 pub struct TextUIContainer;
+#[derive(Component)]
 pub struct TextUINode;
 
 fn build_ui(
@@ -138,10 +129,11 @@ fn build_ui(
     windows: Res<Windows>,
 ) {
     let current_window = windows.get_primary().unwrap();
-    let tran_col_h = materials.add(Color::rgba_u8(0, 0, 0, 0).into());
+    //let tran_col_h = materials.add(Color::rgba_u8(0, 0, 0, 0).into());
 
     let container = NodeBundle {
-        material: tran_col_h,
+        //material: tran_col_h,
+        color: Color::rgba_u8(0, 0, 0, 0).into(),
         style: Style {
             position_type: PositionType::Absolute,
             size: Size::new(
@@ -200,7 +192,8 @@ pub fn apply_animation(
 
     let delta_t = time.seconds_since_startup() - ui_bundle.animation.start_time;
     let value = 1.0 - (-(delta_t * ui_bundle.animation.moving_speed)).exp();
-    let new_position = ui_bundle.animation
+    let new_position = ui_bundle
+        .animation
         .start_position
         .lerp(ui_bundle.animation.end_position, value as f32);
 
@@ -224,7 +217,7 @@ pub fn apply_animation(
         }
     }
 
-    if let Ok((_, mut style)) = console_query.single_mut() {
+    if let (_, mut style) = console_query.single_mut() {
         style.position.bottom = Val::Px(new_position.y);
         style.position.left = Val::Px(new_position.x);
     }

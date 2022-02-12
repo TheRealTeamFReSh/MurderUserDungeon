@@ -1,5 +1,5 @@
 use crate::apartment::{animation::BasicAnimationComponent, player::PlayerComponent};
-use bevy::prelude::*;
+use bevy::{math::Vec3Swizzles, prelude::*};
 use bevy_rapier2d::prelude::*;
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -37,6 +37,7 @@ pub struct InteractableData {
 }
 
 /// Stores data specific interactable item
+#[derive(Component)]
 pub struct InteractableComponent {
     pub interactable_type: InteractableType,
     pub range: f32,
@@ -59,7 +60,7 @@ pub fn spawn_furniture_system(
             range: interactable_data.range,
         })
         .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static,
+            body_type: RigidBodyType::Static.into(),
             position: interactable_data.position.into(),
             ..Default::default()
         })
@@ -67,12 +68,14 @@ pub fn spawn_furniture_system(
             shape: ColliderShape::cuboid(
                 interactable_data.collider_size.x,
                 interactable_data.collider_size.y,
-            ),
+            )
+            .into(),
             material: ColliderMaterial {
                 friction: 0.0,
                 restitution: 0.0,
                 ..Default::default()
-            },
+            }
+            .into(),
             ..Default::default()
         })
         .insert(RigidBodyPositionSync::Discrete)
@@ -88,7 +91,7 @@ pub fn spawn_furniture_system(
             range: interactable_data.range,
         })
         .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static,
+            body_type: RigidBodyType::Static.into(),
             position: interactable_data.position.into(),
             ..Default::default()
         })
@@ -96,12 +99,14 @@ pub fn spawn_furniture_system(
             shape: ColliderShape::cuboid(
                 interactable_data.collider_size.x,
                 interactable_data.collider_size.y,
-            ),
+            )
+            .into(),
             material: ColliderMaterial {
                 friction: 0.0,
                 restitution: 0.0,
                 ..Default::default()
-            },
+            }
+            .into(),
             ..Default::default()
         })
         .insert(RigidBodyPositionSync::Discrete)
@@ -117,7 +122,7 @@ pub fn spawn_furniture_system(
             range: interactable_data.range,
         })
         .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static,
+            body_type: RigidBodyType::Static.into(),
             position: interactable_data.position.into(),
             ..Default::default()
         })
@@ -134,7 +139,7 @@ pub fn spawn_furniture_system(
             range: interactable_data.range,
         })
         .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static,
+            body_type: RigidBodyType::Static.into(),
             position: interactable_data.position.into(),
             ..Default::default()
         })
@@ -142,12 +147,14 @@ pub fn spawn_furniture_system(
             shape: ColliderShape::cuboid(
                 interactable_data.collider_size.x,
                 interactable_data.collider_size.y,
-            ),
+            )
+            .into(),
             material: ColliderMaterial {
                 friction: 0.0,
                 restitution: 0.0,
                 ..Default::default()
-            },
+            }
+            .into(),
             ..Default::default()
         })
         .insert(RigidBodyPositionSync::Discrete)
@@ -179,8 +186,8 @@ pub fn check_interactables_system(
     for (player_transform, mut player_component) in player_query.iter_mut() {
         let mut interactable_in_range: Option<InteractableType> = None;
         for (interactable_component, interactable_transform) in interactable_query.iter() {
-            let interactable_position: Vec2 = interactable_transform.translation.into();
-            let player_position: Vec2 = player_transform.translation.into();
+            let interactable_position: Vec2 = interactable_transform.translation.xy();
+            let player_position: Vec2 = player_transform.translation.xy();
 
             // get distance between player and interactable
             let distance = interactable_position.distance(player_position);
@@ -241,6 +248,7 @@ pub fn check_interactables_system(
 }
 
 /// Tag for interactable icons
+#[derive(Component)]
 pub struct InteractableIconComponent;
 
 /// Spawn an interactable icon

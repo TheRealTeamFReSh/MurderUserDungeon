@@ -6,6 +6,7 @@ use std::collections::HashMap;
 use super::PlayerComponent;
 
 /// Tag for basic (1 row) animation
+#[derive(Component)]
 pub struct BasicAnimationComponent;
 
 /// Animate basic (1 row) animations
@@ -21,7 +22,7 @@ pub fn basic_sprite_animation_system(
         timer.tick(time.delta());
         if timer.finished() {
             let texture_atlas = texture_atlases.get(texture_atlas_handle).unwrap();
-            sprite.index = ((sprite.index as usize + 1) % texture_atlas.textures.len()) as u32;
+            sprite.index = (sprite.index as usize + 1) % texture_atlas.textures.len();
         }
     }
 }
@@ -38,8 +39,8 @@ pub fn animate_character_system(
         if character_animation.timer.finished() {
             let animation_idxs =
                 character_animations.animations[&character_animation.animation_type];
-            if sprite.index == animation_idxs.1 {
-                sprite.index = animation_idxs.0;
+            if sprite.index == animation_idxs.1 as usize {
+                sprite.index = animation_idxs.0 as usize;
             } else {
                 sprite.index += 1;
             }
@@ -80,6 +81,7 @@ impl CharacterAnimationType {
 }
 
 /// Used for tracking animations of a character entity
+#[derive(Component)]
 pub struct CharacterAnimationComponent {
     pub timer: Timer,
     pub animation_type: CharacterAnimationType,

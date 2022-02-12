@@ -10,7 +10,7 @@ use super::ConsoleGamesData;
 pub struct TicTacToePlugin;
 
 impl Plugin for TicTacToePlugin {
-    fn build(&self, app: &mut AppBuilder) {
+    fn build(&self, app: &mut App) {
         app.insert_resource(game::TicTacToeData::default());
         app.add_system_set(
             SystemSet::on_update(GameState::ConsoleOpenedState)

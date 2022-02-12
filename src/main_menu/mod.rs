@@ -7,37 +7,28 @@ use bevy::{
 pub struct Plugin;
 
 impl prelude::Plugin for Plugin {
-    fn build(&self, app: &mut AppBuilder) {
-        app.add_system_set(
-            SystemSet::on_enter(GameState::MainMenu).with_system(build_main_menu),
-        )
-        .add_system_set(
-            SystemSet::on_resume(GameState::MainMenu).with_system(build_main_menu),
-        )
-        .add_system_set(
-            SystemSet::on_update(GameState::MainMenu).with_system(click_menu_item),
-        )
-        .add_system_set(
-            SystemSet::on_pause(GameState::MainMenu).with_system(despawn_menu_items),
-        )
-        .add_system_set(
-            SystemSet::on_exit(GameState::MainMenu).with_system(despawn_menu_items),
-        )
-        .add_system_set(
-            SystemSet::on_enter(GameState::ControlMenu).with_system(build_control_menu),
-        )
-        .add_system_set(
-            SystemSet::on_update(GameState::ControlMenu).with_system(return_button),
-        )
-        .add_system_set(
-            SystemSet::on_exit(GameState::ControlMenu).with_system(despawn_control_menu),
-        );
+    fn build(&self, app: &mut App) {
+        app.add_system_set(SystemSet::on_enter(GameState::MainMenu).with_system(build_main_menu))
+            .add_system_set(SystemSet::on_resume(GameState::MainMenu).with_system(build_main_menu))
+            .add_system_set(SystemSet::on_update(GameState::MainMenu).with_system(click_menu_item))
+            .add_system_set(
+                SystemSet::on_pause(GameState::MainMenu).with_system(despawn_menu_items),
+            )
+            .add_system_set(SystemSet::on_exit(GameState::MainMenu).with_system(despawn_menu_items))
+            .add_system_set(
+                SystemSet::on_enter(GameState::ControlMenu).with_system(build_control_menu),
+            )
+            .add_system_set(SystemSet::on_update(GameState::ControlMenu).with_system(return_button))
+            .add_system_set(
+                SystemSet::on_exit(GameState::ControlMenu).with_system(despawn_control_menu),
+            );
     }
 }
 
+#[derive(Component)]
 struct MainMenu;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Component)]
 enum MenuItem {
     Play,
     Controls,
@@ -63,9 +54,9 @@ fn build_main_menu(
                 justify_content: JustifyContent::SpaceEvenly,
                 ..Style::default()
             },
-            visible: Visible {
+            visibility: Visibility {
                 is_visible: false,
-                ..Visible::default()
+                ..Visibility::default()
             },
             ..NodeBundle::default()
         })
@@ -169,8 +160,10 @@ fn despawn_menu_items(mut commands: Commands, query: Query<Entity, With<MainMenu
     query.for_each(|entity| commands.entity(entity).despawn_recursive());
 }
 
+#[derive(Component)]
 struct ControlMenu;
 
+#[derive(Component)]
 struct ReturnButton;
 
 fn build_control_menu(mut commands: Commands, ass: ResMut<AssetServer>) {
@@ -188,9 +181,9 @@ fn build_control_menu(mut commands: Commands, ass: ResMut<AssetServer>) {
                 justify_content: JustifyContent::SpaceEvenly,
                 ..Style::default()
             },
-            visible: Visible {
+            visibility: Visibility {
                 is_visible: false,
-                ..Visible::default()
+                ..Visibility::default()
             },
             ..NodeBundle::default()
         })
